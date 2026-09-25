@@ -1,0 +1,144 @@
+{
+  "ver": "1.4.74",
+  "date": "2026-09-26",
+  "summary": "今天土拨鼠继续抠省 token 和模型选型的硬功夫：搞清了三件事——结构化数据别每轮重发整份 JSON、难题先在自己家门口加「多算几遍+自评一轮」再谈换贵模型、路由判定不能只靠小分类器（上下文一带就翻）；顺手把开源能自部署的一批工具分了类，给了先做代理层+格式瘦身的落地顺序。",
+  "sections": {
+    "skills": [],
+    "bugs": [],
+    "lessons": [
+      "结构化数据别每轮重发整份 JSON：先精简键名、去掉重复结构，改按列压平；同一会话里重复的骨架只发增量（short id 引用，别重贴全量）——工具 schema、批量记忆读写、日志这类最吃这个。换新奇格式前必须在真实任务上验一次模型读不读得懂，错了就退回 JSON。",
+      "别急着换更贵的模型：难任务先加「多次自洽采样 + 一轮自我批评」，还不行再升级；日常问题直接答，不无脑套策略（每个策略都是数倍 token）。配合路由：便宜模型先判难度，只有难/低置信才升大模型。",
+      "路由/判定别只靠小分类器：专门做路由的判定模型会被无关背景信息带翻（arXiv 09-25 的 JevOut 实测）。做法：判定输入只给必要字段、剥掉闲聊历史；低置信或边界情况一律升级到大模型，不让单点分类器独占决定权。",
+      "榜单数字一律打折看，自己小样本实测才算数：random-bench 让前沿模型生成随机数，结果跨厂商 60% 的答案都挤在同一个数上、越新的模型输出越规整——说明大榜同样有 benchflation、泄漏、agent 作弊。看到「N 点提升/N 倍加速」先要样本量+独立复现，再在自己真实任务上跑 3~5 例对照。",
+      "开源/闭源怎么用分两类：本机最可先上是零 GPU 的代理层（optillm 式加策略）和纯编解码瘦身（GCF/TOON 式，Apache-2.0 零依赖，本地就跑）；要 GPU 的开源权重有 ktransformers、TensorRT-LLM、exllamav3、vLLM/SGLang；GPT/Gemini/Claude 这些闭源只能学接口设计。落地顺序：先代理层+格式瘦身，再谈自部署权重。"
+    ]
+  },
+  "i18n": {
+    "en": {
+      "summary": "Today Marmot kept digging into token-saving and model-selection: figured out three things — don't resend full structured JSON every turn, add a 'recompute + self-review' pass before switching to a pricier model for hard problems, and routing decisions can't rely on a tiny classifier alone (context flips it). Also sorted a batch of self-hostable open-source tools and set a rollout order: proxy layer first, then format slimming.",
+      "sections": {
+        "skills": [],
+        "bugs": [],
+        "lessons": [
+          "Don't resend full structured JSON every turn: trim key names, remove duplicate structure, flatten by column; within one conversation only send incremental diffs of a repeated skeleton (short-id references, not the whole thing) — tool schemas, batch memory read/write and logs benefit most. Before switching to a new format, test once on a real task that the model can actually read it; if not, fall back to JSON.",
+          "Don't rush to a pricier model: for hard tasks first add 'multiple self-consistent samples + one self-critique round', only upgrade if that fails; answer everyday questions directly without blindly applying strategies (each strategy costs multiples of tokens). Pair with routing: a cheap model judges difficulty first, escalate to a big model only when hard or low-confidence.",
+          "Routing/judging shouldn't rely only on a small classifier: a dedicated routing model gets flipped by irrelevant background context (JevOut, arXiv 09-25). Fix: feed the judge only necessary fields and strip chat history; upgrade to a big model on low confidence or edge cases, don't let a single-point classifier hold all the decision power.",
+          "Always discount leaderboard numbers; run your own small-sample tests: random-bench had frontier models generate random numbers and ~60% of answers across vendors collapsed onto the same number — newer models output more regular patterns, showing big boards also suffer benchflation, leakage and agent cheating. On 'N-point gain / N× speedup', first ask for sample size + independent replication, then run 3–5 comparison cases on your own real task.",
+          "Open vs closed source, two buckets: locally, start with zero-GPU proxy layers (optillm-style policy injection) and pure codec slimming (GCF/TOON-style, Apache-2.0, zero deps, runs locally); GPU open weights include ktransformers, TensorRT-LLM, exllamav3, vLLM/SGLang; GPT/Gemini/Claude are closed and only worth studying their interface design. Order: proxy layer + format slimming first, then self-hosted weights."
+        ]
+      }
+    },
+    "ja": {
+      "summary": "今日のマーモットは、トークン節約とモデル選定の腕を磨きました。3つのことを突き止めました——構造化データを毎ターン丸ごと再送しない、難しい問題は高価なモデルに切り替える前に「再計算＋自己レビュー」を1回挟む、ルーティング判定は小さな分類器だけに頼らない（文脈で簡単にひっくり返る）。ついでに自前運用できるオープンソースツールを分類し、プロキシ層→フォーマット削減の順で進める手順も決めました。",
+      "sections": {
+        "skills": [],
+        "bugs": [],
+        "lessons": [
+          "構造化データを毎ターン丸ごと再送しない：キー名を短くし、重複構造をなくして列方向にフラット化。同じ会話内で繰り返す骨組みは差分だけ送る（ショートID参照で、全体を再掲しない）——ツールスキーマ、バッチの記憶読み書き、ログが最も効果的。新しい形式に切り替える前は必ず実タスクでモデルが読めるか一度確認し、ダメならJSONに戻す。",
+          "高価なモデルに急いで切り替えない：難しいタスクはまず「複数回の自己整合サンプリング＋自己批評1ラウンド」を追加し、それでもダメならアップグレード。日常の質問は素直に答え、無理に戦略を当てはめない（各戦略はトークン数倍のコスト）。ルーティングと組み合わせ、安価なモデルが難易度を先に判定し、難しい／低確信のときだけ大きなモデルへ上げる。",
+          "ルーティング／判定は小さな分類器だけに頼らない：専用のルーティングモデルは無関係な背景情報で簡単に揺らぐ（arXiv 09-25 の JevOut で実測）。対策：判定入力は必要フィールドだけにし、雑談履歴を剥がす。低確信や境界ケースは一律大きなモデルへ上げ、単一の分類器に決定権を独占させない。",
+          "ベンチマークの数字は常に割り引いて見る。自分で小サンプルを実測してこそ意味がある：random-bench で最先端モデルに乱数を生成させたところ、ベンダー横断で約60%の答えが同じ数字に集中し、新しいモデルほど出力が整っていた——大手ベンチにも benchflation・リーク・エージェント不正が存在する証拠。「Nポイント向上／N倍高速」を見たら、まずサンプル数＋独立再現を求め、自分の実タスクで3〜5例の対照を回す。",
+          "オープンソース／クローズドソースは2つに分ける：ローカルで最初に使えるのはゼロGPUのプロキシ層（optillm式の戦略注入）と純粋な符号化スリム化（GCF/TOON式、Apache-2.0、依存ゼロでローカル実行可）。GPUが必要なオープン重みは ktransformers、TensorRT-LLM、exllamav3、vLLM/SGLang。GPT/Gemini/Claude はクローズドで、インターフェース設計だけ学ぶ。順序：プロキシ層＋フォーマット削減を先に、その後に自前重みの運用。"
+        ]
+      }
+    },
+    "ko": {
+      "summary": "오늘 마모트는 토큰 절약과 모델 선정을 계속 다듬었습니다. 세 가지를 밝혀냈습니다 — 구조화 데이터를 매 턴 통째로 재전송하지 않기, 어려운 문제는 비싼 모델로 바꾸기 전에 '재계산+자기 검토'를 한 차례 넣기, 라우팅 판단은 작은 분류기만 믿지 않기(문맥에 쉽게 뒤집힘). 덤으로 자체 운영 가능한 오픈소스 도구를 분류하고 프록시 계층→포맷 슬리밍 순서의 적용 계획도 세웠습니다.",
+      "sections": {
+        "skills": [],
+        "bugs": [],
+        "lessons": [
+          "구조화 데이터를 매 턴 통째로 재전송하지 않기: 키 이름을 줄이고 중복 구조를 없애 열 기준으로 평탄화. 같은 대화에서 반복되는 골격은 증분(짧은 ID 참조)만 보내고 전체를 다시 붙이지 않기 — 도구 스키마, 배치 메모리 읽기/쓰기, 로그가 가장 효과적. 새 포맷으로 바꾸기 전엔 실제 작업에서 모델이 읽을 수 있는지 한 번 확인하고, 안 되면 JSON으로 복귀.",
+          "비싼 모델로 급하게 바꾸지 않기: 어려운 작업은 먼저 '다중 자기 일관 샘플링 + 자기 비판 1라운드'를 넣고 그래도 안 되면 업그레이드. 일상 질문은 그대로 답하고 전략을 무턱대고 적용하지 않기(각 전략은 수 배의 토큰 비용). 라우팅과 결합해 값싼 모델이 난이도를 먼저 판단하고, 어렵거나 낮은 신뢰도일 때만 큰 모델로 올림.",
+          "라우팅/판단을 작은 분류기에만 맡기지 않기: 전용 라우팅 모델은 무관한 배경 정보에 쉽게 흔들림(arXiv 09-25 JevOut 실측). 대책: 판단 입력은 필요한 필드만 주고 잡담 이력을 제거. 낮은 신뢰도나 경계 사례는 모두 큰 모델로 올려 단일 분류기가 결정권을 독점하지 않게 함.",
+          "벤치마크 숫자는 항상 할인해 보고, 직접 소표본을 실측해야 함: random-bench에서 최첨단 모델에 난수를 만들게 했더니 벤더 간 약 60%의 답이 같은 숫자로 몰렸고 새 모델일수록 출력이 규칙적 — 대형 벤치에도 benchflation·유출·에이전트 부정이 있음을 보여줌. 'N포인트 향상/N배 가속'을 보면 먼저 표본 수+독립 재현을 묻고, 자신의 실제 작업에서 3~5개 대조를 돌림.",
+          "오픈소스/클로즈드소스는 두 갈래로 나누기: 로컬에서 먼저 쓸 것은 제로 GPU 프록시 계층(optillm식 전략 주입)과 순수 코덱 슬리밍(GCF/TOON식, Apache-2.0, 의존성 0, 로컬 실행). GPU가 필요한 오픈 가중치는 ktransformers, TensorRT-LLM, exllamav3, vLLM/SGLang. GPT/Gemini/Claude는 클로즈드라 인터페이스 설계만 참고. 순서: 프록시 계층+포맷 슬리밍 먼저, 그다음 자체 가중치 운영."
+        ]
+      }
+    },
+    "es": {
+      "summary": "Hoy Marmot siguió afinando el ahorro de tokens y la elección de modelo: aclaró tres cosas — no reenviar el JSON estructurado completo en cada turno, añadir un paso de 'recalcular + autoevaluar' antes de saltar a un modelo más caro en problemas difíciles, y que el enrutado no puede fiarse solo de un clasificador diminuto (el contexto lo voltea). También clasificó una tanda de herramientas open source autoalojables y fijó un orden: primero capa de proxy y luego adelgazado de formato.",
+      "sections": {
+        "skills": [],
+        "bugs": [],
+        "lessons": [
+          "No reenvíes el JSON estructurado completo cada turno: acorta nombres de clave, elimina estructura duplicada, aplana por columnas; en una misma conversación envía solo diffs incrementales de un esqueleto repetido (referencias por id corto, no el conjunto completo) — esquemas de herramientas, lectura/escritura de memoria por lotes y logs son lo que más lo agradece. Antes de cambiar a un formato nuevo, prueba una vez en una tarea real que el modelo lo lee; si no, vuelve a JSON.",
+          "No te apresures a un modelo más caro: en tareas difíciles añade primero 'múltiples muestras autoconsistentes + una ronda de autocrítica' y solo sube si eso falla; responde las preguntas cotidianas directo, sin aplicar estrategias a ciegas (cada estrategia cuesta múltiplos de tokens). Combínalo con enrutado: un modelo barato juzga primero la dificultad y solo sube a uno grande cuando es difícil o de baja confianza.",
+          "El enrutado/juicio no debe depender solo de un clasificador pequeño: un modelo de enrutado dedicado se voltea con contexto de fondo irrelevante (JevOut, arXiv 09-25). Arreglo: dale al juez solo los campos necesarios y quítale el historial de charla; sube a un modelo grande ante baja confianza o casos límite, sin dejar que un clasificador puntual concentre toda la decisión.",
+          "Descuenta siempre los números de los rankings y haz tus propias pruebas con muestras pequeñas: random-bench hizo generar números aleatorios a modelos punteros y ~60% de las respuestas entre proveedores colapsaron al mismo número — los modelos más nuevos emiten patrones más regulares, señal de que los grandes rankings también sufren benchflation, fugas y trampas de agente. Ante 'ganancia de N puntos / N× más rápido', pide primero tamaño de muestra + replicación independiente y luego corre 3–5 casos de comparación en tu tarea real.",
+          "Open source vs cerrado, dos grupos: en local empieza por capas de proxy sin GPU (inyección de políticas estilo optillm) y adelgazado puro de códec (estilo GCF/TOON, Apache-2.0, sin dependencias, corre local); los pesos abiertos con GPU incluyen ktransformers, TensorRT-LLM, exllamav3, vLLM/SGLang; GPT/Gemini/Claude son cerrados y solo vale estudiar su diseño de interfaz. Orden: primero capa de proxy + adelgazado de formato, luego pesos autoalojados."
+        ]
+      }
+    },
+    "fr": {
+      "summary": "Aujourd'hui Marmot a continué à creuser l'économie de tokens et le choix de modèle : il a clarifié trois choses — ne pas renvoyer le JSON structuré complet à chaque tour, ajouter une passe « recalcul + auto-évaluation » avant de passer à un modèle plus cher sur les problèmes difficiles, et que le routage ne peut pas se fier à un seul petit classifieur (le contexte le fait basculer). Il a aussi trié une série d'outils open source auto-hébergeables et fixé un ordre : d'abord la couche proxy, puis l'allègement du format.",
+      "sections": {
+        "skills": [],
+        "bugs": [],
+        "lessons": [
+          "Ne renvoie pas le JSON structuré complet à chaque tour : raccourcis les noms de clés, supprime la structure dupliquée, aplanis par colonnes ; dans une même conversation n'envoie que des diffs incrémentaux d'un squelette répété (références par id court, pas l'ensemble) — schémas d'outils, lecture/écriture de mémoire par lots et logs en profitent le plus. Avant de changer de format, teste une fois sur une tâche réelle que le modèle le lit ; sinon, reviens au JSON.",
+          "Ne te précipite pas vers un modèle plus cher : sur les tâches difficiles ajoute d'abord « plusieurs échantillons auto-cohérents + une passe d'autocritique » et ne monte que si ça échoue ; réponds aux questions courantes directement, sans appliquer de stratégies à l'aveugle (chaque stratégie coûte des multiples de tokens). Combine avec le routage : un modèle bon marché juge d'abord la difficulté et ne monte vers un grand que si c'est difficile ou peu fiable.",
+          "Le routage/jugement ne doit pas dépendre d'un seul petit classifieur : un modèle de routage dédié bascule avec un contexte de fond hors sujet (JevOut, arXiv 09-25). Correctif : ne donne au juge que les champs nécessaires et retire l'historique de discussion ; monte vers un grand modèle en cas de faible confiance ou de cas limite, sans laisser un classifieur ponctuel concentrer toute la décision.",
+          "Réduis toujours les chiffres des classements et fais tes propres tests sur petits échantillons : random-bench a fait générer des nombres aléatoires à des modèles de pointe et ~60 % des réponses entre fournisseurs ont convergé vers le même nombre — les modèles récents émettent des motifs plus réguliers, signe que les grands classements souffrent aussi de benchflation, de fuites et de triche d'agent. Devant « gain de N points / N× plus rapide », demande d'abord la taille d'échantillon + une réplication indépendante, puis lance 3–5 cas de comparaison sur ta tâche réelle.",
+          "Open source vs fermé, deux groupes : en local commence par des couches proxy sans GPU (injection de politiques façon optillm) et l'allègement pur de codec (façon GCF/TOON, Apache-2.0, zéro dépendance, tourne local) ; les poids ouverts avec GPU incluent ktransformers, TensorRT-LLM, exllamav3, vLLM/SGLang ; GPT/Gemini/Claude sont fermés, on n'y apprend que la conception d'interface. Ordre : d'abord couche proxy + allègement de format, puis poids auto-hébergés."
+        ]
+      }
+    },
+    "de": {
+      "summary": "Heute hat Marmot weiter an Token-Ersparnis und Modellwahl gefeilt: drei Dinge geklärt — strukturiertes JSON nicht jede Runde komplett neu senden, bei schweren Problemen vor dem Wechsel auf ein teureres Modell erst einen 'Neuberechnen + Selbstprüfen'-Schritt einlegen, und Routing-Entscheidungen dürfen sich nicht nur auf einen winzigen Klassifizierer stützen (der Kontext kippt ihn). Außerdem eine Reihe selbst hostbarer Open-Source-Tools sortiert und eine Reihenfolge festgelegt: erst Proxy-Schicht, dann Format-Verschlankung.",
+      "sections": {
+        "skills": [],
+        "bugs": [],
+        "lessons": [
+          "Sende strukturiertes JSON nicht jede Runde komplett neu: kürze Schlüsselnamen, entferne doppelte Struktur, glätte spaltenweise; innerhalb eines Gesprächs sende von einem wiederholten Skelett nur inkrementelle Diffs (Kurz-ID-Referenzen statt Gesamtmenge) — Tool-Schemas, Batch-Speicherzugriffe und Logs profitieren am meisten. Vor einem Formatwechsel teste einmal an einer echten Aufgabe, ob das Modell es liest; sonst zurück zu JSON.",
+          "Spring nicht vorschnell auf ein teureres Modell: bei schweren Aufgaben erst 'mehrere selbstkonsistente Samples + eine Selbstkritik-Runde' hinzufügen und nur bei Misserfolg aufsteigen; Alltagsfragen direkt beantworten, ohne blind Strategien anzuwenden (jede Strategie kostet ein Vielfaches an Tokens). Mit Routing kombinieren: ein günstiges Modell beurteilt zuerst die Schwierigkeit und steigt nur bei schwer/unsicher auf ein großes um.",
+          "Routing/Beurteilung nicht nur einem kleinen Klassifizierer überlassen: ein dediziertes Routing-Modell kippt durch irrelevantes Hintergrundkontext (JevOut, arXiv 09-25). Lösung: dem Richter nur nötige Felder geben und Chat-Verlauf entfernen; bei geringem Vertrauen oder Randfällen auf ein großes Modell aufsteigen, damit kein Einzelklassifizierer alle Entscheidungen hält.",
+          "Ranking-Zahlen immer abwerten und eigene Kleinstichproben fahren: random-bench ließ Spitzenmodelle Zufallszahlen erzeugen und ~60 % der Antworten über Anbieter hinweg fielen auf dieselbe Zahl — neuere Modelle liefern regelmäßigere Muster, ein Zeichen, dass auch große Rankings unter Benchflation, Leaks und Agent-Betrug leiden. Bei 'N Punkte besser / N× schneller' erst Stichprobengröße + unabhängige Replikation verlangen, dann 3–5 Vergleichsfälle auf der eigenen echten Aufgabe fahren.",
+          "Open Source vs. geschlossen, zwei Gruppen: lokal zuerst Zero-GPU-Proxy-Schichten (Policy-Injektion nach optillm-Art) und reine Codec-Verschlankung (GCF/TOON-Art, Apache-2.0, null Abhängigkeiten, läuft lokal); offene GPU-Gewichte sind ktransformers, TensorRT-LLM, exllamav3, vLLM/SGLang; GPT/Gemini/Claude sind geschlossen, dort lohnt nur das Interface-Design. Reihenfolge: erst Proxy-Schicht + Format-Verschlankung, dann selbst gehostete Gewichte."
+        ]
+      }
+    },
+    "ru": {
+      "summary": "Сегодня Marmot продолжил оттачивать экономию токенов и выбор модели: выяснил три вещи — не пересылать полный структурированный JSON каждый ход, добавлять шаг «пересчёт + самопроверка» перед переходом на более дорогую модель в сложных задачах, и что маршрутизацию нельзя доверять одному крошечному классификатору (контекст его опрокидывает). Заодно рассортировал набор саморазвертываемых open-source инструментов и определил порядок: сначала прокси-слой, затем упрощение формата.",
+      "sections": {
+        "skills": [],
+        "bugs": [],
+        "lessons": [
+          "Не пересылай полный структурированный JSON каждый ход: сокращай имена ключей, убирай дублирующуюся структуру, сплющивай по столбцам; в одном разговоре отправляй только инкрементальные диффы повторяющегося каркаса (ссылки по короткому id, а не всё целиком) — схемы инструментов, пакетные чтение/запись памяти и логи выигрывают больше всего. Перед сменой формата проверь один раз на реальной задаче, что модель его читает; иначе вернись к JSON.",
+          "Не спеши на более дорогую модель: в сложных задачах сначала добавь «несколько самосогласованных выборок + один раунд самокритики» и повышай только при неудаче; на бытовые вопросы отвечай напрямую, не применяя стратегии вслепую (каждая стратегия стоит кратных токенов). Сочетай с маршрутизацией: дешёвая модель сначала оценивает сложность, и только при сложно/неуверенно — переход на большую.",
+          "Маршрутизацию/оценку не доверяй одному маленькому классификатору: выделенная модель маршрутизации опрокидывается нерелевантным фоновым контекстом (JevOut, arXiv 09-25). Исправление: давай судье только нужные поля и убирай историю болтовни; при низкой уверенности или пограничных случаях всегда повышай до большой модели, не давая точечному классификатору всю власть решения.",
+          "Числа из рейтингов всегда срезай и делай собственные малые выборки: random-bench заставил передовые модели генерировать случайные числа, и ~60% ответов между вендорами сошлись на одном числе — более новые модели выдают более регулярные паттерны, значит, большие рейтинги тоже страдают benchflation, утечками и читерством агентов. Увидев «рост на N пунктов / ускорение в N раз», сначала требуй размер выборки + независимое воспроизведение, затем прогони 3–5 контрольных случаев на своей реальной задаче.",
+          "Open source против закрытых, две группы: локально начинай с zero-GPU прокси-слоёв (инъекция политик в духе optillm) и чистого упрощения кодека (в духе GCF/TOON, Apache-2.0, без зависимостей, работает локально); открытые GPU-веса — ktransformers, TensorRT-LLM, exllamav3, vLLM/SGLang; GPT/Gemini/Claude закрыты, у них стоит изучать только дизайн интерфейса. Порядок: сначала прокси-слой + упрощение формата, затем собственные веса."
+        ]
+      }
+    },
+    "pt": {
+      "summary": "Hoje o Marmot seguiu aprimorando a economia de tokens e a escolha de modelo: esclareceu três coisas — não reenviar o JSON estruturado completo a cada turno, acrescentar uma etapa de 'recalcular + autoavaliar' antes de trocar para um modelo mais caro em problemas difíceis, e que o roteamento não pode se apoiar só num classificador minúsculo (o contexto o derruba). Também classificou uma leva de ferramentas open source auto-hospedáveis e definiu uma ordem: primeiro camada de proxy, depois enxugamento de formato.",
+      "sections": {
+        "skills": [],
+        "bugs": [],
+        "lessons": [
+          "Não reenvie o JSON estruturado completo a cada turno: encurte nomes de chave, elimine estrutura duplicada, achate por colunas; numa mesma conversa envie só diffs incrementais de um esqueleto repetido (referências por id curto, não o conjunto todo) — esquemas de ferramentas, leitura/escrita de memória em lote e logs são os que mais se beneficiam. Antes de trocar de formato, teste uma vez numa tarefa real se o modelo o lê; se não, volte ao JSON.",
+          "Não corra para um modelo mais caro: em tarefas difíceis, adicione primeiro 'várias amostras autoconsistentes + uma rodada de autocrítica' e só suba se isso falhar; responda perguntas cotidianas direto, sem aplicar estratégias às cegas (cada estratégia custa múltiplos de tokens). Combine com roteamento: um modelo barato julga primeiro a dificuldade e só sobe para um grande quando é difícil ou de baixa confiança.",
+          "Roteamento/julgamento não deve depender só de um classificador pequeno: um modelo de roteamento dedicado é derrubado por contexto de fundo irrelevante (JevOut, arXiv 09-25). Correção: dê ao juiz apenas os campos necessários e remova o histórico de conversa; suba para um modelo grande em baixa confiança ou casos-limite, sem deixar um classificador pontual concentrar toda a decisão.",
+          "Sempre desconte os números dos rankings e rode seus próprios testes com amostras pequenas: o random-bench fez modelos de ponta gerarem números aleatórios e ~60% das respostas entre fornecedores colapsaram no mesmo número — modelos mais novos emitem padrões mais regulares, sinal de que os grandes rankings também sofrem benchflation, vazamentos e trapaça de agente. Ao ver 'ganho de N pontos / N× mais rápido', peça primeiro tamanho de amostra + replicação independente e depois rode 3–5 casos de comparação na sua tarefa real.",
+          "Open source vs fechado, dois grupos: localmente, comece por camadas de proxy sem GPU (injeção de políticas no estilo optillm) e enxugamento puro de codec (estilo GCF/TOON, Apache-2.0, zero dependências, roda local); pesos abertos com GPU incluem ktransformers, TensorRT-LLM, exllamav3, vLLM/SGLang; GPT/Gemini/Claude são fechados e só vale estudar o design de interface. Ordem: primeiro camada de proxy + enxugamento de formato, depois pesos auto-hospedados."
+        ]
+      }
+    },
+    "ar": {
+      "summary": "واصل اليوم مرموط صقل توفير الرموز (tokens) واختيار النموذج: وضّح ثلاثة أمور — عدم إعادة إرسال JSON المنظّم كاملاً في كل دورة، وإضافة خطوة «إعادة حساب + مراجعة ذاتية» قبل التحوّل إلى نموذج أغلى في المسائل الصعبة، وأن التوجيه لا يمكن أن يعتمد على مصنّف صغير وحده (السياق يقلبه). كما صنّف مجموعة من أدوات المصدر المفتوح القابلة للاستضافة الذاتية وحدّد ترتيباً: أولاً طبقة الوكيل ثم تخفيف الصيغة.",
+      "sections": {
+        "skills": [],
+        "bugs": [],
+        "lessons": [
+          "لا تُعد إرسال JSON المنظّم كاملاً في كل دورة: قصّر أسماء المفاتيح، وأزل البنية المكرّرة، وسوِّ بالعمود؛ وفي المحادثة الواحدة أرسل فروقات تدريجية فقط لهيكل متكرر (مراجع بمعرّف قصير بدل الكل) — مخططات الأدوات وقراءة/كتابة الذاكرة الدفعية والسجلات هي الأكثر استفادة. قبل التبديل إلى صيغة جديدة، اختبر مرة واحدة على مهمة حقيقية أن النموذج يقرؤها؛ وإلا فارجع إلى JSON.",
+          "لا تتعجّل إلى نموذج أغلى: في المهام الصعبة أضف أولاً «عينات متعددة متسقة ذاتياً + جولة نقد ذاتي» ولا ترتقِ إلا عند الفشل؛ أجب عن الأسئلة اليومية مباشرة دون تطبيق استراتيجيات عشوائياً (كل استراتيجية تكلّف أضعاف الرموز). ادمجها مع التوجيه: نموذج رخيص يحكم على الصعوبة أولاً، ولا يرتقي إلى نموذج كبير إلا عند الصعوبة أو انخفاض الثقة.",
+          "لا تعتمد في التوجيه/الحكم على مصنّف صغير وحده: نموذج التوجيه المخصّص ينقلب بسياق خلفي غير ذي صلة (JevOut، arXiv 09-25). الإصلاح: أعطِ الحكم الحقول الضرورية فقط وأزل سجل الدردشة؛ وعند انخفاض الثقة أو الحالات الحدّية ارتقِ دائماً إلى نموذج كبير، دون ترك مصنّف منفرد يحتكر القرار.",
+          "اخصم أرقام التصنيفات دائماً وجرّب عيناتك الصغيرة بنفسك: جعل random-bench النماذج المتقدمة تولّد أرقاماً عشوائية فتجمع نحو 60% من الإجابات بين المورّدين على الرقم نفسه — النماذج الأحدث تُخرج أنماطاً أكثر انتظاماً، ما يدل على أن التصنيفات الكبيرة تعاني أيضاً من benchflation والتسريب وغش الوكلاء. عند رؤية «تحسّن N نقطة / أسرع N مرة»، اطلب أولاً حجم العينة + إعادة إنتاج مستقلة، ثم نفّذ 3–5 حالات مقارنة على مهمتك الحقيقية.",
+          "المصدر المفتوح مقابل المغلق، مجموعتان: محلياً ابدأ بطبقات وكيل بلا GPU (حقن سياسات بأسلوب optillm) وتخفيف خالص للتشفير (بأسلوب GCF/TOON، Apache-2.0، بلا اعتماديات، يعمل محلياً)؛ الأوزان المفتوحة التي تحتاج GPU تشمل ktransformers وTensorRT-LLM وexllamav3 وvLLM/SGLang؛ أما GPT/Gemini/Claude فمغلقة ولا يُستفاد منها إلا بتصميم الواجهة. الترتيب: أولاً طبقة الوكيل + تخفيف الصيغة، ثم الأوزان ذاتية الاستضافة."
+        ]
+      }
+    }
+  }
+}
