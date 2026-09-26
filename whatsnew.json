@@ -1,13 +1,25 @@
 {
-  "ver": "1.4.84",
+  "ver": "1.4.85",
   "date": "2026-09-27",
-  "summary": "今天土拨鼠继续抠「省 token / 选模型」的硬功夫，摸清三招：判定和路由这类「从固定选项里挑一个」的活，不用让模型写一整段 JSON，直接读它对每个选项的概率就行（又快又省，还自带置信度）；工具说明塞进上下文前先压成无空格的紧凑 JSON；还有判定模型会被不相关的闲聊背景带偏，必须加「干扰测试」并给低置信兜底。另外把「客服类 agent 上线前先用合成用户跑仿真」和「复杂任务拆成上下文隔离的三段」两条写进了自己的操作手册。",
+  "summary": "昨天（09-26）修了一大串毛病、也添了几件新本事。修的部分：Ctrl+F 截图从「按了没反应/慢」修回 0.3 秒级（真根因是密钥收匣把桌面壳读的钥匙切了，另把大图 PNG 改成 JPEG）；手机版「不理人」七个病根一次治完（轮询卡死、界面一直跳、回复重复、提示刷屏、短消息竖排、英文兜底糊脸、选图丢图）；创作中心壁纸生成不再裂图；QQ 客服掉线定位为「假在线」并恢复。新增能力：官网每日文章引擎（IndexNow 秒收录）、云端公告源（买家实例自动拉公告）、QQ 客服报错分诊 P1~P3、计费改 2 倍固定卖价 + 注册送 100 万 token。今天新学的 3 条省 token 硬功夫一并附上。",
   "sections": {
-    "skills": [],
+    "skills": [
+      "官网加上了每日文章引擎：/blog/ 文章目录 + 发布器 + IndexNow（必应/Yandex 秒收录），每天自动出文并重建列表页和 sitemap。",
+      "云端公告源落地 GitHub Pages：公告写完自动推到云端，买家实例启动后自动拉最新公告，不用人工点。",
+      "QQ 客服报错分诊 P1~P3 上线：报错/举报/封号识别 + 多轮问账号 + 身份核验 + 跑 ddcrash 深挖证据 + AI 总结 + 申诉队列 + 每日 09:00 汇总（只落库排队，不自动解封）。",
+      "计费改「2 倍固定卖价」（DeepSeek Pro 9 元/27 元等，管理员仍免费但看得到真实成本）；注册 free 用户送一次性 100 万 token 额度，取消每日句数限制（1.4.84）。"
+    ],
     "bugs": [
+      "修好 Ctrl+F 截图失效/慢：真根因是密钥收匣把桌面壳读的明文钥匙切了（截图静默失败），加上桌面壳仍用 PNG 编码大图；给 server.js 的本机回环端点加安全白名单（截图/上传/附件等）、桌面壳改 JPEG，截图回到 0.3 秒级，任务栏橙闪提醒也恢复。",
+      "手机版「不理人」七连修：轮询请求没超时会把刷新闸永久锁死（补 8 秒超时自愈）、每 3 秒整块重画导致界面一直跳（改增量渲染）、AI 回复重复、静默提示每 20 秒刷屏、短消息被挤成竖排、网关英文兜底糊脸（拦下改中文重试）、选图后「图没发出去字先出去」的竞态（发送前等上传队列归零）。",
+      "创作中心「壁纸生成」预览裂图：免登录白名单收窄时漏了 /genout 静态路由，生成好的图被 401 挡掉；补进白名单并全量核对 static/legal/genout/att 所有静态路由。",
+      "QQ 客服「不理人」定位为 napcat 假在线（容器活着、登录态还在，但收不到任何新消息）：判据=群消息日志断流 + 发送持续超时，重启出新码扫码后恢复。",
       "修复云端公告推送脚本：文件已存在时漏带 sha 导致上传静默失败（旧公告一直卡在 09-26），现已先取 sha 再上传，并把「成功」判定绑到实际上传结果上，不再假报成功。"
     ],
     "lessons": [
+      "接口形状本身就是 token 成本：同一批数据，给 agent「文件/目录式按需读取」比一次性整块灌进提示省约 45% token、39% 成本，答对率还更高——先给索引，命中再读正文。",
+      "上提示前用真 tokenizer 做一次「省 token 体检」（开源工具 tokensift 有 20 条规则）：长 UUID/哈希映射成短 id、重复粘贴的说明合并、JSON 先 minify、base64/图片一律走文件引用不内联。",
+      "便宜的草稿 + 主模型一次验证能大幅提速：llama.cpp 的 n-gram 推测解码（prompt lookup）把重复文本当草稿，草稿被接受就一次出多个 token；同思路可套「小模型起草、大模型校对」。",
       "判定/路由这类「从固定集合里挑一个」的活：别让模型写整段 JSON 或长篇思考，直接读模型对每个候选选项的概率（约束解码），一次前向就拿结果+置信度——又快又省 token；置信度低再升级大模型。",
       "工具说明、结构化结果塞进提示前，一律压成无空格紧凑 JSON（Kimi K2.7-Code 官方模板就是这么干的），省下的都是真金白银的 token。",
       "判定/路由模型会被「无关背景句」翻盘：只喂必要字段、剥掉闲聊历史；测试时要专门加一条「塞无关背景」的样本；低置信或边界情况一律升级大模型兜底。",
@@ -17,13 +29,25 @@
   },
   "i18n": {
     "en": {
-      "summary": "Today Marmot kept grinding on saving tokens and picking models: three moves settled — for 'pick one from a fixed set' decisions (routing/tool choice) you don't need the model to write a whole JSON, just read its probability for each option (faster, cheaper, and you get confidence for free); squeeze tool specs into compact no-space JSON before injecting them; and decision models can be flipped by irrelevant chatty background, so add a 'distractor' test and a low-confidence fallback. Also wrote two more playbook rules: screen customer-service agents with synthetic users before going live, and split complex tasks into three context-isolated stages.",
+      "summary": "Yesterday (09-26) Marmot fixed a long list of bugs and shipped several new capabilities. Fixes: Ctrl+F screenshot went from 'nothing happens/slow' back to ~0.3s (the real cause was the key-vault migration cutting off the key the desktop shell reads, plus still encoding big PNGs — now JPEG); the phone app's seven 'ignores me' root causes were all treated at once (polling deadlock, screen flicker, duplicate replies, spamming status lines, single-column cramped text, English boilerplate fallback, lost images on send); the creation center's wallpaper preview no longer shows a broken image; the QQ support bot's outage was pinned down to a 'fake online' session and recovered. New capabilities: a daily article engine for the website (instant indexing via IndexNow), a cloud announcement source (buyer instances pull it automatically), QQ support triage P1-P3, and pricing switched to a flat 2x sell price plus a 1M-token signup grant. Three freshly learned token-saving tricks are attached too.",
       "sections": {
-        "skills": [],
+        "skills": [
+          "The website gained a daily-article engine: a /blog/ section plus a publisher plus IndexNow (instant indexing on Bing/Yandex); it writes one article a day and rebuilds the list page and sitemap automatically.",
+          "A cloud announcement source is live on GitHub Pages: finished announcements are auto-pushed to the cloud, and buyer instances pull the latest one on startup — no manual clicking.",
+          "QQ support triage P1-P3 is live: error/report/ban recognition + multi-turn account prompting + identity check + a ddcrash deep-dive for evidence + AI summary + an appeal queue + a daily 09:00 digest (it only logs and queues appeals, never auto-unbans).",
+          "Pricing switched to a flat 2x sell price (DeepSeek Pro 9/27 CNY etc.; admins stay free but see the true cost); new free users get a one-time 1,000,000-token grant and the daily message cap is gone (1.4.84)."
+        ],
         "bugs": [
+          "Fixed the Ctrl+F screenshot failing/being slow: the real cause was the key-vault migration cutting off the plaintext key the desktop shell reads (screenshots failed silently), plus the shell still encoding large PNGs; added a safe whitelist for local loopback endpoints in server.js (screenshot/upload/attachments) and switched the shell to JPEG — screenshots are back to ~0.3s and the taskbar orange-flash alert works again.",
+          "Seven phone-app 'ignores me' fixes at once: a poll request without a timeout could lock the refresh gate forever (added an 8s timeout self-heal), a full re-render every 3s made the screen jump (switched to incremental rendering), duplicated AI replies, status lines spamming every 20s, short messages squeezed into a single column, English boilerplate fallback (intercepted and retried in Chinese), and the 'text sent but image lost' race after picking a photo (send now waits for the upload queue to drain).",
+          "Broken preview in the creation center's wallpaper generator: narrowing the no-login whitelist missed the /genout static route, so generated images were blocked with 401; added it back and re-checked every static route (static/legal/genout/att).",
+          "The QQ support bot's silence was diagnosed as a 'fake online' napcat session (container up, login state present, but no new messages arriving): the tell-tales were a stalled group-message log plus persistent send timeouts; a restart issued a fresh QR code and scanning it restored service.",
           "Fixed the cloud-announcement push script: it omitted the required sha when the file already existed, so uploads failed silently (the live announcement was stuck on 09-26). It now fetches the sha first, and 'success' is tied to the actual upload result instead of being reported blindly."
         ],
         "lessons": [
+          "Interface shape itself is a token cost: on the same data, giving the agent filesystem-style on-demand access used ~45% fewer tokens and cost 39% less than dumping everything into the prompt, and answered more questions right — hand over an index first, read the body only on a hit.",
+          "Before sending a prompt, run a token-lint pass with the real tokenizer (the open-source tokensift ships 20 rules): map long UUIDs/hashes to short ids, merge pasted-twice instructions, minify JSON first, and keep base64/images as file references instead of inlining them.",
+          "A cheap draft plus one verification by the main model buys big speedups: llama.cpp's n-gram speculative decoding (prompt lookup) drafts from repeated text and emits several tokens at once when the draft is accepted; the same idea maps onto 'small model drafts, big model verifies'.",
           "For 'pick one from a fixed set' work (routing, tool choice): don't make the model write a whole JSON or a long reasoning chain — just read its probability for each candidate option (constrained decoding). One forward pass gives the pick plus confidence, faster and cheaper; escalate to a bigger model only when confidence is low.",
           "Before injecting tool specs or structured results into a prompt, always compress to compact no-space JSON (Kimi K2.7-Code's official template does exactly this); what you save is real token money.",
           "Decision/routing models can be flipped by an irrelevant background sentence: feed only the necessary fields and strip chatty history; add a dedicated 'irrelevant context' test case; on low confidence or edge cases always escalate to a big model.",
@@ -33,13 +57,25 @@
       }
     },
     "ja": {
-      "summary": "今日のマーモットは「トークン節約とモデル選び」を引き続き突き詰めました：三つが固まりました——「固定の選択肢から一つ選ぶ」判定（ルーティング/ツール選択）は、モデルにJSON全体を書かせる必要はなく、各選択肢の確率をそのまま読めばいい（速くて安く、信頼度もおまけで付く）；ツール定義は注入前に空白なしのコンパクトJSONに圧縮；判定モデルは無関係な雑談の背景で簡単にひっくり返るので「かく乱テスト」と低信頼時のフォールバックが必須。さらに『サポートのagentは本番前に合成ユーザーで模擬テスト』『複雑なタスクはコンテキスト隔離した三段に分割』の二つを運用ルールに追加しました。",
+      "summary": "昨日（09-26）のマーモットは、たくさんの不具合を直し、いくつかの新機能も出しました。修正：Ctrl+F のスクショが「押しても無反応／遅い」から約0.3秒に回復（真因は鍵の収納庫化でデスクトップ殻が読む鍵が切れたこと、加えて大きなPNGのままだったこと→JPEG化）；スマホアプリの「無視される」七つの根本原因を一括治療（ポーリングのデッドロック、画面のちらつき、返信の重複、状態行の連投、短い文が縦1列、英語の定型フォールバック、画像を送る際の取りこぼし）；創作センターの壁紙プレビューの画像割れを解消；QQサポートの不通は「偽オンライン」と特定して復旧。新機能：サイトの毎日記事エンジン（IndexNowで即時インデックス）、クラウド公告ソース（購入者インスタンスが自動取得）、QQサポートのエラー分診 P1〜P3、料金を2倍の固定売価に変更＋登録で100万トークン進呈。本日新たに学んだトークン節約の技3つも添えました。",
       "sections": {
-        "skills": [],
+        "skills": [
+          "サイトに毎日記事エンジンを追加：/blog/ 記事ディレクトリ＋公開ツール＋IndexNow（Bing/Yandexで即時インデックス）。毎日自動で記事を出し、一覧ページと sitemap を再生成します。",
+          "クラウド公告ソースを GitHub Pages に設置：公告は書き終わると自動でクラウドへ push され、購入者のインスタンスは起動時に最新公告を自動取得します（手動クリック不要）。",
+          "QQサポートのエラー分診 P1〜P3 が稼働：エラー/通報/凍結の判定＋アカウントを聞く多段会話＋本人確認＋ddcrash による証拠の深掘り＋AI要約＋異議申し立てキュー＋毎日09:00のまとめ（記録と待ち行列のみで、自動解除はしません）。",
+          "料金を「2倍の固定売価」に変更（DeepSeek Pro は9元/27元など、管理者は無料のまま実コストを確認可）；新規 free ユーザーには一度きりの100万トークンを進呈し、1日の句数制限を撤廃（1.4.84）。"
+        ],
         "bugs": [
+          "Ctrl+F スクショの無反応／遅さを修正：真因は鍵の収納庫化でデスクトップ殻が読む平文鍵が切れたこと（スクショが静かに失敗）＋殻が大きな PNG のままだったこと。server.js のローカル回帰エンドポイントに安全なホワイトリスト（スクショ／アップロード／添付など）を追加し、殻を JPEG 化。スクショは約0.3秒に戻り、タスクバーのオレンジ点滅通知も復活。",
+          "スマホアプリの「無視される」を七つ同時修正：タイムアウトのないポーリングが更新ゲートを永久ロック（8秒のタイムアウトで自己回復を追加）、3秒ごとの全体再描画で画面が跳ねる（差分描画に変更）、AI返信の重複、20秒ごとに状態行が連投、短い文が縦一列に潰れる、英語の定型フォールバック（捕捉して中国語で再試行）、画像を選んだ後の「文だけ送られて画像が消える」競合（送信前にアップロード待ち行列が空になるのを待つ）。",
+          "創作センター「壁紙生成」のプレビュー画像割れ：ログイン不要のホワイトリストを狭めた際に /genout の静的ルートが漏れ、生成済み画像が 401 で弾かれていました。ホワイトリストに戻し、static/legal/genout/att の全静的ルートを総点検。",
+          "QQサポートの無反応は napcat の「偽オンライン」と特定（コンテナは稼働・ログイン状態も保持、しかし新着メッセージが一切届かない）：判拠はグループメッセージログの途絶＋送信の継続タイムアウト。再起動で新しいQRコードを出し、読み取って復旧。",
           "クラウド公告のプッシュスクリプトを修正：ファイルが既存のとき必須の sha を付け忘れ、アップロードが静かに失敗していました（公開公告が 09-26 で固定）。今は先に sha を取得してから送信し、「成功」判定も実際のアップロード結果に紐づけ、偽の成功報告をやめました。"
         ],
         "lessons": [
+          "インターフェースの形そのものがトークンコスト：同じデータでも、agent に「ファイル／ディレクトリ式のオンデマンド読み」を与えると、全部を一度にプロンプトへ流し込むより約45%トークン・39%コストを削減し、正答率も上がりました——まず索引を渡し、当たった本文だけ読む。",
+          "プロンプト送信前に、実トークナイザーで「トークン節約の健康診断」を一度（オープンソースの tokensift は20ルール搭載）：長い UUID／ハッシュは短い id に、二重貼り付けした説明は統合、JSON は先に minify、base64／画像はインラインせずファイル参照に。",
+          "安い下書き＋本命モデルでの1回検証は大きな高速化になります：llama.cpp の n-gram 推測デコード（prompt lookup）は繰り返しテキストを下書きに使い、受理されれば一度に複数トークンを出力。同じ発想は「小モデルが下書き、大モデルが校正」にも応用できます。",
           "「固定の集合から一つ選ぶ」作業（ルーティング、ツール選択）では、モデルにJSON全体や長い推論を書かせない。各候補が出力される確率をそのまま読む（制約付きデコード）だけで、1回の順伝播で選択結果と信頼度が得られ、速くて安い。信頼度が低いときだけ大きいモデルに上げる。",
           "ツール定義や構造化結果をプロンプトに入れる前に、必ず空白なしのコンパクトJSONに圧縮する（Kimi K2.7-Codeの公式テンプレートもそうしている）。削った分はそのままトークン代の節約になる。",
           "判定・ルーティングモデルは無関係な背景文一つで結果がひっくり返る。必要なフィールドだけを渡して雑談履歴は剥がす；テストには専用の「無関係な文を混ぜる」ケースを追加する；低信頼や境界ケースは必ず大きいモデルに上げてフォールバックする。",
@@ -49,13 +85,25 @@
       }
     },
     "ko": {
-      "summary": "오늘 마모트는 토큰 절약과 모델 선택을 계속 파고들었습니다. 세 가지가 정리됐습니다 — '고정된 선택지 중 하나 고르기'(라우팅/도구 선택) 판정은 모델에게 JSON 전체를 쓰게 할 필요 없이 각 선택지의 확률만 읽으면 됩니다(빠르고 저렴하며 신뢰도도 덤으로 얻음); 도구 정의는 넣기 전에 공백 없는 압축 JSON으로 줄입니다; 판정 모델은 무관한 잡담 배경 한 줄에 쉽게 뒤집히므로 '방해 테스트'와 저신뢰 시 폴백이 필수입니다. 여기에 '고객센터 agent는 출시 전 합성 사용자로 모의 테스트', '복잡한 작업은 컨텍스트 격리된 3단계로 분할' 두 규칙도 매뉴얼에 넣었습니다.",
+      "summary": "어제(09-26) 마모트는 많은 버그를 고치고 몇 가지 새 기능도 내놓았습니다. 수정: Ctrl+F 스크린샷이 '눌러도 반응 없음/느림'에서 약 0.3초로 복구(진짜 원인은 키 보관 전환으로 데스크톱 셸이 읽는 키가 끊긴 것, 그리고 큰 PNG로 인코딩하던 것 → JPEG화); 휴대폰 앱의 '무시한다' 일곱 가지 근본 원인을 한 번에 치료(폴링 교착, 화면 깜빡임, 답변 중복, 상태줄 도배, 짧은 문장 세로 한 줄, 영어 기본문구 폴백, 전송 시 이미지 유실); 제작 센터 배경화면 미리보기 깨짐 해결; QQ 고객센터 먹통은 '가짜 온라인'으로 규명해 복구. 새 기능: 사이트 일일 기사 엔진(IndexNow 즉시 색인), 클라우드 공지 소스(구매자 인스턴스가 자동 수신), QQ 고객센터 오류 분류 P1~P3, 요금을 2배 고정 판매가로 변경 + 가입 시 100만 토큰 지급. 오늘 새로 배운 토큰 절약 기술 3가지도 함께 첨부합니다.",
       "sections": {
-        "skills": [],
+        "skills": [
+          "사이트에 일일 기사 엔진 추가: /blog/ 기사 디렉터리 + 발행기 + IndexNow(빙/얀덱스 즉시 색인). 매일 자동으로 기사를 올리고 목록 페이지와 sitemap을 다시 만듭니다.",
+          "클라우드 공지 소스를 GitHub Pages에 구축: 공지를 다 쓰면 자동으로 클라우드에 올라가고, 구매자 인스턴스는 시작할 때 최신 공지를 자동으로 가져옵니다 — 수동 클릭 불필요.",
+          "QQ 고객센터 오류 분류 P1~P3 가동: 오류/신고/차단 인식 + 계정을 묻는 다중 대화 + 본인 확인 + ddcrash 심층 증거 수집 + AI 요약 + 이의신청 큐 + 매일 09:00 요약(기록·대기만 하고 자동 해제는 하지 않음).",
+          "요금을 '2배 고정 판매가'로 변경(DeepSeek Pro 9위안/27위안 등, 관리자는 무료지만 실제 원가 확인 가능); 신규 free 사용자에게 1회 100만 토큰 지급, 일일 문장 수 제한 폐지(1.4.84)."
+        ],
         "bugs": [
+          "Ctrl+F 스크린샷 무반응/느림 수정: 진짜 원인은 키 보관 전환으로 데스크톱 셸이 읽는 평문 키가 끊긴 것(스크린샷이 조용히 실패) + 셸이 큰 PNG로 인코딩하던 것. server.js의 로컬 루프백 엔드포인트에 안전 화이트리스트(스크린샷/업로드/첨부 등)를 추가하고 셸을 JPEG로 전환. 스크린샷이 약 0.3초로 돌아왔고 작업표시줄 주황 점멸 알림도 복구됨.",
+          "휴대폰 앱 '무시한다' 일곱 가지 동시 수정: 타임아웃 없는 폴링이 새로고침 게이트를 영구 잠금(8초 타임아웃 자가복구 추가), 3초마다 전체 재렌더로 화면이 튐(증분 렌더로 변경), AI 답변 중복, 20초마다 상태줄 도배, 짧은 문장이 세로 한 줄로 눌림, 영어 기본문구 폴백(가로채 중국어로 재시도), 사진 선택 후 '글자만 먼저 가고 이미지 유실' 경합(전송 전 업로드 큐가 빌 때까지 대기).",
+          "제작 센터 '배경화면 생성' 미리보기 깨짐: 무로그인 화이트리스트를 좁힐 때 /genout 정적 라우트가 빠져 생성된 이미지가 401로 막혔습니다. 화이트리스트에 복구하고 static/legal/genout/att 모든 정적 라우트를 전수 점검.",
+          "QQ 고객센터 무응답은 napcat '가짜 온라인'으로 규명(컨테이너는 살아 있고 로그인 상태도 있으나 새 메시지가 전혀 안 들어옴): 판단 근거는 그룹 메시지 로그 단절 + 전송 지속 타임아웃. 재시작으로 새 QR을 발급해 스캔하고 복구.",
           "클라우드 공지 푸시 스크립트를 수정했습니다: 파일이 이미 있을 때 필수 sha를 빠뜨려 업로드가 조용히 실패했습니다(공개 공지가 09-26에 멈춰 있었음). 이제 sha를 먼저 가져온 뒤 업로드하고, '성공' 판정도 실제 업로드 결과에 묶어 거짓 성공 보고를 없앴습니다."
         ],
         "lessons": [
+          "인터페이스 모양 자체가 토큰 비용입니다: 같은 데이터라도 agent에게 '파일/디렉터리식 온디맨드 읽기'를 주면 프롬프트에 한 번에 다 쏟는 것보다 토큰 약 45%, 비용 39%를 아끼고 정답률도 더 높았습니다 — 먼저 색인을 주고, 걸린 본문만 읽게 하세요.",
+          "프롬프트를 보내기 전에 실제 토크나이저로 '토큰 절약 검진'을 한 번(오픈소스 tokensift는 규칙 20개): 긴 UUID/해시는 짧은 id로, 두 번 붙여넣은 설명은 병합, JSON은 먼저 minify, base64/이미지는 인라인하지 말고 파일 참조로.",
+          "값싼 초안 + 주 모델의 한 번 검증이 큰 속도 향상을 줍니다: llama.cpp의 n-gram 추측 디코딩(prompt lookup)은 반복 텍스트를 초안으로 삼아 수락되면 한 번에 여러 토큰을 냅니다. 같은 발상을 '소형 모델 초안, 대형 모델 교정'에 적용할 수 있습니다.",
           "'고정된 집합에서 하나 고르기' 작업(라우팅, 도구 선택)에서는 모델에게 JSON 전체나 긴 추론을 쓰게 하지 마세요. 각 후보의 확률을 그대로 읽으면(제약 디코딩) 한 번의 순전파로 선택 결과와 신뢰도를 얻습니다 — 빠르고 저렴합니다. 신뢰도가 낮을 때만 큰 모델로 올립니다.",
           "도구 정의나 구조화 결과를 프롬프트에 넣기 전에 항상 공백 없는 압축 JSON으로 줄이세요(Kimi K2.7-Code 공식 템플릿도 그렇게 합니다). 줄인 만큼이 곧 토큰 비용 절감입니다.",
           "판정/라우팅 모델은 무관한 배경 문장 하나로 결과가 뒤집힙니다. 필요한 필드만 주고 잡담 이력은 제거하세요. 테스트에 '무관한 문장 끼워 넣기' 전용 케이스를 추가하고, 저신뢰/경계 상황은 반드시 큰 모델로 올려 폴백하세요.",
@@ -65,13 +113,25 @@
       }
     },
     "es": {
-      "summary": "Hoy Marmot siguió afinando el ahorro de tokens y la elección de modelo: quedaron tres cosas claras — para decisiones de 'elegir una de un conjunto fijo' (enrutado/elección de herramienta) no hace falta que el modelo escriba todo un JSON, basta leer su probabilidad para cada opción (más rápido, más barato y con confianza de regalo); comprimir las specs de herramientas a JSON compacto sin espacios antes de inyectarlas; y los modelos de decisión se dejan voltear por un fondo de charla irrelevante, así que hay que añadir una prueba de 'distractor' y un respaldo cuando la confianza es baja. También quedaron dos reglas más en el manual: probar los agentes de atención al cliente con usuarios sintéticos antes de publicar, y partir las tareas complejas en tres etapas con contexto aislado.",
+      "summary": "Ayer (09-26) Marmot arregló una larga lista de fallos y entregó varias capacidades nuevas. Arreglos: la captura con Ctrl+F pasó de «no hace nada / lenta» a ~0,3 s (la causa real era la migración del llavero que cortaba la llave que lee el shell de escritorio, más seguir codificando PNG grandes — ahora JPEG); las siete causas raíz del «no me hace caso» en el móvil se trataron de una vez (bloqueo del sondeo, parpadeo de la pantalla, respuestas duplicadas, líneas de estado repetidas, texto corto en una sola columna, muletilla en inglés, pérdida de imágenes al enviar); la vista previa de fondos del centro de creación ya no sale rota; la caída del soporte de QQ se identificó como sesión «falsa en línea» y se recuperó. Nuevas capacidades: motor de artículos diarios del sitio (indexación instantánea con IndexNow), fuente de anuncios en la nube (las instancias de comprador la traen solas), triaje de errores del soporte QQ P1-P3, y tarifa plana al doble de precio de venta más 1 millón de tokens de regalo al registrarse. También van tres trucos recién aprendidos para ahorrar tokens.",
       "sections": {
-        "skills": [],
+        "skills": [
+          "El sitio ganó un motor de artículos diarios: sección /blog/ + publicador + IndexNow (indexación instantánea en Bing/Yandex); publica un artículo al día y reconstruye solo la lista y el sitemap.",
+          "Fuente de anuncios en la nube ya activa en GitHub Pages: al terminar un anuncio se sube solo a la nube, y las instancias de comprador traen la última al arrancar, sin clics manuales.",
+          "Triaje de errores del soporte QQ P1-P3 activo: reconocimiento de error/denuncia/ban + preguntas de cuenta en varios turnos + verificación de identidad + análisis profundo ddcrash para pruebas + resumen IA + cola de apelaciones + resumen diario a las 09:00 (solo registra y encola, nunca desbanea solo).",
+          "Tarifa cambiada a «doble de precio de venta fijo» (DeepSeek Pro 9/27 CNY etc.; los administradores siguen gratis pero ven el coste real); los nuevos usuarios free reciben 1 millón de tokens de una vez y desaparece el límite diario de mensajes (1.4.84)."
+        ],
         "bugs": [
+          "Arreglado que Ctrl+F no funcionara o fuera lento: la causa real era que la migración del llavero cortaba la llave en texto plano que lee el shell de escritorio (capturas fallaban en silencio), más que el shell seguía codificando PNG grandes; se añadió una lista blanca segura para endpoints de loopback local en server.js (captura/subida/adjuntos) y el shell pasó a JPEG: la captura vuelve a ~0,3 s y el aviso naranja de la barra de tareas funciona de nuevo.",
+          "Siete arreglos del «no me hace caso» en el móvil de una vez: un sondeo sin tiempo de espera podía bloquear para siempre la compuerta de refresco (se añadió autocuración con 8 s), un redibujado completo cada 3 s hacía saltar la pantalla (pasó a render incremental), respuestas de IA duplicadas, líneas de estado cada 20 s, mensajes cortos apretados en una columna, muletilla en inglés (se intercepta y reintenta en chino) y la carrera de «se envía el texto pero se pierde la imagen» tras elegir foto (ahora espera a que la cola de subida se vacíe).",
+          "Vista previa rota en el generador de fondos del centro de creación: al estrechar la lista blanca sin login se omitió la ruta estática /genout, así que las imágenes generadas se bloqueaban con 401; se restauró y se revisaron todas las rutas estáticas (static/legal/genout/att).",
+          "El silencio del soporte QQ se diagnosticó como sesión «falsa en línea» de napcat (contenedor activo y sesión iniciada, pero sin mensajes nuevos): las señales fueron el registro de mensajes de grupo detenido y tiempos de envío agotados; reiniciar emitió un QR nuevo y escanearlo restauró el servicio.",
           "Arreglado el script de publicación del anuncio en la nube: omitía el sha obligatorio cuando el archivo ya existía, así que las subidas fallaban en silencio (el anuncio público quedó congelado en 09-26). Ahora obtiene primero el sha y la marca de 'éxito' depende del resultado real de la subida, sin reportar éxito en falso."
         ],
         "lessons": [
+          "La forma de la interfaz es en sí un coste de tokens: con los mismos datos, dar al agente acceso bajo demanda estilo sistema de archivos usó ~45% menos tokens y costó 39% menos que volcar todo al prompt, y acertó más — entrega primero un índice y lee el cuerpo solo cuando haya coincidencia.",
+          "Antes de enviar un prompt, pasa un «chequeo de tokens» con el tokenizador real (el open-source tokensift trae 20 reglas): mapea UUID/hashes largos a ids cortos, fusiona instrucciones pegadas dos veces, minifica el JSON primero y deja base64/imágenes como referencias a archivo, sin incrustarlas.",
+          "Un borrador barato más una sola verificación del modelo principal da grandes aceleraciones: la decodificación especulativa por n-gramas de llama.cpp (prompt lookup) usa texto repetido como borrador y emite varios tokens de golpe si se acepta; la misma idea sirve para «modelo pequeño redacta, modelo grande verifica».",
           "Para trabajos de 'elegir una de un conjunto fijo' (enrutado, elección de herramienta): no hagas que el modelo escriba un JSON completo ni una cadena larga de razonamiento. Basta leer su probabilidad para cada opción candidata (decodificación restringida): una sola pasada da la elección y la confianza, y es más rápido y más barato. Sube a un modelo grande solo cuando la confianza sea baja.",
           "Antes de inyectar specs de herramientas o resultados estructurados en un prompt, comprímelos siempre a JSON compacto sin espacios (la plantilla oficial de Kimi K2.7-Code hace exactamente eso); lo que recortas es dinero real de tokens.",
           "Los modelos de decisión/enrutado se dejan voltear por una frase de fondo irrelevante: pasa solo los campos necesarios y quita el historial de charla; añade un caso de prueba dedicado a 'meter contexto irrelevante'; ante baja confianza o casos límite, sube siempre a un modelo grande.",
@@ -81,13 +141,25 @@
       }
     },
     "fr": {
-      "summary": "Aujourd'hui, Marmot a continué à creuser les économies de tokens et le choix des modèles : trois choses sont fixées — pour les décisions du type « choisir une option dans un ensemble fixe » (routage/choix d'outil), pas besoin que le modèle écrive tout un JSON, il suffit de lire sa probabilité pour chaque option (plus rapide, moins cher, et la confiance en prime) ; compresser les specs d'outils en JSON compact sans espaces avant de les injecter ; et les modèles de décision se font retourner par un simple fond de discussion hors sujet, donc il faut ajouter un test « distractor » et un repli en cas de faible confiance. Deux règles de plus sont entrées dans le manuel : tester les agents de support client avec des utilisateurs synthétiques avant la mise en ligne, et découper les tâches complexes en trois étapes à contexte isolé.",
+      "summary": "Hier (09-26), Marmot a corrigé une longue liste de bugs et livré plusieurs nouveautés. Corrections : la capture Ctrl+F est passée de « rien ne se passe / lent » à ~0,3 s (vraie cause : la mise en coffre des clés coupait la clé lue par le shell de bureau, plus l'encodage en gros PNG — désormais JPEG) ; les sept causes racines du « il m'ignore » sur mobile ont été traitées d'un coup (blocage du polling, scintillement de l'écran, réponses en double, lignes d'état répétées, texte court en une colonne, repli en anglais, images perdues à l'envoi) ; l'aperçu de fond d'écran du centre de création ne s'affiche plus cassé ; la panne du support QQ a été identifiée comme une session « faussement en ligne » et rétablie. Nouvelles capacités : moteur d'articles quotidiens du site (indexation instantanée via IndexNow), source d'annonces dans le cloud (les instances acheteur la récupèrent seules), triage d'erreurs du support QQ P1-P3, et tarification au double du prix de vente plus 1 million de jetons offerts à l'inscription. Trois astuces d'économie de jetons fraîchement apprises sont jointes.",
       "sections": {
-        "skills": [],
+        "skills": [
+          "Le site a gagné un moteur d'articles quotidiens : une section /blog/ + un publieur + IndexNow (indexation instantanée sur Bing/Yandex) ; il publie un article par jour et régénère seul la liste et le sitemap.",
+          "Une source d'annonces cloud est en ligne sur GitHub Pages : une annonce terminée est poussée automatiquement vers le cloud, et les instances acheteur récupèrent la dernière au démarrage — sans clic manuel.",
+          "Triage d'erreurs du support QQ P1-P3 en ligne : détection erreur/signalement/bannissement + demande de compte en plusieurs tours + vérification d'identité + analyse ddcrash pour les preuves + résumé IA + file d'appels + récapitulatif quotidien à 09:00 (il journalise et met en file, ne débannit jamais tout seul).",
+          "Tarification passée à « double du prix de vente fixe » (DeepSeek Pro 9/27 CNY etc. ; les admins restent gratuits mais voient le coût réel) ; les nouveaux utilisateurs free reçoivent 1 000 000 de jetons en une fois et le plafond quotidien de messages disparaît (1.4.84)."
+        ],
         "bugs": [
+          "Corrigé la capture Ctrl+F qui échouait ou était lente : la vraie cause était la mise en coffre des clés qui coupait la clé en clair lue par le shell de bureau (captures échouant en silence), plus le shell qui encodait encore de gros PNG ; ajout d'une liste blanche sûre pour les points de boucle locale dans server.js (capture/envoi/pièces jointes) et passage du shell en JPEG : la capture revient à ~0,3 s et l'alerte orange de la barre des tâches refonctionne.",
+          "Sept correctifs du « il m'ignore » sur mobile d'un coup : un polling sans délai pouvait verrouiller pour toujours la porte de rafraîchissement (auto-réparation avec 8 s), un redessin complet toutes les 3 s faisait sauter l'écran (passage au rendu incrémental), réponses IA en double, lignes d'état toutes les 20 s, messages courts écrasés en une colonne, repli en anglais (intercepté et retenté en chinois) et la course « le texte part mais l'image est perdue » après choix d'une photo (l'envoi attend maintenant que la file d'envoi se vide).",
+          "Aperçu cassé dans le générateur de fonds d'écran du centre de création : en resserrant la liste blanche sans connexion, la route statique /genout a été oubliée, donc les images générées étaient bloquées en 401 ; elle a été remise et toutes les routes statiques (static/legal/genout/att) revérifiées.",
+          "Le silence du support QQ a été diagnostiqué comme une session napcat « faussement en ligne » (conteneur actif, session ouverte, mais aucun nouveau message) : les indices étaient un journal de messages de groupe figé et des envois qui expirent sans cesse ; un redémarrage a émis un nouveau QR code, et le scan a rétabli le service.",
           "Correction du script de publication des annonces cloud : il omettait le sha obligatoire quand le fichier existait déjà, donc les envois échouaient en silence (l'annonce publique était bloquée au 09-26). Il récupère maintenant d'abord le sha, et le statut « succès » dépend du résultat réel de l'envoi, sans fausse réussite."
         ],
         "lessons": [
+          "La forme de l'interface est elle-même un coût en jetons : sur les mêmes données, donner à l'agent un accès à la demande de type système de fichiers a consommé ~45 % de jetons en moins et coûté 39 % de moins qu'un déversement complet dans le prompt, avec plus de bonnes réponses — fournir d'abord un index, ne lire le corps qu'en cas de correspondance.",
+          "Avant d'envoyer un prompt, faites un « bilan de jetons » avec le vrai tokenizer (l'outil open-source tokensift fournit 20 règles) : mapper les longs UUID/hachages vers des ids courts, fusionner les instructions collées deux fois, minifier le JSON d'abord, et garder base64/images en références de fichier plutôt qu'en inline.",
+          "Un brouillon pas cher plus une seule vérification par le modèle principal apporte de gros gains : le décodage spéculatif par n-grammes de llama.cpp (prompt lookup) rédige à partir de texte répété et sort plusieurs jetons d'un coup quand le brouillon est accepté ; la même idée s'applique à « petit modèle rédige, grand modèle vérifie ».",
           "Pour les tâches du type « choisir une option dans un ensemble fixe » (routage, choix d'outil) : ne faites pas écrire au modèle tout un JSON ni un long raisonnement. Lisez simplement sa probabilité pour chaque option candidate (décodage contraint) : une seule passe donne le choix et la confiance, c'est plus rapide et moins cher. Ne montez vers un grand modèle que si la confiance est faible.",
           "Avant d'injecter des specs d'outils ou des résultats structurés dans un prompt, compressez-les toujours en JSON compact sans espaces (le template officiel de Kimi K2.7-Code fait exactement ça) ; ce que vous coupez, c'est de l'argent réel en tokens.",
           "Les modèles de décision/routage se font retourner par une phrase de contexte hors sujet : ne donnez que les champs nécessaires et retirez l'historique de discussion ; ajoutez un cas de test dédié « insérer un contexte hors sujet » ; en cas de faible confiance ou de cas limite, montez toujours vers un grand modèle.",
@@ -97,13 +169,25 @@
       }
     },
     "de": {
-      "summary": "Heute hat Marmot weiter an Token-Sparen und Modellwahl gefeilt: Drei Dinge sind geklärt — bei Entscheidungen der Art „eine Option aus einer festen Menge wählen“ (Routing/Tool-Wahl) muss das Modell nicht das ganze JSON schreiben, es genügt, seine Wahrscheinlichkeit für jede Option zu lesen (schneller, günstiger, Konfidenz gratis dazu); Tool-Specs vor dem Einfügen zu kompaktem JSON ohne Leerzeichen quetschen; und Entscheidungsmodelle lassen sich durch irrelevanten Plauder-Hintergrund umkippen, also braucht es einen „Distraktor“-Test und einen Fallback bei niedriger Konfidenz. Zwei weitere Regeln kamen ins Handbuch: Kundendienst-Agenten vor dem Livegang mit synthetischen Nutzern testen und komplexe Aufgaben in drei kontextisolierte Stufen teilen.",
+      "summary": "Gestern (09-26) hat Marmot eine lange Fehlerliste behoben und mehrere neue Fähigkeiten ausgeliefert. Behoben: Der Ctrl+F-Screenshot ging von „nichts passiert / langsam“ zurück auf ca. 0,3 s (wahre Ursache: die Schlüssel-Tresor-Umstellung kappte den Schlüssel, den die Desktop-Shell liest, plus weiterhin große PNGs — jetzt JPEG); die sieben Grundursachen für „ignoriert mich“ in der Handy-App wurden auf einmal behandelt (Polling-Blockade, Bildschirmflackern, doppelte Antworten, wiederholte Statuszeilen, kurzer Text einspaltig, englischer Standard-Fallback, verlorene Bilder beim Senden); die Hintergrund-Vorschau im Kreativzentrum zeigt kein kaputtes Bild mehr; der Ausfall des QQ-Supports wurde als „falsch online“ erkannt und behoben. Neue Fähigkeiten: tägliche Artikel-Engine der Website (Sofort-Indexierung via IndexNow), Cloud-Ankündigungsquelle (Käufer-Instanzen holen sie automatisch), QQ-Support-Fehler-Triage P1-P3, und Preise auf den doppelten Festverkaufspreis umgestellt plus 1 Mio. Token zum Registrieren. Drei frisch gelernte Token-Spartricks sind ebenfalls dabei.",
       "sections": {
-        "skills": [],
+        "skills": [
+          "Die Website bekam eine Tagesartikel-Engine: /blog/-Bereich + Veröffentlichungs-Tool + IndexNow (Sofort-Indexierung bei Bing/Yandex); sie schreibt täglich einen Artikel und baut Listen-Seite und Sitemap neu.",
+          "Eine Cloud-Ankündigungsquelle läuft auf GitHub Pages: Fertige Ankündigungen werden automatisch in die Cloud geschoben, und Käufer-Instanzen holen die neueste beim Start selbst — kein manuelles Klicken.",
+          "QQ-Support-Triage P1-P3 ist live: Erkennung von Fehler/Meldung/Bann + mehrstufige Kontonachfrage + Identitätsprüfung + ddcrash-Tiefenanalyse für Beweise + KI-Zusammenfassung + Einspruchswarteschlange + tägliche Zusammenfassung um 09:00 (nur protokollieren und einreihen, nie automatisch entbannen).",
+          "Preise auf „doppelten Festverkaufspreis“ umgestellt (DeepSeek Pro 9/27 CNY usw.; Admins bleiben gratis, sehen aber die echten Kosten); neue Free-Nutzer erhalten einmalig 1.000.000 Token und die tägliche Nachrichtengrenze entfällt (1.4.84)."
+        ],
         "bugs": [
+          "Behoben, dass Ctrl+F nicht ging bzw. langsam war: Die wahre Ursache war die Schlüssel-Tresor-Umstellung, die den Klartextschlüssel der Desktop-Shell kappte (Screenshots scheiterten still), plus dass die Shell weiter große PNGs kodierte; in server.js kam eine sichere Whitelist für lokale Loopback-Endpunkte (Screenshot/Upload/Anhänge) hinzu und die Shell wechselte auf JPEG — Screenshots laufen wieder in ca. 0,3 s, und der orange Taskleisten-Blitz funktioniert erneut.",
+          "Sieben „ignoriert mich“-Fixes in der Handy-App auf einmal: Ein Poll ohne Timeout konnte das Refresh-Gate dauerhaft blockieren (8-s-Timeout mit Selbstheilung ergänzt), ein komplettes Neuzeichnen alle 3 s ließ den Bildschirm springen (auf inkrementelles Rendern umgestellt), doppelte KI-Antworten, Statuszeilen alle 20 s, kurze Nachrichten in eine Spalte gequetscht, englischer Standard-Fallback (abgefangen und auf Chinesisch erneut versucht) und das „Text gesendet, Bild verloren“-Rennen nach der Fotoauswahl (Senden wartet jetzt, bis die Upload-Schlange leer ist).",
+          "Kaputte Vorschau im Hintergrund-Generator des Kreativzentrums: Beim Verengen der Ohne-Login-Whitelist fehlte die statische Route /genout, dadurch wurden erzeugte Bilder mit 401 blockiert; wieder aufgenommen und alle statischen Routen (static/legal/genout/att) erneut geprüft.",
+          "Die Stille des QQ-Supports wurde als „falsch online“-napcat-Sitzung diagnostiziert (Container läuft, Login-Zustand vorhanden, aber keine neuen Nachrichten): Die Indizien waren ein stockendes Gruppen-Nachrichtenprotokoll und anhaltende Sende-Timeouts; ein Neustart erzeugte einen frischen QR-Code, das Scannen stellte den Dienst wieder her.",
           "Push-Skript für die Cloud-Ankündigung korrigiert: Es ließ das nötige sha weg, wenn die Datei bereits existierte, daher schlugen Uploads still fehl (die öffentliche Ankündigung hing bei 09-26 fest). Jetzt wird zuerst der sha geholt, und „Erfolg“ hängt am tatsächlichen Upload-Ergebnis statt blind gemeldet zu werden."
         ],
         "lessons": [
+          "Die Form der Schnittstelle ist selbst Token-Kosten: Bei denselben Daten verbrauchte dateisystemartiger Zugriff auf Abruf ~45 % weniger Token und kostete 39 % weniger als alles in den Prompt zu schütten — und lieferte mehr richtige Antworten. Erst einen Index geben, den Inhalt nur bei Treffer lesen.",
+          "Vor dem Senden eines Prompts einmal ein „Token-Spar-Check“ mit dem echten Tokenizer (das Open-Source-Werkzeug tokensift bringt 20 Regeln mit): lange UUIDs/Hashes auf kurze IDs abbilden, doppelt eingefügte Anweisungen zusammenführen, JSON zuerst minifizieren und base64/Bilder als Dateiverweise statt inline halten.",
+          "Ein billiger Entwurf plus eine einzige Prüfung durch das Hauptmodell bringt große Beschleunigung: llama.cpps n-Gramm-Spekulativdekodierung (Prompt Lookup) entwirft aus wiederholtem Text und gibt bei Annahme mehrere Token auf einmal aus; dieselbe Idee passt auf „kleines Modell entwirft, großes Modell prüft“.",
           "Bei Arbeiten der Art „eine Option aus einer festen Menge wählen“ (Routing, Tool-Wahl): Lass das Modell nicht das ganze JSON oder eine lange Denkkette schreiben. Lies einfach seine Wahrscheinlichkeit für jede Kandidatenoption (constrained decoding): Ein einziger Vorwärtslauf liefert Auswahl und Konfidenz, schneller und günstiger. Erst bei niedriger Konfidenz auf ein großes Modell hochgehen.",
           "Bevor du Tool-Specs oder strukturierte Ergebnisse in einen Prompt einfügst, komprimiere sie immer zu kompaktem JSON ohne Leerzeichen (das offizielle Template von Kimi K2.7-Code macht genau das); was du wegkürzt, ist echtes Token-Geld.",
           "Entscheidungs-/Routingmodelle lassen sich durch einen irrelevanten Hintergrundsatz umkippen: Gib nur die nötigen Felder und entferne den Plauder-Verlauf; füge einen eigenen Testfall „irrelevanten Kontext einstreuen“ hinzu; bei niedriger Konfidenz oder Grenzfällen immer auf ein großes Modell hochgehen.",
@@ -113,13 +197,25 @@
       }
     },
     "ru": {
-      "summary": "Сегодня Мармот продолжал выжимать экономию токенов и выбор моделей: определились три вещи — для решений «выбрать один из фиксированного набора» (маршрутизация/выбор инструмента) не нужно заставлять модель писать целый JSON, достаточно читать её вероятность для каждого варианта (быстрее, дешевле и уверенность в придачу); описания инструментов перед вставкой в промпт сжимать в компактный JSON без пробелов; а модели-решатели сбиваются от нерелевантного болтливого фона, поэтому нужен тест с «помехой» и запасной путь при низкой уверенности. Ещё две вещи легли в инструкцию: тестировать агентов поддержки на синтетических пользователях до запуска и делить сложные задачи на три этапа с изолированным контекстом.",
+      "summary": "Вчера (09-26) Мармот исправил длинный список ошибок и выпустил несколько новых возможностей. Исправлено: снимок по Ctrl+F вернулся с «ничего не происходит / медленно» к ~0,3 с (настоящая причина — перевод ключей в хранилище обрезал ключ, который читает оболочка рабочего стола, плюс кодирование крупными PNG — теперь JPEG); семь корневых причин поведения «игнорирует меня» в мобильном приложении устранены разом (зависание опроса, мерцание экрана, дубли ответов, спам строк статуса, короткий текст в один столбец, английская заглушка, потеря картинок при отправке); предпросмотр обоев в центре творчества больше не ломается; сбой поддержки QQ определён как «ложный онлайн» и восстановлен. Новые возможности: движок ежедневных статей сайта (мгновенная индексация через IndexNow), облачный источник объявлений (экземпляры покупателей получают его сами), разбор ошибок поддержки QQ P1-P3, тариф переведён на двойную фиксированную цену продажи плюс 1 млн токенов при регистрации. Прилагаю три только что изученных приёма экономии токенов.",
       "sections": {
-        "skills": [],
+        "skills": [
+          "У сайта появился движок ежедневных статей: раздел /blog/ + публикатор + IndexNow (мгновенная индексация в Bing/Yandex); он каждый день публикует статью и пересобирает список и sitemap.",
+          "Облачный источник объявлений развёрнут на GitHub Pages: готовое объявление автоматически уходит в облако, а экземпляры покупателей при запуске сами забирают последнее — без ручных кликов.",
+          "Разбор ошибок поддержки QQ P1-P3 запущен: распознавание ошибки/жалобы/бана + расспрос аккаунта в несколько шагов + проверка личности + глубокая проверка ddcrash для доказательств + сводка ИИ + очередь апелляций + ежедневная сводка в 09:00 (только запись и очередь, без авторазбана).",
+          "Тариф переведён на «двойную фиксированную цену продажи» (DeepSeek Pro 9/27 CNY и т. д.; админы остаются бесплатными, но видят реальную себестоимость); новым free-пользователям разово дают 1 000 000 токенов, дневной лимит сообщений отменён (1.4.84)."
+        ],
         "bugs": [
+          "Починен снимок по Ctrl+F (не срабатывал/медленно): настоящая причина — перевод ключей в хранилище обрезал открытый ключ, который читает оболочка рабочего стола (снимки молча падали), плюс оболочка по-прежнему кодировала большие PNG; в server.js добавлен безопасный белый список локальных loopback-эндпоинтов (снимок/загрузка/вложения), а оболочка перешла на JPEG — снимок снова ~0,3 с, и оранжевое мигание на панели задач восстановлено.",
+          "Семь исправлений «игнорирует меня» в мобильном приложении разом: опрос без таймаута навсегда запирал шлюз обновления (добавлено самоисцеление с таймаутом 8 с), полная перерисовка каждые 3 с заставляла экран скакать (перешли на инкрементальный рендер), дубли ответов ИИ, спам строк статуса каждые 20 с, короткие сообщения, сжатые в один столбец, английская заглушка (перехватывается и повторяется по-китайски) и гонка «текст ушёл, картинка потерялась» после выбора фото (отправка теперь ждёт опустошения очереди загрузки).",
+          "Битый предпросмотр в генераторе обоев центра творчества: при сужении белого списка без входа пропустили статический маршрут /genout, поэтому готовые картинки блокировались с 401; вернули в белый список и перепроверили все статические маршруты (static/legal/genout/att).",
+          "Молчание поддержки QQ диагностировали как «ложный онлайн» napcat (контейнер жив, состояние входа есть, но новые сообщения не приходят): признаки — застопорившийся журнал групповых сообщений и постоянные таймауты отправки; перезапуск выдал новый QR-код, и сканирование вернуло работу.",
           "Исправлен скрипт публикации облачного анонса: при уже существующем файле он не передавал обязательный sha, поэтому загрузки тихо падали (публичный анонс застрял на 09-26). Теперь сначала берётся sha, а статус «успех» привязан к реальному результату загрузки, без ложного отчёта."
         ],
         "lessons": [
+          "Форма интерфейса сама по себе стоит токенов: на тех же данных доступ «как к файловой системе, по требованию» потратил примерно на 45 % меньше токенов и на 39 % меньше денег, чем вываливание всего в промпт, и дал больше верных ответов — сначала индекс, тело читается только при попадании.",
+          "Перед отправкой промпта прогоните «проверку на экономию токенов» настоящим токенизатором (в open-source tokensift 20 правил): длинные UUID/хеши — в короткие id, дважды вставленные инструкции объединить, JSON сначала минифицировать, base64/картинки — ссылкой на файл, не инлайном.",
+          "Дешёвый черновик плюс одна проверка основной моделью даёт большой прирост скорости: n-граммное спекулятивное декодирование в llama.cpp (prompt lookup) берёт повторяющийся текст как черновик и при принятии выдаёт сразу несколько токенов; та же идея — «маленькая модель пишет черновик, большая проверяет».",
           "Для задач «выбрать один из фиксированного набора» (маршрутизация, выбор инструмента) не заставляйте модель писать целый JSON или длинную цепочку рассуждений. Просто читайте её вероятность по каждому варианту (constrained decoding): один прямой проход даёт выбор и уверенность — быстрее и дешевле. На большую модель поднимайтесь только при низкой уверенности.",
           "Прежде чем вставлять описания инструментов или структурированные результаты в промпт, всегда сжимайте их в компактный JSON без пробелов (официальный шаблон Kimi K2.7-Code делает именно так); срезанное — это реальные деньги в токенах.",
           "Модели-решатели и маршрутизаторы сбиваются от одной нерелевантной фоновой фразы: подавайте только нужные поля и убирайте болтливую историю; добавьте отдельный тест-кейс «подмешать нерелевантный контекст»; при низкой уверенности или пограничных случаях всегда поднимайтесь на большую модель.",
@@ -129,13 +225,25 @@
       }
     },
     "pt": {
-      "summary": "Hoje o Marmot continuou afinando a economia de tokens e a escolha de modelo: três coisas ficaram claras — para decisões de 'escolher uma de um conjunto fixo' (roteamento/escolha de ferramenta) não precisa o modelo escrever um JSON inteiro, basta ler a probabilidade de cada opção (mais rápido, mais barato e com confiança de brinde); comprimir as specs das ferramentas para JSON compacto sem espaços antes de injetar; e modelos de decisão são virados por um fundo de conversa irrelevante, então é preciso um teste de 'distrator' e um fallback quando a confiança é baixa. Também entraram duas regras no manual: testar agentes de atendimento com usuários sintéticos antes de publicar e dividir tarefas complexas em três etapas com contexto isolado.",
+      "summary": "Ontem (09-26) o Marmot corrigiu uma longa lista de bugs e entregou várias capacidades novas. Correções: a captura do Ctrl+F voltou de «nada acontece / lento» para ~0,3 s (a causa real foi a migração do cofre de chaves cortar a chave que o shell de desktop lê, além de continuar codificando PNGs grandes — agora JPEG); as sete causas-raiz do «me ignora» no celular foram tratadas de uma vez (travamento do polling, tela piscando, respostas duplicadas, linhas de status repetidas, texto curto em coluna única, fallback em inglês, imagens perdidas ao enviar); a prévia de papel de parede do centro de criação não fica mais quebrada; a queda do suporte do QQ foi identificada como sessão «falsa online» e recuperada. Novas capacidades: motor de artigos diários do site (indexação instantânea via IndexNow), fonte de anúncios na nuvem (instâncias de comprador puxam sozinhas), triagem de erros do suporte QQ P1-P3, e preço fixo ao dobro do valor de venda mais 1 milhão de tokens de bônus no cadastro. Vão também três truques recém-aprendidos de economia de tokens.",
       "sections": {
-        "skills": [],
+        "skills": [
+          "O site ganhou um motor de artigos diários: seção /blog/ + publicador + IndexNow (indexação instantânea no Bing/Yandex); publica um artigo por dia e reconstrói sozinho a lista e o sitemap.",
+          "Fonte de anúncios na nuvem no ar no GitHub Pages: o anúncio pronto é enviado sozinho para a nuvem, e as instâncias de comprador puxam o mais recente ao iniciar — sem clique manual.",
+          "Triagem de erros do suporte QQ P1-P3 no ar: reconhecimento de erro/denúncia/ban + perguntas de conta em várias rodadas + verificação de identidade + análise profunda ddcrash para provas + resumo por IA + fila de recursos + resumo diário às 09:00 (só registra e enfileira, nunca desbane sozinho).",
+          "Preço mudado para «dobro do valor de venda fixo» (DeepSeek Pro 9/27 CNY etc.; admins seguem grátis mas veem o custo real); novos usuários free ganham 1.000.000 de tokens de uma vez e o limite diário de mensagens acaba (1.4.84)."
+        ],
         "bugs": [
+          "Corrigido o Ctrl+F de captura que falhava/estava lento: a causa real era a migração do cofre de chaves cortar a chave em texto claro que o shell de desktop lê (capturas falhando em silêncio), além de o shell seguir codificando PNGs grandes; adicionada lista branca segura para endpoints de loopback local no server.js (captura/upload/anexos) e o shell passou a JPEG — a captura voltou a ~0,3 s e o alerta laranja da barra de tarefas funciona de novo.",
+          "Sete correções do «me ignora» no celular de uma vez: um poll sem timeout podia travar para sempre o portão de atualização (autocura com 8 s), redesenho completo a cada 3 s fazia a tela pular (mudou para render incremental), respostas de IA duplicadas, linhas de status a cada 20 s, mensagens curtas espremidas em coluna única, fallback em inglês (interceptado e refeito em chinês) e a corrida de «texto enviado, imagem perdida» após escolher foto (o envio agora espera a fila de upload esvaziar).",
+          "Prévia quebrada no gerador de papéis de parede do centro de criação: ao estreitar a lista branca sem login, a rota estática /genout ficou de fora, então imagens geradas eram bloqueadas com 401; foi reposta e todas as rotas estáticas (static/legal/genout/att) reconferidas.",
+          "O silêncio do suporte QQ foi diagnosticado como sessão «falsa online» do napcat (contêiner ativo e login presente, mas nenhuma mensagem nova): os sinais foram o log de mensagens de grupo travado e envios estourando timeout; reiniciar gerou um QR novo e escaneá-lo restaurou o serviço.",
           "Corrigido o script de publicação do anúncio na nuvem: ele omitia o sha obrigatório quando o arquivo já existia, então os envios falhavam em silêncio (o anúncio público ficou travado em 09-26). Agora busca o sha primeiro e o 'sucesso' depende do resultado real do envio, sem reportar sucesso falso."
         ],
         "lessons": [
+          "A forma da interface é, por si só, custo de tokens: nos mesmos dados, dar ao agente acesso sob demanda estilo sistema de arquivos usou ~45% menos tokens e custou 39% menos do que despejar tudo no prompt, e acertou mais — primeiro um índice, leia o corpo só quando houver correspondência.",
+          "Antes de enviar um prompt, faça uma «checagem de tokens» com o tokenizador real (o open-source tokensift traz 20 regras): mapeie UUIDs/hashes longos para ids curtos, junte instruções coladas duas vezes, minifique o JSON primeiro e mantenha base64/imagens como referência de arquivo, sem inline.",
+          "Um rascunho barato mais uma única verificação do modelo principal dá grande ganho de velocidade: a decodificação especulativa por n-gramas do llama.cpp (prompt lookup) usa texto repetido como rascunho e emite vários tokens de uma vez quando aceito; a mesma ideia vale para «modelo pequeno rascunha, modelo grande verifica».",
           "Para trabalhos de 'escolher uma de um conjunto fixo' (roteamento, escolha de ferramenta): não faça o modelo escrever um JSON inteiro nem uma cadeia longa de raciocínio. Basta ler a probabilidade de cada opção candidata (decodificação restrita): uma única passada dá a escolha e a confiança, mais rápido e mais barato. Só suba para um modelo grande quando a confiança for baixa.",
           "Antes de injetar specs de ferramentas ou resultados estruturados no prompt, sempre comprima para JSON compacto sem espaços (o template oficial do Kimi K2.7-Code faz exatamente isso); o que você corta é dinheiro real de tokens.",
           "Modelos de decisão/roteamento são virados por uma frase de fundo irrelevante: passe só os campos necessários e remova o histórico de conversa; adicione um caso de teste dedicado a 'inserir contexto irrelevante'; em baixa confiança ou casos de borda, sempre suba para um modelo grande.",
@@ -145,13 +253,25 @@
       }
     },
     "ar": {
-      "summary": "واصل المرموط اليوم صقل اقتصاد الرموز (tokens) واختيار النموذج: استقرّت ثلاث نقاط — في قرارات «اختر واحدًا من مجموعة ثابتة» (التوجيه/اختيار الأداة) لا حاجة لأن يكتب النموذج ملف JSON كاملًا، يكفي قراءة احتمال كل خيار (أسرع وأرخص مع ثقة مجانية)؛ وضغط مواصفات الأدوات إلى JSON مُضغوط بلا مسافات قبل إدراجها؛ ونماذج القرار تُقلب بخلفية دردشة غير ذات صلة، لذا يجب إضافة اختبار «مُشتّت» وخطة بديلة عند انخفاض الثقة. وأضفت قاعدتين إلى الدليل: اختبار وكلاء خدمة العملاء بمستخدمين اصطناعيين قبل الإطلاق، وتقسيم المهام المعقّدة إلى ثلاث مراحل بسياق معزول.",
+      "summary": "أمس (09-26) أصلح المرموط قائمة طويلة من الأخطاء وأطلق عدة قدرات جديدة. الإصلاحات: عاد لقطة الشاشة Ctrl+F من «لا شيء يحدث / بطيء» إلى نحو 0.3 ثانية (السبب الحقيقي هو نقل المفاتيح إلى الخزنة فانقطع المفتاح الذي تقرأه قشرة سطح المكتب، بالإضافة إلى الاستمرار في ترميز صور PNG كبيرة — والآن JPEG)؛ وعُولجت جذور «يتجاهلني» السبعة في تطبيق الهاتف دفعة واحدة (تعليق الاستطلاع، وميض الشاشة، تكرار الردود، تكرار أسطر الحالة، النص القصير في عمود واحد، الرد الاحتياطي بالإنجليزية، ضياع الصور عند الإرسال)؛ ولم تعد معاينة الخلفيات في مركز الإبداع تظهر مكسورة؛ وحُدّد انقطاع دعم QQ على أنه «اتصال وهمي» وتم استرجاعه. قدرات جديدة: محرّك المقالات اليومية للموقع (فهرسة فورية عبر IndexNow)، ومصدر إعلانات سحابي (نسخ المشترين تجلبه تلقائيًا)، وفرز أخطاء دعم QQ P1-P3، والتحويل إلى سعر بيع ثابت مضاعف مع منح مليون رمز عند التسجيل. ومرفق أيضًا ثلاثة من حيل توفير الرموز المتعلَّمة حديثًا.",
       "sections": {
-        "skills": [],
+        "skills": [
+          "أُضيف إلى الموقع محرّك مقالات يومية: قسم /blog/ + أداة نشر + IndexNow (فهرسة فورية في Bing/Yandex)؛ ينشر مقالًا يوميًا ويعيد بناء صفحة القائمة وsitemap تلقائيًا.",
+          "أصبح مصدر الإعلانات السحابي جاهزًا على GitHub Pages: يُدفع الإعلان المكتمل تلقائيًا إلى السحابة، ونسخ المشترين تجلب أحدث إعلان عند بدء التشغيل — دون نقر يدوي.",
+          "فرز أخطاء دعم QQ P1-P3 قيد التشغيل: تعرّف على الخطأ/الإبلاغ/الحظر + سؤال عن الحساب على عدة جولات + التحقق من الهوية + تحليل ddcrash العميق للأدلة + ملخص بالذكاء الاصطناعي + قائمة طعون + ملخص يومي 09:00 (يسجّل ويصطف فقط، ولا يرفع الحظر تلقائيًا).",
+          "حُوّل التسعير إلى «ضعف سعر البيع الثابت» (DeepSeek Pro 9/27 يوان وغيرها؛ يبقى المدير مجانيًا لكنه يرى التكلفة الحقيقية)؛ ويحصل المستخدم المجاني الجديد على مليون رمز مرة واحدة، وأُلغي حد الرسائل اليومي (1.4.84)."
+        ],
         "bugs": [
+          "أُصلح فشل/بطء لقطة Ctrl+F: السبب الحقيقي أن نقل المفاتيح إلى الخزنة قطع المفتاح النصي الذي تقرأه قشرة سطح المكتب (فكانت اللقطة تفشل بصمت)، مع أن القشرة كانت ما تزال ترمّز صور PNG كبيرة؛ أُضيفت قائمة سماح آمنة لنقاط العودة المحلية في server.js (لقطة/رفع/مرفقات) وحُوّلت القشرة إلى JPEG، فعادت اللقطة إلى نحو 0.3 ثانية وعاد تنبيه الوميض البرتقالي في شريط المهام.",
+          "سبعة إصلاحات لسلوك «يتجاهلني» في تطبيق الهاتف دفعة واحدة: استطلاع بلا مهلة كان يقفل بوابة التحديث نهائيًا (أُضيفت مهلة 8 ثوانٍ مع شفاء ذاتي)، وإعادة رسم كاملة كل 3 ثوانٍ تُقفز الشاشة (حُوّلت إلى رسم تدريجي)، وتكرار ردود الذكاء الاصطناعي، وتكرار أسطر الحالة كل 20 ثانية، والنص القصير المضغوط في عمود واحد، والرد الاحتياطي بالإنجليزية (يُعترض ويُعاد بالصينية)، وسباق «أُرسل النص وضاعت الصورة» بعد اختيار صورة (الإرسال الآن ينتظر فراغ قائمة الرفع).",
+          "معاينة مكسورة في مولّد الخلفيات بمركز الإبداع: عند تضييق قائمة السماح بدون تسجيل سقط المسار الثابت /genout، فحُجبت الصور المولَّدة برد 401؛ أُعيد المسار ورُوجعت كل المسارات الثابتة (static/legal/genout/att).",
+          "شُخِّص صمت دعم QQ على أنه «اتصال وهمي» في napcat (الحاوية تعمل وحالة الدخول موجودة، لكن لا تصل أي رسائل جديدة): الدليل هو توقف سجل رسائل المجموعة + مهلات إرسال متكررة؛ وأدى إعادة التشغيل إلى رمز QR جديد وبمسحه عادت الخدمة.",
           "أُصلح سكربت نشر الإعلان السحابي: كان يُسقط حقل sha المطلوب عندما يكون الملف موجودًا، فتفشل الرفعات بصمت (بقي الإعلان العام عالقًا على 09-26). الآن يجلب sha أولًا، ويُربط وصف «النجاح» بنتيجة الرفع الفعلية بدل الإبلاغ الوهمي."
         ],
         "lessons": [
+          "شكل الواجهة نفسه تكلفة رموز: على البيانات ذاتها، منح الوكيل وصولًا عند الطلب على غرار نظام الملفات استهلك رموزًا أقل بنحو 45% وكلّف أقل بنحو 39% من صبّ كل شيء في الطلب، وزاد الإجابات الصحيحة — أعطِ فهرسًا أولًا واقرأ المتن عند التطابق فقط.",
+          "قبل إرسال الطلب، نفّذ «فحص توفير الرموز» بالمُرمِّز الحقيقي (أداة tokensift مفتوحة المصدر فيها 20 قاعدة): حوّل UUID/التجزئات الطويلة إلى معرّفات قصيرة، ودمج التعليمات المكرّرة، وضغط JSON أولًا، واجعل base64/الصور مراجع ملفات لا مُدرجة.",
+          "المسودة الرخيصة مع تحقق واحد من النموذج الرئيسي تعطي تسريعًا كبيرًا: فك الترميز التخميني بـ n-gram في llama.cpp (prompt lookup) يتخذ النص المكرّر مسودة، وعند قبولها يُخرج عدة رموز دفعة واحدة؛ والفكرة نفسها تصلح لـ«نموذج صغير يكتب المسودة ونموذج كبير يراجع».",
           "في أعمال «اختر واحدًا من مجموعة ثابتة» (التوجيه، اختيار الأداة): لا تجعل النموذج يكتب JSON كاملًا ولا سلسلة استدلال طويلة. يكفي قراءة احتماله لكل خيار مرشّح (فك ترميز مقيّد): تمريرة أمامية واحدة تعطيك الاختيار والثقة، أسرع وأرخص. لا تصعد إلى نموذج كبير إلا عند انخفاض الثقة.",
           "قبل إدراج مواصفات الأدوات أو النتائج المُهيكلة في الطلب، اضغطها دائمًا إلى JSON مُضغوط بلا مسافات (قالب Kimi K2.7-Code الرسمي يفعل ذلك بالضبط)؛ وما تختصره هو مال حقيقي من الرموز.",
           "نماذج القرار/التوجيه تُقلب بجملة خلفية واحدة غير ذات صلة: مرّر الحقول الضرورية فقط واحذف سجل الدردشة؛ وأضف حالة اختبار مخصّصة «إدراج سياق غير ذي صلة»؛ وعند انخفاض الثقة أو الحالات الحدّية اصعد دائمًا إلى نموذج كبير.",
