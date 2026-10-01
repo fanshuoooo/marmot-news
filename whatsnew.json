@@ -1,202 +1,192 @@
 {
   "ver": "1.4.92",
-  "date": "2026-09-30",
-  "summary": "昨天(09-29)上线了独立的「用户权限管理」页面，并修好了智谱余额卡消失、搜索报错、CRM 全站打不开三件事；同时把「JeecgBoot 改菜单/权限的正确姿势」彻底摸清并固化下来。",
+  "date": "2026-10-01",
+  "summary": "昨天(09-30)修好了代理商登录失败、A套餐用户管理一直转圈、改密后 Java 端登不上三个 bug，并把改密算法彻底对齐 Java 登录端；同时给全量接口加了缓存，查询从 67 秒降到 0.3 秒。",
   "sections": {
     "skills": [
-      "新增独立「用户权限管理」页面（usermgmt.html）：不再塞进数据中心内部 tab，改为 CRM 左侧菜单独立项，账号列表/搜索/增改一页搞定。",
-      "菜单权限关联打通：改菜单不止写 sys_permission，还要在 sys_role_permission 关联角色、清 shiro:cache，fanshuo 等角色才真正看得见。"
+      "A套餐用户管理接入全量缓存：新增 itvGetAllBox() 每 600 秒缓存一次 IPTV 全量 box 数据，代理商查询从翻页 67 秒降到 0.3 秒。",
+      "用户权限管理改密算法打通：agentapi 的 umHash 重写为与 Java PBEWithMD5AndDES 逐字节一致，页面改密后 Java 端能正常登录。"
     ],
     "bugs": [
-      "智谱余额卡消失：部署用户权限时用了不含 zhipu 的基线文件覆盖首页，已从含智谱的备份恢复，余额卡重新显示。",
-      "搜索 hanxu 报「接口不存在 usermgmt_list」：前端写 api('usermgmt_list')、后端注册成 usermgmt/list，命名不一致；已统一为 usermgmt/xxx，搜索参数统一用 kw。",
-      "CRM 全站打不开（我自己误杀进程造成）：重启 JeecgBoot 时 kill 掉端口进程，又把 supervisor 自动拉起的那只当重复进程清掉，8080 无监听；后按 supervisorctl 重启恢复，全站 200。"
+      "代理商登录失败：历史遗留的 PHP umHash 算法参数装反（生成 32 位旧 hash）与 Java 不兼容，改用 Java RunPwd 重算 hash 并清掉 Redis 失败计数后，chuyi、dajin 都能登录。",
+      "A套餐用户管理一直加载中：代理商逐个用 searchusername 查上游 getboxinfo，遇到历史遗留短号会「参数错误」把整页打断；改成拉全量本地按 stbMac 过滤后恢复正常。",
+      "改密后 Java 端登不上：umHash 三处错误（key 派生、iv 长度、加密对象）已修正，laojia 改密后端到端登录成功。"
     ],
     "lessons": [
-      "CRM 由宝塔 supervisor 守护，重启只准用 supervisorctl -c /etc/supervisor/supervisord.conf restart springboot-crm，严禁 kill；判活用 netstat :8080 + curl http（是 http 不是 https）。",
-      "JeecgBoot 菜单看不到的真正根因不是缓存：sys_permission 只是定义，必须在 sys_role_permission 关联角色；授权缓存要清 shiro:cache:*，只清 ALL_*/SYS_*/MENU* 没用。",
-      "老板纠正的「位置需求」第一时间确认（独立左侧菜单 vs 内部 tab），不要默认做成内部 tab。",
-      "部署前端前先确认基线文件包含所有已上线功能（如智谱），别用旧基线覆盖。"
+      "改密 hash 一律用 Java RunPwd 对拍，绝不手写 PHP umHash；写库的 hash 用 base64 传，不用字面量。",
+      "JeecgBoot 登录失败超过 5 次会锁 10 分钟：排查登录问题先看 Redis 的 LOGIN_FAIL_* 有没有堆积，测完清掉。",
+      "全量数据过滤方案必须先做缓存，否则翻页拉取会拖垮接口；数据库/SSH 一律不暴露公网、不用弱口令。"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "Yesterday (09-29) we shipped a standalone 'User Permission Management' menu page and fixed three problems — the Zhipu balance card had vanished, searches threw an error, and the whole CRM was unreachable; along the way we fully nailed down and locked in the right way to change JeecgBoot menus and permissions.",
+      "summary": "Yesterday (09-30) we fixed three bugs — agents couldn't log in, the A-package user management spun forever, and after a credential change the Java side couldn't log in — and fully aligned the credential algorithm with the Java login side; we also added caching to the full-data interface, cutting a query from 67 seconds to 0.3.",
       "sections": {
         "skills": [
-          "New standalone 'User Permission Management' page (usermgmt.html): instead of being buried as a tab inside the data center, it is now its own item in the CRM left menu, with the account list, search and add/edit all on one page.",
-          "Menu permissions properly wired: changing a menu isn't just writing sys_permission — you must also link the role in sys_role_permission and clear shiro:cache before roles like fanshuo can actually see it."
+          "A-package user management now uses a full cache: the new itvGetAllBox() caches the entire IPTV box list every 600 seconds, taking an agent query from 67 seconds down to 0.3.",
+          "The user-permission credential algorithm is now fully wired: agentapi's umHash was rewritten to match Java PBEWithMD5AndDES byte for byte, so the Java side logs in normally after a page-side change."
         ],
         "bugs": [
-          "The Zhipu balance card disappeared: deploying the user-permission feature overwrote the home page with a baseline file that lacked zhipu; restored from the backup that has zhipu, and the card is back.",
-          "Searching hanxu threw 'interface not found usermgmt_list': the front end called api('usermgmt_list') while the backend registered usermgmt/list — mismatched names; unified to usermgmt/xxx with the search param consistently 'kw'.",
-          "The whole CRM was unreachable (caused by me killing the wrong process): while restarting JeecgBoot I killed the port-holding process, then killed the one supervisor auto-restarted, taking it for a duplicate, leaving 8080 with no listener; recovered via supervisorctl restart, the site back to 200."
+          "Agents couldn't log in: the legacy PHP umHash had its parameters swapped, producing 32-char hashes incompatible with Java; recomputed into Java RunPwd and cleared the fail counter in Redis, and both chuyi and dajin can log in.",
+          "A-package user management spun forever: agents queried the upstream getboxinfo one by one with searchusername, and a legacy short number triggered a 'parameter error' that broke the whole page; switched to pulling the full list and filtering by stbMac locally, and it recovered.",
+          "After a credential change the Java side couldn't log in: three errors in umHash (key derivation, IV length, and the encrypted object) are fixed; end-to-end login verified."
         ],
         "lessons": [
-          "The CRM is guarded by the BT panel's supervisor; to restart use only supervisorctl -c /etc/supervisor/supervisord.conf restart springboot-crm — never kill. Check liveness with netstat :8080 plus curl over http (it's http, not https).",
-          "The real reason a JeecgBoot menu doesn't show is not caching: sys_permission only defines it, you must link the role in sys_role_permission; for the authorization cache clear shiro:cache:* (clearing only ALL_*/SYS_*/MENU* does nothing).",
-          "When the boss corrects a placement requirement, confirm at once (standalone left-menu item vs internal tab) — don't default to an internal tab.",
-          "Before deploying the front end, confirm the baseline file already contains every live feature (e.g. zhipu); never overwrite with an old baseline."
+          "Always cross-check credential hashes with Java RunPwd — never hand-write PHP umHash; pass hashes to the database as base64, never as literals.",
+          "JeecgBoot locks an account for 10 minutes after more than 5 failed logins; when debugging login, first check Redis LOGIN_FAIL_* keys for a backlog, then clear them after testing.",
+          "Full-data filtering must be cached first, or paging will stall the endpoint; never expose the database/SSH to the public internet, and never use weak credentials."
         ]
       }
     },
     "ja": {
-      "summary": "昨日（09-29）は、独立した「ユーザー権限管理」メニューページを公開し、智譜（Zhipu）残高カードが消えた・検索がエラー・CRM全体が開けないという3件を修正しました。あわせて、JeecgBootのメニュー／権限を正しく変える手順を完全に把握して固めました。",
+      "summary": "昨日（09-30）は、代理店がログインできない・Aパッケージのユーザー管理がずっと読み込み中・パスワード変更後にJava側でログインできないという3件のバグを修正し、パスワード計算アルゴリズムをJavaログイン側と完全に揃えました。さらに全件取得インターフェースにキャッシュを追加し、問い合わせは67秒から0.3秒に短縮しました。",
       "sections": {
         "skills": [
-          "独立した「ユーザー権限管理」ページ（usermgmt.html）を新設：データセンター内のタブにせず、CRM左メニューの独立項目に。アカウント一覧／検索／追加・編集を1ページで。",
-          "メニュー権限の紐付けを整備：メニュー変更は sys_permission を書くだけでは不十分で、sys_role_permission でロールを紐付け、shiro:cache を消して初めて fanshuo などのロールに見える。"
+          "Aパッケージのユーザー管理に全件キャッシュを導入：新設の itvGetAllBox() が IPTV の全 box を600秒ごとにキャッシュし、代理店の問い合わせが67秒→0.3秒に。",
+          "ユーザー権限管理のパスワード計算を接続：agentapi の umHash を Java の PBEWithMD5AndDES とバイト単位で一致するよう書き直し、ページ側の変更後に Java 側でも正常にログイン可能に。"
         ],
         "bugs": [
-          "智譜（Zhipu）残高カードが消えた：ユーザー権限機能の配備時に zhipu を含まないベースラインファイルでトップページを上書きしたため。zhipu 入りのバックアップから復元し、カードが戻りました。",
-          "hanxu 検索で「接口不存在 usermgmt_list」：フロントは api('usermgmt_list')、バックエンドは usermgmt/list と命名不一致。usermgmt/xxx に統一し、検索パラメータも kw に統一。",
-          "CRM全体が開けない（自分の誤 kill が原因）：JeecgBoot再起動時にポート保持プロセスを kill し、supervisor が自動起動したプロセスを重複と誤認してさらに kill → 8080 が無監視に。supervisorctl で再起動して復旧、全站200。"
+          "代理店がログインできない：旧 PHP umHash の引数が逆で、Java と互換性のない32桁ハッシュを生成していた。Java RunPwd でハッシュを再計算し Redis の失敗カウントを消去、chuyi と dajin の両方がログイン成功。",
+          "Aパッケージのユーザー管理がずっと読み込み中：代理店が searchusername で上流 getboxinfo を1件ずつ照会し、過去の短番号が「パラメータエラー」を起こしてページ全体が落ちていた。全件取得＋ローカルで stbMac 絞り込みに変更し復旧。",
+          "パスワード変更後に Java 側でログインできない：umHash の3か所の誤り（キー導出・IV長・暗号化対象）を修正し、エンドツーエンドでログイン確認。"
         ],
         "lessons": [
-          "CRMは宝塔パネルの supervisor が守っている。再起動は supervisorctl -c /etc/supervisor/supervisord.conf restart springboot-crm のみ。kill 厳禁。死活確認は netstat :8080 と curl（http、httpsではない）。",
-          "JeecgBootのメニューが見えない本当の原因はキャッシュではない：sys_permission は定義のみ。sys_role_permission でロール紐付けが必須。認可キャッシュは shiro:cache:* を消す（ALL_*/SYS_*/MENU* だけでは無意味）。",
-          "ボスの配置指示は即座に確認する（左メニューの独立項目 vs 内部タブ）。勝手に内部タブにしない。",
-          "フロント配備前に、ベースラインファイルが既存機能（智譜など）を全て含むか確認。古いベースラインで上書きしない。"
+          "パスワードのハッシュは必ず Java RunPwd で突き合わせる。PHP umHash を手書きしない。DB へは base64 で渡し、リテラルは使わない。",
+          "JeecgBoot はログイン失敗が5回を超えると10分ロックする。ログイン調査時はまず Redis の LOGIN_FAIL_* を確認し、終わったら消す。",
+          "全件データの絞り込みはまずキャッシュ必須。ページングで取得すると接口が詰まる。DB/SSH は絶対に公網へ出さず、弱いパスワードも使わない。"
         ]
       }
     },
     "ko": {
-      "summary": "어제(09-29) 독립 '사용자 권한 관리' 메뉴 페이지를 출시하고, 지푸(Zhipu) 잔액 카드 실종·검색 오류·CRM 전체 접속 불가 세 가지를 고쳤습니다. 아울러 JeecgBoot 메뉴/권한을 올바르게 바꾸는 방법을 완전히 파악해 정리했습니다.",
+      "summary": "어제(09-30) 대리점 로그인 실패, A패키지 사용자 관리가 계속 로딩 중, 비밀번호 변경 후 Java 측 로그인 불가 세 가지 버그를 고치고 비밀번호 계산 알고리즘을 Java 로그인 측과 완전히 맞췄습니다. 또 전체 조회 인터페이스에 캐시를 추가해 조회가 67초에서 0.3초로 줄었습니다.",
       "sections": {
         "skills": [
-          "독립 '사용자 권한 관리' 페이지(usermgmt.html) 신설: 데이터센터 내부 탭이 아니라 CRM 왼쪽 메뉴의 독립 항목으로. 계정 목록/검색/추가·수정을 한 페이지에서.",
-          "메뉴 권한 연결 정비: 메뉴 변경은 sys_permission만으로 부족하며 sys_role_permission에서 역할을 연결하고 shiro:cache를 지워야 fanshuo 등 역할에 보입니다."
+          "A패키지 사용자 관리에 전체 캐시 도입: 신설된 itvGetAllBox()가 IPTV 전체 box를 600초마다 캐시해 대리점 조회가 67초→0.3초.",
+          "사용자 권한 관리 비밀번호 계산 연결: agentapi의 umHash를 Java PBEWithMD5AndDES와 바이트 단위로 일치하도록 재작성해, 페이지에서 변경 후 Java 측도 정상 로그인."
         ],
         "bugs": [
-          "지푸(Zhipu) 잔액 카드 실종: 사용자 권한 기능 배포 시 zhipu가 없는 기준 파일로 홈을 덮어씀. zhipu 포함 백업에서 복원해 카드가 다시 표시됩니다.",
-          "hanxu 검색 시 '接口不存在 usermgmt_list': 프런트는 api('usermgmt_list'), 백엔드는 usermgmt/list로 불일치. usermgmt/xxx로 통일하고 검색 파라미터도 kw로 통일.",
-          "CRM 전체 접속 불가(제가 잘못 죽인 프로세스가 원인): JeecgBoot 재시작 중 포트 점유 프로세스를 kill하고, supervisor가 자동 재기동한 프로세스를 중복으로 오인해 또 kill → 8080 무응답. supervisorctl 재시작으로 복구, 전 사이트 200."
+          "대리점 로그인 실패: 구 PHP umHash의 인자가 뒤바뀌어 Java와 호환되지 않는 32자리 해시를 만들었음. Java RunPwd로 해시를 다시 계산하고 Redis 실패 카운트를 지워 chuyi와 dajin 모두 로그인 성공.",
+          "A패키지 사용자 관리가 계속 로딩: 대리점이 searchusername으로 상위 getboxinfo를 한 건씩 조회하다 과거 단번호가 '파라미터 오류'를 일으켜 페이지 전체가 죽었음. 전체 조회+로컬 stbMac 필터로 변경해 복구.",
+          "비밀번호 변경 후 Java 측 로그인 불가: umHash의 세 곳 오류(키 유도·IV 길이·암호화 대상) 수정, 종단 간 로그인 확인."
         ],
         "lessons": [
-          "CRM은 BT 패널 supervisor가 관리합니다. 재시작은 supervisorctl -c /etc/supervisor/supervisord.conf restart springboot-crm만. kill 금지. 생존 확인은 netstat :8080 + curl(https 아닌 http).",
-          "JeecgBoot 메뉴가 안 보이는 진짜 원인은 캐시가 아니다: sys_permission은 정의일 뿐이고 sys_role_permission에서 역할 연결이 필수. 인가 캐시는 shiro:cache:*를 지워야 함(ALL_*/SYS_*/MENU*만으로는 무의미).",
-          "사장님이 바로잡은 위치 요구는 즉시 확인(왼쪽 메뉴 독립 항목 vs 내부 탭). 임의로 내부 탭으로 만들지 않는다.",
-          "프런트 배포 전 기준 파일에 기존 기능(지푸 등)이 모두 포함됐는지 확인. 낡은 기준으로 덮어쓰지 않는다."
+          "비밀번호 해시는 반드시 Java RunPwd로 대조. PHP umHash를 직접 쓰지 않는다. DB에는 base64로 전달, 리터럴 금지.",
+          "JeecgBoot는 로그인 5회 초과 시 10분 잠금. 로그인 문제를 볼 땐 먼저 Redis LOGIN_FAIL_*를 확인하고 끝나면 지운다.",
+          "전체 데이터 필터링은 먼저 캐시 필수. 페이징 조회는 인터페이스를 막는다. DB/SSH는 절대 공용망에 노출하지 않고 약한 비밀번호도 쓰지 않는다."
         ]
       }
     },
     "es": {
-      "summary": "Ayer (09-29) publicamos una página de menú independiente de «Gestión de permisos de usuario» y arreglamos tres problemas: la tarjeta de saldo de Zhipu había desaparecido, las búsquedas daban error y todo el CRM estaba inaccesible; además dejamos completamente claros y fijados los pasos correctos para cambiar menús y permisos en JeecgBoot.",
+      "summary": "Ayer (09-30) arreglamos tres bugs —los agentes no podían iniciar sesión, la gestión de usuarios del paquete A giraba sin parar y tras cambiar la contraseña el lado Java no podía entrar— y alineamos por completo el algoritmo de contraseñas con el inicio de sesión de Java; además añadimos caché a la interfaz de datos completos, bajando una consulta de 67 segundos a 0,3.",
       "sections": {
         "skills": [
-          "Nueva página independiente de «Gestión de permisos de usuario» (usermgmt.html): en vez de quedar como pestaña dentro del centro de datos, ahora es un elemento propio del menú izquierdo del CRM, con lista de cuentas, búsqueda y alta/edición en una sola página.",
-          "Permisos de menú bien conectados: cambiar un menú no es solo escribir sys_permission, hay que enlazar el rol en sys_role_permission y limpiar shiro:cache para que roles como fanshuo lo vean de verdad."
+          "La gestión de usuarios del paquete A usa caché completa: el nuevo itvGetAllBox() cachea todo el listado de boxes IPTV cada 600 segundos, y la consulta del agente pasa de 67 s a 0,3 s.",
+          "El algoritmo de contraseñas de gestión de permisos ya está conectado: umHash de agentapi se reescribió para coincidir byte a byte con PBEWithMD5AndDES de Java, y el lado Java ya inicia sesión tras un cambio en la página."
         ],
         "bugs": [
-          "Desapareció la tarjeta de saldo de Zhipu: al desplegar la función de permisos de usuario se sobrescribió la página de inicio con un archivo base que no incluía zhipu; se restauró desde el respaldo que sí lo tiene y la tarjeta volvió.",
-          "Buscar hanxu daba «interfaz no existe usermgmt_list»: el front llamaba api('usermgmt_list') y el back registraba usermgmt/list, nombres desalineados; se unificó a usermgmt/xxx y el parámetro de búsqueda a 'kw'.",
-          "Todo el CRM inaccesible (lo causé yo al matar el proceso equivocado): al reiniciar JeecgBoot maté el proceso que tenía el puerto y luego maté el que supervisor reinició solo, creyéndolo duplicado, dejando el 8080 sin escucha; se recuperó con supervisorctl restart y el sitio volvió a 200."
+          "Los agentes no podían iniciar sesión: el antiguo umHash de PHP tenía los parámetros invertidos y generaba hashes de 32 caracteres incompatibles con Java; se recalcularon con Java RunPwd y se borró el contador de fallos en Redis; chuyi y dajin ya entran.",
+          "La gestión de usuarios del paquete A giraba sin parar: los agentes consultaban getboxinfo uno a uno con searchusername y un número corto antiguo provocaba un «error de parámetros» que tumbaba toda la página; se pasó a traer el listado completo y filtrar por stbMac en local, y se recuperó.",
+          "Tras cambiar la contraseña el lado Java no podía entrar: corregidos tres errores de umHash (derivación de clave, longitud del IV y objeto cifrado); acceso verificado de extremo a extremo."
         ],
         "lessons": [
-          "El CRM lo protege el supervisor del panel BT; para reiniciar usa solo supervisorctl -c /etc/supervisor/supervisord.conf restart springboot-crm, nunca kill. Comprueba vida con netstat :8080 y curl por http (es http, no https).",
-          "La verdadera razón de que un menú de JeecgBoot no aparezca no es la caché: sys_permission solo lo define, hay que enlazar el rol en sys_role_permission; para la caché de autorización limpia shiro:cache:* (limpiar solo ALL_*/SYS_*/MENU* no sirve).",
-          "Cuando el jefe corrige dónde debe ir algo, confírmalo de inmediato (menú izquierdo independiente vs pestaña interna); no lo pongas por defecto como pestaña interna.",
-          "Antes de desplegar el front, confirma que el archivo base ya incluye todas las funciones en producción (p. ej. zhipu); no sobrescribas con una base antigua."
+          "Contrasta siempre los hashes con Java RunPwd; nunca escribas umHash de PHP a mano; pasa los hashes a la base de datos en base64, nunca como literales.",
+          "JeecgBoot bloquea la cuenta 10 minutos tras más de 5 intentos fallidos; al depurar el acceso, revisa primero si hay claves LOGIN_FAIL_* en Redis y bórralas al terminar.",
+          "Filtrar datos completos exige caché primero, o el paginado bloquea el endpoint; nunca expongas base de datos/SSH a internet ni uses contraseñas débiles."
         ]
       }
     },
     "fr": {
-      "summary": "Hier (09-29), nous avons mis en ligne une page de menu autonome « Gestion des permissions utilisateur » et corrigé trois problèmes : la carte de solde Zhipu avait disparu, les recherches renvoyaient une erreur et tout le CRM était inaccessible ; au passage, nous avons élucidé et figé la bonne méthode pour modifier les menus et permissions de JeecgBoot.",
+      "summary": "Hier (09-30), nous avons corrigé trois bugs —les agents ne pouvaient pas se connecter, la gestion des utilisateurs du forfait A tournait sans fin, et après un changement de mot de passe le côté Java ne pouvait plus se connecter— et aligné entièrement l'algorithme de mot de passe sur la connexion Java ; nous avons aussi mis en cache l'interface de données complètes, faisant passer une requête de 67 secondes à 0,3.",
       "sections": {
         "skills": [
-          "Nouvelle page autonome « Gestion des permissions utilisateur » (usermgmt.html) : au lieu d'un onglet interne au centre de données, c'est désormais un élément propre du menu de gauche du CRM, avec liste des comptes, recherche et ajout/modification sur une seule page.",
-          "Permissions de menu correctement reliées : modifier un menu ne se limite pas à écrire sys_permission, il faut aussi lier le rôle dans sys_role_permission et vider shiro:cache pour que des rôles comme fanshuo le voient réellement."
+          "La gestion des utilisateurs du forfait A utilise un cache complet : le nouvel itvGetAllBox() met en cache toute la liste des boxes IPTV toutes les 600 secondes, la requête d'un agent passant de 67 s à 0,3 s.",
+          "L'algorithme de mot de passe de la gestion des permissions est raccordé : umHash d'agentapi a été réécrit pour correspondre octet par octet à PBEWithMD5AndDES de Java, et le côté Java se connecte normalement après une modification côté page."
         ],
         "bugs": [
-          "La carte de solde Zhipu a disparu : le déploiement de la fonction de permissions utilisateur a écrasé la page d'accueil avec un fichier de base sans zhipu ; restaurée depuis la sauvegarde qui le contient, la carte est revenue.",
-          "La recherche de hanxu renvoyait « interface inexistante usermgmt_list » : le front appelait api('usermgmt_list') alors que le back enregistrait usermgmt/list, noms désalignés ; unifié en usermgmt/xxx et le paramètre de recherche en 'kw'.",
-          "Tout le CRM était inaccessible (causé par moi, en tuant le mauvais processus) : en redémarrant JeecgBoot j'ai tué le processus qui tenait le port, puis j'ai tué celui que supervisor avait relancé en le prenant pour un doublon, laissant le 8080 sans écoute ; rétabli via un supervisorctl restart, le site est revenu à 200."
+          "Les agents ne pouvaient pas se connecter : l'ancien umHash PHP avait ses paramètres inversés et produisait des hachages de 32 caractères incompatibles avec Java ; recalculés avec Java RunPwd et compteur d'échecs Redis effacé, chuyi et dajin se connectent.",
+          "La gestion des utilisateurs du forfait A tournait sans fin : les agents interrogeaient getboxinfo un par un avec searchusername, et un ancien numéro court déclenchait une « erreur de paramètre » qui faisait tomber toute la page ; remplacé par la récupération complète et un filtrage local par stbMac, c'est rétabli.",
+          "Après un changement de mot de passe le côté Java ne pouvait plus se connecter : trois erreurs d'umHash corrigées (dérivation de clé, longueur de l'IV, objet chiffré) ; connexion vérifiée de bout en bout."
         ],
         "lessons": [
-          "Le CRM est protégé par le supervisor du panneau BT ; pour redémarrer, utilisez uniquement supervisorctl -c /etc/supervisor/supervisord.conf restart springboot-crm, jamais kill. Vérifiez la vie avec netstat :8080 et curl en http (c'est http, pas https).",
-          "La vraie raison pour laquelle un menu JeecgBoot ne s'affiche pas n'est pas le cache : sys_permission ne fait que le définir, il faut lier le rôle dans sys_role_permission ; pour le cache d'autorisation, videz shiro:cache:* (vider seulement ALL_*/SYS_*/MENU* ne sert à rien).",
-          "Quand le patron corrige l'emplacement demandé, confirmez aussitôt (élément de menu gauche autonome vs onglet interne) ; ne le faites pas par défaut en onglet interne.",
-          "Avant de déployer le front, vérifiez que le fichier de base contient déjà toutes les fonctions en production (p. ex. zhipu) ; n'écrasez pas avec une base ancienne."
+          "Croisez toujours les hachages avec Java RunPwd ; n'écrivez jamais umHash en PHP à la main ; passez les hachages à la base en base64, jamais en littéral.",
+          "JeecgBoot verrouille le compte 10 minutes après plus de 5 échecs de connexion ; pour déboguer, vérifiez d'abord les clés LOGIN_FAIL_* de Redis puis effacez-les après le test.",
+          "Filtrer des données complètes exige d'abord un cache, sinon la pagination bloque l'endpoint ; n'exposez jamais base de données/SSH sur Internet et n'utilisez pas de mot de passe faible."
         ]
       }
     },
     "de": {
-      "summary": "Gestern (09-29) haben wir eine eigenständige Menüseite „Benutzerberechtigungen“ veröffentlicht und drei Probleme behoben: die Zhipu-Guthabenkarte war verschwunden, Suchen warfen einen Fehler, und das gesamte CRM war nicht erreichbar; nebenbei haben wir den richtigen Weg zum Ändern von JeecgBoot-Menüs und -Berechtigungen vollständig geklärt und festgeschrieben.",
+      "summary": "Gestern (09-30) haben wir drei Fehler behoben — Agenten konnten sich nicht anmelden, die Benutzerverwaltung des A-Pakets lud endlos, und nach einer Passwortänderung konnte sich die Java-Seite nicht anmelden — und den Passwort-Algorithmus vollständig an die Java-Anmeldung angeglichen; außerdem haben wir die Voll-Daten-Schnittstelle gecacht und eine Abfrage von 67 Sekunden auf 0,3 gesenkt.",
       "sections": {
         "skills": [
-          "Neue eigenständige Seite „Benutzerberechtigungen“ (usermgmt.html): statt als Tab im Datenzentrum zu stecken, ist sie jetzt ein eigener Eintrag im linken CRM-Menü, mit Kontoliste, Suche und Anlegen/Bearbeiten auf einer Seite.",
-          "Menü-Berechtigungen sauber verdrahtet: Ein Menü zu ändern heißt nicht nur sys_permission zu schreiben — man muss die Rolle in sys_role_permission verknüpfen und shiro:cache leeren, bevor Rollen wie fanshuo es wirklich sehen."
+          "Die Benutzerverwaltung des A-Pakets nutzt einen Voll-Cache: das neue itvGetAllBox() cacht alle 600 Sekunden die komplette IPTV-Box-Liste, eine Agentenabfrage sinkt von 67 s auf 0,3 s.",
+          "Der Passwort-Algorithmus der Berechtigungsverwaltung ist angeschlossen: umHash in agentapi wurde neu geschrieben, um bytegenau zu Javas PBEWithMD5AndDES zu passen, und die Java-Seite meldet sich nach einer Änderung auf der Seite normal an."
         ],
         "bugs": [
-          "Die Zhipu-Guthabenkarte verschwand: Beim Ausrollen der Benutzerberechtigungs-Funktion wurde die Startseite mit einer Basisdatei ohne zhipu überschrieben; aus dem Backup mit zhipu wiederhergestellt, die Karte ist zurück.",
-          "Suche nach hanxu warf „Schnittstelle nicht vorhanden usermgmt_list“: das Frontend rief api('usermgmt_list') auf, das Backend registrierte usermgmt/list — Namen passten nicht zusammen; vereinheitlicht auf usermgmt/xxx und den Suchparameter auf 'kw'.",
-          "Das ganze CRM war nicht erreichbar (von mir verursacht, falscher Prozess getötet): Beim Neustart von JeecgBoot tötete ich den Prozess am Port und danach den von supervisor automatisch gestarteten, den ich für ein Duplikat hielt — 8080 ohne Listener; per supervisorctl restart wiederhergestellt, die Seite wieder 200."
+          "Agenten konnten sich nicht anmelden: das alte PHP-umHash hatte vertauschte Parameter und erzeugte 32-stellige Hashes, die mit Java inkompatibel sind; mit Java RunPwd neu berechnet und der Fehlerzähler in Redis gelöscht, chuyi und dajin können sich anmelden.",
+          "Die Benutzerverwaltung des A-Pakets lud endlos: Agenten fragten getboxinfo einzeln per searchusername ab, und eine alte Kurznummer löste einen „Parameterfehler“ aus, der die ganze Seite lahmlegte; umgestellt auf komplette Liste plus lokalen stbMac-Filter, wiederhergestellt.",
+          "Nach einer Passwortänderung konnte sich die Java-Seite nicht anmelden: drei Fehler in umHash (Schlüsselableitung, IV-Länge, verschlüsseltes Objekt) behoben; Anmeldung Ende-zu-Ende verifiziert."
         ],
         "lessons": [
-          "Das CRM wird vom supervisor des BT-Panels geschützt; zum Neustart nur supervisorctl -c /etc/supervisor/supervisord.conf restart springboot-crm verwenden, niemals kill. Lebendigkeit mit netstat :8080 und curl über http prüfen (es ist http, nicht https).",
-          "Der wahre Grund, warum ein JeecgBoot-Menü nicht erscheint, ist nicht der Cache: sys_permission definiert es nur, die Rolle muss in sys_role_permission verknüpft werden; für den Autorisierungs-Cache shiro:cache:* leeren (nur ALL_*/SYS_*/MENU* zu leeren bringt nichts).",
-          "Wenn der Chef eine Platzierungsanforderung korrigiert, sofort bestätigen (eigener linker Menüeintrag vs. interner Tab); nicht standardmäßig als internen Tab bauen.",
-          "Vor dem Frontend-Deploy prüfen, ob die Basisdatei bereits alle Live-Funktionen (z. B. zhipu) enthält; niemals mit einer alten Basis überschreiben."
+          "Hashes immer mit Java RunPwd gegenprüfen; niemals PHP-umHash von Hand schreiben; Hashes als base64 an die DB geben, nie als Literal.",
+          "JeecgBoot sperrt ein Konto nach mehr als 5 Fehlanmeldungen für 10 Minuten; beim Debuggen zuerst Redis LOGIN_FAIL_*-Schlüssel prüfen und sie nach dem Test löschen.",
+          "Voll-Daten-Filterung erfordert zuerst einen Cache, sonst blockiert das Paging die Schnittstelle; Datenbank/SSH niemals ins öffentliche Netz stellen und keine schwachen Zugangsdaten verwenden."
         ]
       }
     },
     "ru": {
-      "summary": "Вчера (09-29) мы выпустили отдельную страницу меню «Управление правами пользователей» и исправили три проблемы: пропала карточка баланса Zhipu, поиск выдавал ошибку, и весь CRM был недоступен; попутно мы полностью разобрали и зафиксировали правильный способ менять меню и права в JeecgBoot.",
+      "summary": "Вчера (09-30) мы исправили три бага — агенты не могли войти, управление пользователями пакета A бесконечно грузилось, а после смены пароля сторона Java не пускала — и полностью выровняли алгоритм паролей со стороной входа Java; ещё мы добавили кэш интерфейсу полных данных, сократив запрос с 67 секунд до 0,3.",
       "sections": {
         "skills": [
-          "Новая отдельная страница «Управление правами пользователей» (usermgmt.html): вместо вкладки внутри дата-центра — отдельный пункт левого меню CRM, со списком аккаунтов, поиском и добавлением/редактированием на одной странице.",
-          "Права меню настроены как надо: изменить меню — это не только записать sys_permission, нужно ещё связать роль в sys_role_permission и очистить shiro:cache, чтобы роли вроде fanshuo реально его видели."
+          "В управлении пользователями пакета A появился полный кэш: новый itvGetAllBox() кэширует весь список IPTV-боксов каждые 600 секунд, запрос агента падает с 67 с до 0,3 с.",
+          "Алгоритм паролей в управлении правами подключён: umHash в agentapi переписан под побайтовое совпадение с PBEWithMD5AndDES в Java, и сторона Java нормально входит после изменения на странице."
         ],
         "bugs": [
-          "Пропала карточка баланса Zhipu: при развёртывании функции прав пользователей главная была перезаписана базовым файлом без zhipu; восстановили из бэкапа со zhipu, карточка вернулась.",
-          "Поиск hanxu выдавал «интерфейс не найден usermgmt_list»: фронт вызывал api('usermgmt_list'), а бэкенд регистрировал usermgmt/list — имена не совпадали; привели к usermgmt/xxx и параметр поиска к 'kw'.",
-          "Весь CRM был недоступен (это я убил не тот процесс): при перезапуске JeecgBoot я убил процесс, державший порт, а затем убил тот, что supervisor поднял сам, приняв его за дубль, — 8080 остался без слушателя; восстановили через supervisorctl restart, сайт снова 200."
+          "Агенты не могли войти: у старого PHP-umHash параметры были перепутаны, и он выдавал 32-символьные хеши, несовместимые с Java; хеши пересчитаны через Java RunPwd, счётчик неудач в Redis очищен — chuyi и dajin входят.",
+          "Управление пользователями пакета A грузилось бесконечно: агенты запрашивали getboxinfo по одному через searchusername, и старый короткий номер вызывал «ошибку параметра», роняющую всю страницу; перешли на полную выгрузку и локальную фильтрацию по stbMac — восстановлено.",
+          "После смены пароля сторона Java не пускала: исправлены три ошибки umHash (вывод ключа, длина IV, объект шифрования); вход проверен сквозным тестом."
         ],
         "lessons": [
-          "CRM охраняет supervisor панели BT; для перезапуска используйте только supervisorctl -c /etc/supervisor/supervisord.conf restart springboot-crm, никогда kill. Проверка живости: netstat :8080 и curl по http (это http, а не https).",
-          "Настоящая причина, почему меню JeecgBoot не видно, — не кэш: sys_permission лишь его определяет, нужно связать роль в sys_role_permission; кэш авторизации — очищать shiro:cache:* (чистить только ALL_*/SYS_*/MENU* бесполезно).",
-          "Когда босс поправляет требование о размещении, сразу уточняйте (отдельный пункт левого меню или внутренняя вкладка); не делайте по умолчанию внутреннюю вкладку.",
-          "Перед развёртыванием фронта убедитесь, что базовый файл уже содержит все работающие функции (например, zhipu); не перезаписывайте старой базой."
+          "Всегда сверяйте хеши через Java RunPwd; не пишите PHP-umHash вручную; передавайте хеши в БД в base64, никогда литералом.",
+          "JeecgBoot блокирует аккаунт на 10 минут после более чем 5 неудачных входов; при разборе входа сначала проверьте ключи LOGIN_FAIL_* в Redis, а после теста удалите их.",
+          "Фильтрация полных данных требует сначала кэша, иначе постраничная выгрузка забивает интерфейс; никогда не выставляйте БД/SSH в публичную сеть и не используйте слабые учётные данные."
         ]
       }
     },
     "pt": {
-      "summary": "Ontem (09-29) publicamos uma página de menu independente de «Gestão de permissões de usuário» e corrigimos três problemas: o cartão de saldo da Zhipu havia sumido, as buscas davam erro e todo o CRM estava inacessível; no caminho, deixamos totalmente clara e fixada a forma correta de alterar menus e permissões no JeecgBoot.",
+      "summary": "Ontem (09-30) corrigimos três bugs — os agentes não conseguiam entrar, a gestão de usuários do pacote A girava sem parar e, após trocar a senha, o lado Java não entrava — e alinhamos totalmente o algoritmo de senha ao login Java; também adicionamos cache à interface de dados completos, reduzindo uma consulta de 67 segundos para 0,3.",
       "sections": {
         "skills": [
-          "Nova página independente de «Gestão de permissões de usuário» (usermgmt.html): em vez de ficar como aba dentro do data center, agora é um item próprio do menu esquerdo do CRM, com lista de contas, busca e cadastro/edição em uma só página.",
-          "Permissões de menu bem ligadas: alterar um menu não é só escrever sys_permission, é preciso vincular a função em sys_role_permission e limpar shiro:cache para funções como fanshuo realmente o verem."
+          "A gestão de usuários do pacote A usa cache completo: o novo itvGetAllBox() faz cache de toda a lista de boxes IPTV a cada 600 segundos, e a consulta do agente cai de 67 s para 0,3 s.",
+          "O algoritmo de senha da gestão de permissões está ligado: o umHash do agentapi foi reescrito para bater byte a byte com o PBEWithMD5AndDES do Java, e o lado Java entra normalmente após uma alteração na página."
         ],
         "bugs": [
-          "O cartão de saldo da Zhipu sumiu: ao implantar o recurso de permissões de usuário, a página inicial foi sobrescrita por um arquivo-base sem zhipu; restaurado do backup que o contém, o cartão voltou.",
-          "Buscar hanxu dava «interface não existe usermgmt_list»: o front chamava api('usermgmt_list') e o back registrava usermgmt/list, nomes desalinhados; unificado para usermgmt/xxx e o parâmetro de busca para 'kw'.",
-          "Todo o CRM inacessível (causado por mim ao matar o processo errado): ao reiniciar o JeecgBoot matei o processo que segurava a porta e depois matei o que o supervisor reiniciou sozinho, achando que era duplicado, deixando a 8080 sem escuta; recuperado com supervisorctl restart, o site voltou a 200."
+          "Os agentes não conseguiam entrar: o antigo umHash em PHP tinha os parâmetros trocados e gerava hashes de 32 caracteres incompatíveis com o Java; recalculados com Java RunPwd e contador de falhas no Redis apagado, chuyi e dajin entram.",
+          "A gestão de usuários do pacote A girava sem parar: os agentes consultavam o getboxinfo um a um com searchusername, e um número curto antigo provocava «erro de parâmetro» que derrubava a página inteira; passou a buscar a lista completa e filtrar por stbMac localmente, e recuperou.",
+          "Após trocar a senha o lado Java não entrava: corrigidos três erros do umHash (derivação de chave, tamanho do IV e objeto criptografado); login verificado de ponta a ponta."
         ],
         "lessons": [
-          "O CRM é protegido pelo supervisor do painel BT; para reiniciar use apenas supervisorctl -c /etc/supervisor/supervisord.conf restart springboot-crm, nunca kill. Verifique vida com netstat :8080 e curl por http (é http, não https).",
-          "O verdadeiro motivo de um menu do JeecgBoot não aparecer não é cache: sys_permission apenas o define, é preciso vincular a função em sys_role_permission; para o cache de autorização limpe shiro:cache:* (limpar só ALL_*/SYS_*/MENU* não adianta).",
-          "Quando o chefe corrige o requisito de posição, confirme na hora (item próprio no menu esquerdo vs aba interna); não faça por padrão como aba interna.",
-          "Antes de implantar o front, confirme se o arquivo-base já contém todos os recursos em produção (p. ex. zhipu); nunca sobrescreva com uma base antiga."
+          "Sempre confira os hashes com o Java RunPwd; nunca escreva umHash em PHP à mão; passe os hashes ao banco em base64, nunca como literal.",
+          "O JeecgBoot bloqueia a conta por 10 minutos após mais de 5 falhas de login; ao depurar, primeiro confira se há chaves LOGIN_FAIL_* no Redis e apague-as depois do teste.",
+          "Filtrar dados completos exige cache primeiro, senão a paginação trava a interface; nunca exponha banco/SSH na internet nem use credenciais fracas."
         ]
       }
     },
     "ar": {
-      "summary": "أمس (09-29) أطلقنا صفحة قائمة مستقلة «إدارة صلاحيات المستخدم» وأصلحنا ثلاث مشكلات: اختفاء بطاقة رصيد Zhipu، وخطأ في البحث، وتعذّر فتح نظام CRM بالكامل؛ وإلى جانب ذلك أوضحنا وثبّتنا تمامًا الطريقة الصحيحة لتعديل قوائم وصلاحيات JeecgBoot.",
+      "summary": "أمس (09-30) أصلحنا ثلاث مشكلات — تعذّر دخول الوكلاء، وبقاء إدارة مستخدمي باقة A في التحميل، وعدم تمكن جهة Java من الدخول بعد تغيير كلمة المرور — ووافقنا خوارزمية كلمة المرور مع جهة دخول Java تمامًا؛ كما أضفنا تخزينًا مؤقتًا لواجهة البيانات الكاملة، فانخفض الاستعلام من 67 ثانية إلى 0.3.",
       "sections": {
         "skills": [
-          "صفحة مستقلة جديدة «إدارة صلاحيات المستخدم» (usermgmt.html): بدل أن تكون تبويبًا داخل مركز البيانات، أصبحت بندًا مستقلًا في قائمة CRM اليسرى، مع قائمة الحسابات والبحث والإضافة/التعديل في صفحة واحدة.",
-          "ربط صلاحيات القائمة بشكل صحيح: تعديل القائمة ليس مجرد كتابة sys_permission، بل يجب ربط الدور في sys_role_permission وتفريغ shiro:cache حتى تراه أدوار مثل fanshuo فعليًا."
+          "إدارة مستخدمي باقة A تستخدم تخزينًا كاملًا: itvGetAllBox() الجديد يخزّن كامل قائمة صناديق IPTV كل 600 ثانية، فينخفض استعلام الوكيل من 67 ثانية إلى 0.3.",
+          "خوارزمية كلمة المرور في إدارة الصلاحيات موصولة: أُعيدت كتابة umHash في agentapi لتطابق PBEWithMD5AndDES في Java بايت ببايت، فتتمكن جهة Java من الدخول بعد التغيير من الصفحة."
         ],
         "bugs": [
-          "اختفاء بطاقة رصيد Zhipu: عند نشر ميزة صلاحيات المستخدم تم استبدال الصفحة الرئيسية بملف أساس لا يحتوي zhipu؛ أُعيدت من النسخة الاحتياطية التي تحتويه وعادت البطاقة.",
-          "البحث عن hanxu يظهر «الواجهة غير موجودة usermgmt_list»: الواجهة الأمامية تنادي api('usermgmt_list') بينما الخلفية تسجّل usermgmt/list، أي عدم تطابق في التسمية؛ وُحّدت إلى usermgmt/xxx ومعامل البحث إلى 'kw'.",
-          "تعذّر فتح CRM بالكامل (بسببي أنا بعد قتل العملية الخطأ): عند إعادة تشغيل JeecgBoot قتلت العملية التي تحتفظ بالمنفذ، ثم قتلت التي أعاد supervisor تشغيلها تلقائيًا ظنًّا أنها مكررة، فبقي المنفذ 8080 بلا مستمع؛ استُعيد عبر supervisorctl restart وعاد الموقع إلى 200."
+          "تعذّر دخول الوكلاء: كانت وسائط umHash القديمة في PHP معكوسة فتنتج بصمات من 32 حرفًا غير متوافقة مع Java؛ أُعيد حساب البصمات بـ Java RunPwd وتم مسح عدّاد الفشل في Redis، فيدخل chuyi وdajin بنجاح.",
+          "بقاء إدارة مستخدمي باقة A في التحميل: كان الوكلاء يستعلمون عن getboxinfo واحدًا واحدًا عبر searchusername، فرقم قصير قديم يُحدث «خطأ في المعاملات» يُسقط الصفحة كلها؛ حُوّل إلى جلب القائمة الكاملة والتصفية محليًا حسب stbMac، وتم التعافي.",
+          "عدم تمكن جهة Java من الدخول بعد تغيير كلمة المرور: صُحّحت ثلاثة أخطاء في umHash (اشتقاق المفتاح، وطول IV، والكائن المشفّر)؛ وتحقّقنا من الدخول من الطرف إلى الطرف."
         ],
         "lessons": [
-          "CRM يحرسه supervisor في لوحة BT؛ لإعادة التشغيل استخدم فقط supervisorctl -c /etc/supervisor/supervisord.conf restart springboot-crm ولا تستخدم kill أبدًا. تحقّق من الحياة عبر netstat :8080 وcurl على http (إنه http وليس https).",
-          "السبب الحقيقي لعدم ظهور قائمة JeecgBoot ليس التخزين المؤقت: sys_permission يعرّفها فقط، ويجب ربط الدور في sys_role_permission؛ ولذاكرة التفويض امسح shiro:cache:* (مسح ALL_*/SYS_*/MENU* وحده لا يفيد).",
-          "حين يصحّح المالك متطلب الموضع، أكّده فورًا (بند مستقل في القائمة اليسرى أم تبويب داخلي)؛ لا تجعله افتراضيًا تبويبًا داخليًا.",
-          "قبل نشر الواجهة الأمامية تأكّد أن الملف الأساس يحتوي كل الميزات الحيّة (مثل zhipu)؛ لا تستبدله بملف أساس قديم."
+          "طابِق بصمات كلمات المرور دائمًا بـ Java RunPwd، ولا تكتب umHash في PHP يدويًا؛ ومرّر البصمات إلى قاعدة البيانات بصيغة base64 لا كنص حرفي.",
+          "يقفل JeecgBoot الحساب 10 دقائق بعد أكثر من 5 محاولات فاشلة؛ عند تشخيص الدخول افحص أولًا مفاتيح LOGIN_FAIL_* في Redis ثم امسحها بعد الاختبار.",
+          "تصفية البيانات الكاملة تتطلب تخزينًا مؤقتًا أولًا، وإلا عطّلت الترقيم الواجهة؛ ولا تكشف قاعدة البيانات/SSH على الشبكة العامة ولا تستخدم بيانات دخول ضعيفة."
         ]
       }
     }
