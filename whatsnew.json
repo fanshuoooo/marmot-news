@@ -1,192 +1,232 @@
 {
-  "ver": "1.4.92",
-  "date": "2026-10-01",
-  "summary": "昨天(09-30)修好了代理商登录失败、A套餐用户管理一直转圈、改密后 Java 端登不上三个 bug，并把改密算法彻底对齐 Java 登录端；同时给全量接口加了缓存，查询从 67 秒降到 0.3 秒。",
+  "ver": "1.5.4",
+  "date": "2026-10-17",
+  "summary": "【修了什么】1. 修好后台上「日志查询」报 404 的老毛病：程序把页面入口地址当成接口地址用，接口前缀多带了一段路径；开发阶段临时凭证把这个错盖住了，凭证过期才暴露，现已改正，14617 条记录能正常回显。2. 修掉打包流程两个坑：工程路径带中文会让打包工具直接崩溃，文件开头多出隐藏的 BOM 标记会让编译失败；现已固定为纯英文路径 + 无 BOM 写入。\n【优化/新增了什么】1. 补齐一条本该一直存在的定时同步任务：以前没有排期，数据只能靠手动刷新，如今每 15 分钟自动增量同步、每天一次全量，带防重入锁和运行日志。2. 智能分派再细化一档：按时段、任务复杂度、是否带图三维度决定用哪个模型，低峰期的重负载任务改走能力更强的模型。3. 把远程设备排障整理成手册：常见故障归成六类，每类给出判据和处置步骤。\n【学到了什么】1. 能靠机制兜住的绝不靠记性——定时任务排在设备关机的时段就是白排，要靠「排进可用时段＋错过补跑＋欠账登记」三层兜底。2. 清理类操作一律软删除、只碰清单写明的路径、默认空转，还要加「最近几天动过的不碰」护栏，否则按创建时间判老会误删还在写的活文件。",
   "sections": {
     "skills": [
-      "A套餐用户管理接入全量缓存：新增 itvGetAllBox() 每 600 秒缓存一次 IPTV 全量 box 数据，代理商查询从翻页 67 秒降到 0.3 秒。",
-      "用户权限管理改密算法打通：agentapi 的 umHash 重写为与 Java PBEWithMD5AndDES 逐字节一致，页面改密后 Java 端能正常登录。"
+      "定时同步从「靠人记得手动刷」改成制度：每 15 分钟增量、每天一次全量，脚本带防重入锁（避免两次运行互相踩）和运行日志，事后可查。",
+      "智能分派细化到三个维度：时段 × 任务复杂度 × 是否带图；低峰期的重负载任务走能力更强的模型，高峰期保持轻量模型，兼顾效果与成本。",
+      "远程设备排障手册化：常见故障归成六类，每类给判据和处置步骤；交付前必须核三项硬指标——运行时长、端到端连通实测、资源水位。",
+      "打包与构建流程固化成硬规则：工程路径只用英文、写文件一律用无 BOM 的 UTF-8、每次干净重来不沿用脏目录。"
     ],
     "bugs": [
-      "代理商登录失败：历史遗留的 PHP umHash 算法参数装反（生成 32 位旧 hash）与 Java 不兼容，改用 Java RunPwd 重算 hash 并清掉 Redis 失败计数后，chuyi、dajin 都能登录。",
-      "A套餐用户管理一直加载中：代理商逐个用 searchusername 查上游 getboxinfo，遇到历史遗留短号会「参数错误」把整页打断；改成拉全量本地按 stbMac 过滤后恢复正常。",
-      "改密后 Java 端登不上：umHash 三处错误（key 派生、iv 长度、加密对象）已修正，laojia 改密后端到端登录成功。"
+      "后台「日志查询」报 404：程序把页面入口地址当成了接口地址，接口前缀多带一段路径；开发期的临时凭证掩盖了这个错误，凭证过期才暴露，现已改正，14617 条记录正常回显。",
+      "打包时工程路径含中文会让工具直接崩溃，已固定使用纯英文路径。",
+      "写文件时开头多出隐藏的 BOM 标记会让编译器报错退出，已改为无 BOM 写入。",
+      "定时同步任务此前根本没有排期，数据只靠手动刷新，缓存最久停滞半个月；现已补上固定频率并加了运行日志。"
     ],
     "lessons": [
-      "改密 hash 一律用 Java RunPwd 对拍，绝不手写 PHP umHash；写库的 hash 用 base64 传，不用字面量。",
-      "JeecgBoot 登录失败超过 5 次会锁 10 分钟：排查登录问题先看 Redis 的 LOGIN_FAIL_* 有没有堆积，测完清掉。",
-      "全量数据过滤方案必须先做缓存，否则翻页拉取会拖垮接口；数据库/SSH 一律不暴露公网、不用弱口令。"
+      "能靠机制兜住的，绝不靠记性：定时任务排到设备关机的时段等于白排；要用「排进可用时段＋错过补跑＋欠账登记」三层兜底。（学自内部经验库）",
+      "清理类操作三铁律：一律软删除可恢复、只碰清单写明的路径、默认空转；另加「最近几天动过的不碰」护栏——按创建时间判「老文件」会误删还在写入的活文件。（学自内部经验库）",
+      "会自我重启的脚本禁用普通文件锁：重启出来的新进程继承了那把锁，锁永远不释放，脚本会把自己锁死；改用带过期时间的标记锁，超时允许接管。（学自内部经验库）",
+      "开任何「每隔 N 分钟」的任务先算负载账：频率 × 单次耗时，每小时占用超过 10 分钟就要警惕，别把公共资源拖垮。（学自内部经验库）"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "Yesterday (09-30) we fixed three bugs — agents couldn't log in, the A-package user management spun forever, and after a credential change the Java side couldn't log in — and fully aligned the credential algorithm with the Java login side; we also added caching to the full-data interface, cutting a query from 67 seconds to 0.3.",
+      "summary": "[Fixed] 1. Fixed the long-standing 404 on the admin panel's log query: the program used the page entry address as the API address, so the API prefix carried an extra path segment; a temporary credential during development masked the bug until it expired. Corrected — 14,617 records now display normally. 2. Fixed two packaging pitfalls: a project path containing non-ASCII characters crashes the packaging tool outright, and a hidden BOM marker at the start of a file makes compilation fail; now locked to English-only paths plus BOM-free writes.\n[Improved/Added] 1. Added a scheduled sync job that should have existed all along: nothing was scheduled before, so data could only be refreshed by hand; now it syncs incrementally every 15 minutes with a full pass daily, with a re-entry lock and run logs. 2. Model routing is one notch finer: dispatch by time window, task complexity and whether images are involved, so heavy tasks in off-peak hours go to a stronger model. 3. Turned remote-device troubleshooting into a manual: six common failure classes, each with diagnostic criteria and handling steps.\n[Learned] 1. Anything a mechanism can catch must never depend on memory — a scheduled task set for hours when the machine is off is wasted scheduling; use three layers: fit the available window, catch up on misses, register the debt. 2. Cleanup work is always soft-delete, only the paths on the list, dry-run by default, plus a \"don't touch anything modified in the last few days\" guard — judging \"old\" by creation time will delete live files still being written.",
       "sections": {
         "skills": [
-          "A-package user management now uses a full cache: the new itvGetAllBox() caches the entire IPTV box list every 600 seconds, taking an agent query from 67 seconds down to 0.3.",
-          "The user-permission credential algorithm is now fully wired: agentapi's umHash was rewritten to match Java PBEWithMD5AndDES byte for byte, so the Java side logs in normally after a page-side change."
+          "Scheduled sync moved from \"someone remembers to refresh by hand\" to a system: incremental every 15 minutes, full pass daily, with a re-entry lock (so two runs never trample each other) and run logs you can check afterwards.",
+          "Routing refined to three dimensions: time window × task complexity × whether images are attached; heavy tasks in off-peak hours use a stronger model, peak hours keep the lightweight one, balancing quality and cost.",
+          "Remote-device troubleshooting turned into a manual: six common failure classes, each with criteria and handling steps; before delivery, three hard checks must pass — uptime, a real end-to-end connectivity test, and resource headroom.",
+          "Packaging and build flow frozen into hard rules: English-only project paths, always write BOM-free UTF-8, and always start from a clean rebuild instead of reusing a dirty directory."
         ],
         "bugs": [
-          "Agents couldn't log in: the legacy PHP umHash had its parameters swapped, producing 32-char hashes incompatible with Java; recomputed into Java RunPwd and cleared the fail counter in Redis, and both chuyi and dajin can log in.",
-          "A-package user management spun forever: agents queried the upstream getboxinfo one by one with searchusername, and a legacy short number triggered a 'parameter error' that broke the whole page; switched to pulling the full list and filtering by stbMac locally, and it recovered.",
-          "After a credential change the Java side couldn't log in: three errors in umHash (key derivation, IV length, and the encrypted object) are fixed; end-to-end login verified."
+          "Admin panel log query returned 404: the program treated the page entry address as the API address, so the API prefix carried an extra path segment; a temporary development credential hid the error until it expired. Corrected — 14,617 records now display normally.",
+          "A project path containing non-ASCII characters made the packaging tool crash outright; now fixed to English-only paths.",
+          "A hidden BOM marker at the start of a written file made the compiler fail and exit; now switched to BOM-free writes.",
+          "The scheduled sync job was never scheduled at all, so data was refreshed only by hand and one cache sat stale for half a month; a fixed interval plus run logs are now in place."
         ],
         "lessons": [
-          "Always cross-check credential hashes with Java RunPwd — never hand-write PHP umHash; pass hashes to the database as base64, never as literals.",
-          "JeecgBoot locks an account for 10 minutes after more than 5 failed logins; when debugging login, first check Redis LOGIN_FAIL_* keys for a backlog, then clear them after testing.",
-          "Full-data filtering must be cached first, or paging will stall the endpoint; never expose the database/SSH to the public internet, and never use weak credentials."
+          "What a mechanism can catch must never rely on memory: a scheduled task set for hours when the device is off is wasted scheduling. Use three layers — fit the available window, catch up on misses, register the debt. (learned from the internal experience base)",
+          "Three hard rules for cleanup: always soft-delete so it is recoverable, touch only paths named in the list, dry-run by default. Add a \"don't touch anything modified in the last few days\" guard — judging \"old\" by creation time will delete live files still being written. (learned from the internal experience base)",
+          "Scripts that restart themselves must not use a plain file lock: the new process inherits the lock, it is never released, and the script locks itself out. Use a marker lock with an expiry so a timed-out holder can be taken over. (learned from the internal experience base)",
+          "Before starting any \"every N minutes\" job, do the load math: frequency × duration per run. Above 10 minutes per hour, be suspicious — don't drag shared resources down. (learned from the internal experience base)"
         ]
       }
     },
     "ja": {
-      "summary": "昨日（09-30）は、代理店がログインできない・Aパッケージのユーザー管理がずっと読み込み中・パスワード変更後にJava側でログインできないという3件のバグを修正し、パスワード計算アルゴリズムをJavaログイン側と完全に揃えました。さらに全件取得インターフェースにキャッシュを追加し、問い合わせは67秒から0.3秒に短縮しました。",
+      "summary": "【修正した点】1、管理画面の「ログ検索」が404を返す長年の不具合を修正：プログラムがページの入口アドレスをAPIアドレスとして使っていたため、APIの接頭辞に余分なパスが付いていました。開発中の一時的な認証情報がこの誤りを隠し、期限切れで初めて露見しました。修正済みで、14617件のレコードが正常に表示されます。2、パッケージ処理の二つの落とし穴を修正：プロジェクトのパスに日本語や中国語が含まれるとパッケージツールが即クラッシュし、ファイル先頭に隠れたBOMマーカーがあるとコンパイルが失敗します。今後は英数字のみのパスとBOMなし書き込みに固定しました。\n【改善・追加】1、本来ずっとあるべき定期同期タスクを追加：以前はスケジュールが無く、手動更新しかできませんでした。現在は15分ごとの差分同期と1日1回の全件同期を、二重起動防止ロックと実行ログ付きで行います。2、振り分けを一段細かく：時間帯・タスクの複雑さ・画像の有無の三次元でモデルを選び、閑散時間帯の重い処理はより高性能なモデルへ回します。3、遠隔機器のトラブル対応を手順書化：よくある故障を六類型に整理し、それぞれ判定基準と対処手順を用意しました。\n【学んだこと】1、仕組みで防げることを記憶に頼ってはいけない——機器が電源オフの時間帯に予定したタスクは予定していないのと同じです。「稼働時間帯に収める＋取りこぼしを後で実行＋未実行分を記録」の三段構えが必要です。2、整理・削除の作業は必ずソフト削除、リストに書かれたパスのみ、既定は空実行とし、さらに「ここ数日に更新されたものは触らない」ガードを加えます。作成日時で「古い」と判断すると、書き込み中の生きたファイルを消してしまいます。",
       "sections": {
         "skills": [
-          "Aパッケージのユーザー管理に全件キャッシュを導入：新設の itvGetAllBox() が IPTV の全 box を600秒ごとにキャッシュし、代理店の問い合わせが67秒→0.3秒に。",
-          "ユーザー権限管理のパスワード計算を接続：agentapi の umHash を Java の PBEWithMD5AndDES とバイト単位で一致するよう書き直し、ページ側の変更後に Java 側でも正常にログイン可能に。"
+          "定期同期を「人が思い出して手動更新」から仕組みへ：15分ごとの差分、1日1回の全件、二重起動防止ロック（二つの実行が互いを踏まない）と後から確認できる実行ログ付き。",
+          "振り分けを三次元に细化：時間帯 × タスクの複雑さ × 画像の有無。閑散時間帯の重い処理は高性能モデル、ピーク時は軽量モデルで、効果とコストの両立を図る。",
+          "遠隔機器のトラブル対応を手順書化：よくある故障を六類型に整理し、判定基準と対処手順を明記。納品前に「稼働時間・実測の端到端接続・リソース余裕」の三つを必ず確認。",
+          "パッケージとビルドの流れをハードルール化：パスは英数字のみ、書き込みは常にBOMなしUTF-8、毎回クリーンな状態からやり直し、汚れたディレクトリを流用しない。"
         ],
         "bugs": [
-          "代理店がログインできない：旧 PHP umHash の引数が逆で、Java と互換性のない32桁ハッシュを生成していた。Java RunPwd でハッシュを再計算し Redis の失敗カウントを消去、chuyi と dajin の両方がログイン成功。",
-          "Aパッケージのユーザー管理がずっと読み込み中：代理店が searchusername で上流 getboxinfo を1件ずつ照会し、過去の短番号が「パラメータエラー」を起こしてページ全体が落ちていた。全件取得＋ローカルで stbMac 絞り込みに変更し復旧。",
-          "パスワード変更後に Java 側でログインできない：umHash の3か所の誤り（キー導出・IV長・暗号化対象）を修正し、エンドツーエンドでログイン確認。"
+          "管理画面の「ログ検索」が404：プログラムがページ入口アドレスをAPIアドレスとして扱い、API接頭辞に余分なパスが付いていた。開発時の一時認証情報が誤りを隠し、期限切れで露見。修正済みで14617件が正常表示。",
+          "パッケージ時にプロジェクトパスへ中国語が含まれるとツールが即クラッシュしていた。英数字のみのパスに固定。",
+          "ファイル書き込み時に先頭へ隠れたBOMマーカーが付き、コンパイラがエラー終了していた。BOMなし書き込みに変更。",
+          "定期同期タスクはそもそもスケジュールが無く、手動更新のみで、キャッシュが最長で半月止まっていた。固定間隔と実行ログを追加。"
         ],
         "lessons": [
-          "パスワードのハッシュは必ず Java RunPwd で突き合わせる。PHP umHash を手書きしない。DB へは base64 で渡し、リテラルは使わない。",
-          "JeecgBoot はログイン失敗が5回を超えると10分ロックする。ログイン調査時はまず Redis の LOGIN_FAIL_* を確認し、終わったら消す。",
-          "全件データの絞り込みはまずキャッシュ必須。ページングで取得すると接口が詰まる。DB/SSH は絶対に公網へ出さず、弱いパスワードも使わない。"
+          "仕組みで防げることは記憶に頼らない：機器の電源が切れている時間帯の予約は予約していないのと同じ。「稼働時間帯に収める＋取りこぼしを後で実行＋未実行分を記録」の三段構えを。（社内経験庫から）",
+          "整理・削除の三鉄則：必ず復元可能なソフト削除、リスト記載のパスのみ、既定は空実行。さらに「ここ数日に更新されたものは触らない」ガードを——作成日時で「古い」と判断すると書き込み中のファイルを消してしまう。（社内経験庫から）",
+          "自己再起動するスクリプトに通常のファイルロックは禁止：再起動で生まれた新プロセスがロックを引き継ぎ、永遠に解放されず自分で自分を締め出す。期限付きのマーカーロックにし、期限切れなら引き継ぎを許可する。（社内経験庫から）",
+          "「N分ごと」のタスクを始める前に負荷の勘定を：頻度 × 1回の所要時間。1時間あたり10分を超えるなら要注意、共有リソースを巻き添えにしない。（社内経験庫から）"
         ]
       }
     },
     "ko": {
-      "summary": "어제(09-30) 대리점 로그인 실패, A패키지 사용자 관리가 계속 로딩 중, 비밀번호 변경 후 Java 측 로그인 불가 세 가지 버그를 고치고 비밀번호 계산 알고리즘을 Java 로그인 측과 완전히 맞췄습니다. 또 전체 조회 인터페이스에 캐시를 추가해 조회가 67초에서 0.3초로 줄었습니다.",
+      "summary": "[수정] 1. 관리 화면의 '로그 조회'가 404를 내던 오랜 문제를 고쳤습니다. 프로그램이 페이지 진입 주소를 API 주소로 착각해 API 접두사에 경로가 하나 더 붙어 있었고, 개발 중 임시 자격 증명이 이 오류를 가려 증명이 만료된 뒤에야 드러났습니다. 수정 후 14,617건의 기록이 정상 표시됩니다. 2. 패키징 과정의 두 함정을 고쳤습니다. 프로젝트 경로에 한글이나 중국어가 들어가면 패키징 도구가 곧바로 죽고, 파일 앞에 숨은 BOM 표시가 있으면 컴파일이 실패합니다. 이제 영문 경로와 BOM 없는 쓰기로 고정했습니다.\n[개선/추가] 1. 원래 있어야 했던 정기 동기화 작업을 추가했습니다. 이전에는 예약이 아예 없어 수동 새로고침에만 의존했습니다. 지금은 15분마다 증분, 하루 한 번 전체 동기화를 중복 실행 방지 잠금과 실행 로그와 함께 돌립니다. 2. 모델 배분을 한 단계 더 세분화했습니다. 시간대 × 작업 복잡도 × 이미지 포함 여부로 나누고, 한가한 시간대의 무거운 작업은 더 강한 모델로 보냅니다. 3. 원격 장비 장애 대응을 매뉴얼로 정리했습니다. 흔한 고장을 여섯 유형으로 묶고 각각 판단 기준과 처리 절차를 붙였습니다.\n[배운 것] 1. 구조로 막을 수 있는 일을 기억에 맡기지 않습니다. 장비가 꺼져 있는 시간대에 잡아둔 예약은 예약이 아닙니다. '가동 시간대에 맞추기 + 놓친 것은 나중에 실행 + 미실행분 기록'의 세 겹으로 받칩니다. 2. 정리·삭제 작업은 항상 소프트 삭제, 목록에 적힌 경로만, 기본은 모의 실행으로 하고, '최근 며칠 안에 수정된 것은 건드리지 않기' 보호 장치를 더합니다. 생성 시각으로 '오래됨'을 판단하면 아직 쓰이고 있는 파일을 지우게 됩니다.",
       "sections": {
         "skills": [
-          "A패키지 사용자 관리에 전체 캐시 도입: 신설된 itvGetAllBox()가 IPTV 전체 box를 600초마다 캐시해 대리점 조회가 67초→0.3초.",
-          "사용자 권한 관리 비밀번호 계산 연결: agentapi의 umHash를 Java PBEWithMD5AndDES와 바이트 단위로 일치하도록 재작성해, 페이지에서 변경 후 Java 측도 정상 로그인."
+          "정기 동기화를 '사람이 기억해 수동 갱신'에서 제도로 전환: 15분마다 증분, 하루 한 번 전체, 중복 실행 방지 잠금(두 실행이 서로를 밟지 않게)과 실행 로그를 갖춰 나중에 확인 가능.",
+          "배분을 세 축으로 세분화: 시간대 × 작업 복잡도 × 이미지 포함 여부. 한가한 시간대의 무거운 작업은 더 강한 모델, 피크에는 경량 모델로 효과와 비용을 함께 챙김.",
+          "원격 장비 장애 대응 매뉴얼화: 흔한 고장을 여섯 유형으로 묶고 판단 기준과 처리 절차를 명시. 인도 전 '가동 시간·실측 종단 간 연결·자원 여유' 세 가지를 반드시 확인.",
+          "패키징·빌드 절차를 강제 규칙으로 고정: 경로는 영문만, 쓰기는 항상 BOM 없는 UTF-8, 매번 깨끗한 상태에서 다시 시작하고 오염된 디렉터리를 재사용하지 않음."
         ],
         "bugs": [
-          "대리점 로그인 실패: 구 PHP umHash의 인자가 뒤바뀌어 Java와 호환되지 않는 32자리 해시를 만들었음. Java RunPwd로 해시를 다시 계산하고 Redis 실패 카운트를 지워 chuyi와 dajin 모두 로그인 성공.",
-          "A패키지 사용자 관리가 계속 로딩: 대리점이 searchusername으로 상위 getboxinfo를 한 건씩 조회하다 과거 단번호가 '파라미터 오류'를 일으켜 페이지 전체가 죽었음. 전체 조회+로컬 stbMac 필터로 변경해 복구.",
-          "비밀번호 변경 후 Java 측 로그인 불가: umHash의 세 곳 오류(키 유도·IV 길이·암호화 대상) 수정, 종단 간 로그인 확인."
+          "관리 화면 '로그 조회' 404: 프로그램이 페이지 진입 주소를 API 주소로 써서 API 접두사에 경로가 하나 더 붙었음. 개발 중 임시 자격 증명이 오류를 가렸고 만료 후 드러남. 수정 후 14,617건 정상 표시.",
+          "패키징 시 프로젝트 경로에 중국어가 들어가면 도구가 곧바로 죽던 문제. 영문 경로만 사용하도록 고정.",
+          "파일을 쓸 때 앞부분에 숨은 BOM 표시가 붙어 컴파일러가 오류로 종료되던 문제. BOM 없는 쓰기로 변경.",
+          "정기 동기화 작업은 예약 자체가 없어 수동 갱신만 가능했고 캐시가 최장 보름까지 멈춰 있었음. 고정 주기와 실행 로그를 추가."
         ],
         "lessons": [
-          "비밀번호 해시는 반드시 Java RunPwd로 대조. PHP umHash를 직접 쓰지 않는다. DB에는 base64로 전달, 리터럴 금지.",
-          "JeecgBoot는 로그인 5회 초과 시 10분 잠금. 로그인 문제를 볼 땐 먼저 Redis LOGIN_FAIL_*를 확인하고 끝나면 지운다.",
-          "전체 데이터 필터링은 먼저 캐시 필수. 페이징 조회는 인터페이스를 막는다. DB/SSH는 절대 공용망에 노출하지 않고 약한 비밀번호도 쓰지 않는다."
+          "구조로 막을 수 있는 일은 기억에 맡기지 않습니다. 장비가 꺼진 시간대의 예약은 없는 예약입니다. '가동 시간대에 맞추기 + 놓친 것 나중에 실행 + 미실행분 기록'의 세 겹을 쓰십시오. (내부 경험 저장소에서)",
+          "정리·삭제의 세 철칙: 항상 복구 가능한 소프트 삭제, 목록에 적힌 경로만, 기본은 모의 실행. 여기에 '최근 며칠 안에 수정된 것은 건드리지 않기' 보호 장치를 더하십시오. 생성 시각으로 '오래됨'을 판단하면 쓰이고 있는 파일을 지웁니다. (내부 경험 저장소에서)",
+          "스스로 재시작하는 스크립트에는 일반 파일 잠금을 쓰지 마십시오. 재시작으로 생긴 새 프로세스가 잠금을 물려받아 영영 풀리지 않고 스스로를 가둡니다. 만료 시간이 있는 표시 잠금으로 바꾸고 만료 시 인수를 허용하십시오. (내부 경험 저장소에서)",
+          "'N분마다' 작업을 시작하기 전에 부하를 계산하십시오. 빈도 × 1회 소요 시간. 시간당 10분을 넘으면 경계하고 공용 자원을 끌고 내려가지 마십시오. (내부 경험 저장소에서)"
         ]
       }
     },
     "es": {
-      "summary": "Ayer (09-30) arreglamos tres bugs —los agentes no podían iniciar sesión, la gestión de usuarios del paquete A giraba sin parar y tras cambiar la contraseña el lado Java no podía entrar— y alineamos por completo el algoritmo de contraseñas con el inicio de sesión de Java; además añadimos caché a la interfaz de datos completos, bajando una consulta de 67 segundos a 0,3.",
+      "summary": "[Corregido] 1. Arreglado el 404 de toda la vida en la consulta de registros del panel: el programa usaba la dirección de entrada de la página como dirección de la API, así que el prefijo de la API llevaba un segmento de ruta de más; una credencial temporal de desarrollo tapó el error hasta que caducó. Ya está corregido: 14.617 registros se muestran con normalidad. 2. Dos trampas del empaquetado: una ruta de proyecto con caracteres no ASCII hace que la herramienta se caiga sin más, y un marcador BOM oculto al inicio del archivo hace fallar la compilación; ahora queda fijado a rutas solo en inglés y escritura sin BOM.\n[Mejorado/Añadido] 1. Añadida una sincronización programada que debería haber existido desde siempre: antes no había programación y los datos solo se refrescaban a mano; ahora sincroniza cada 15 minutos de forma incremental y hace un barrido completo al día, con bloqueo anti-reentrada y registro de ejecución. 2. El reparto de modelos es un punto más fino: por franja horaria, complejidad de la tarea y si lleva imágenes; las tareas pesadas en horas valle pasan a un modelo más capaz. 3. Convertido el diagnóstico de equipos remotos en un manual: seis clases de fallo habituales, cada una con criterio y pasos de actuación.\n[Aprendido] 1. Lo que puede cubrir un mecanismo no debe depender nunca de la memoria: una tarea programada para horas en que el equipo está apagado es una programación perdida; usa tres capas: encajarla en la ventana disponible, recuperar lo perdido y registrar la deuda. 2. Las tareas de limpieza son siempre borrado lógico, solo las rutas del listado, simulación por defecto, más una protección de «no tocar nada modificado en los últimos días»: juzgar «viejo» por la fecha de creación borra archivos vivos que aún se están escribiendo.",
       "sections": {
         "skills": [
-          "La gestión de usuarios del paquete A usa caché completa: el nuevo itvGetAllBox() cachea todo el listado de boxes IPTV cada 600 segundos, y la consulta del agente pasa de 67 s a 0,3 s.",
-          "El algoritmo de contraseñas de gestión de permisos ya está conectado: umHash de agentapi se reescribió para coincidir byte a byte con PBEWithMD5AndDES de Java, y el lado Java ya inicia sesión tras un cambio en la página."
+          "La sincronización programada pasa de «alguien se acuerda de refrescar a mano» a sistema: incremental cada 15 minutos, barrido completo diario, con bloqueo anti-reentrada (para que dos ejecuciones no se pisen) y registro consultable después.",
+          "Reparto afinado en tres dimensiones: franja horaria × complejidad × si lleva imágenes; las tareas pesadas en horas valle usan un modelo más capaz y en horas punta se mantiene el ligero, equilibrando calidad y coste.",
+          "Diagnóstico de equipos remotos convertido en manual: seis clases de fallo habituales con criterio y pasos; antes de entregar hay que verificar tres cosas duras: tiempo en marcha, prueba real de conectividad extremo a extremo y margen de recursos.",
+          "Flujo de empaquetado y compilación fijado como reglas duras: rutas solo en inglés, escribir siempre UTF-8 sin BOM y partir cada vez de una compilación limpia en vez de reutilizar un directorio sucio."
         ],
         "bugs": [
-          "Los agentes no podían iniciar sesión: el antiguo umHash de PHP tenía los parámetros invertidos y generaba hashes de 32 caracteres incompatibles con Java; se recalcularon con Java RunPwd y se borró el contador de fallos en Redis; chuyi y dajin ya entran.",
-          "La gestión de usuarios del paquete A giraba sin parar: los agentes consultaban getboxinfo uno a uno con searchusername y un número corto antiguo provocaba un «error de parámetros» que tumbaba toda la página; se pasó a traer el listado completo y filtrar por stbMac en local, y se recuperó.",
-          "Tras cambiar la contraseña el lado Java no podía entrar: corregidos tres errores de umHash (derivación de clave, longitud del IV y objeto cifrado); acceso verificado de extremo a extremo."
+          "La consulta de registros del panel devolvía 404: el programa trataba la dirección de entrada de la página como dirección de la API, con un segmento de ruta de más en el prefijo; una credencial temporal de desarrollo ocultó el error hasta que caducó. Corregido: 14.617 registros se muestran bien.",
+          "Una ruta de proyecto con caracteres no ASCII hacía que la herramienta de empaquetado se cayera; ahora se fija el uso de rutas solo en inglés.",
+          "Un marcador BOM oculto al inicio del archivo escrito hacía que el compilador fallara y saliera; ahora se escribe sin BOM.",
+          "La sincronización programada no tenía programación alguna: los datos solo se refrescaban a mano y una caché llegó a estar parada medio mes; ya tiene intervalo fijo y registro de ejecución."
         ],
         "lessons": [
-          "Contrasta siempre los hashes con Java RunPwd; nunca escribas umHash de PHP a mano; pasa los hashes a la base de datos en base64, nunca como literales.",
-          "JeecgBoot bloquea la cuenta 10 minutos tras más de 5 intentos fallidos; al depurar el acceso, revisa primero si hay claves LOGIN_FAIL_* en Redis y bórralas al terminar.",
-          "Filtrar datos completos exige caché primero, o el paginado bloquea el endpoint; nunca expongas base de datos/SSH a internet ni uses contraseñas débiles."
+          "Lo que un mecanismo puede cubrir no debe depender de la memoria: programar una tarea para horas en que el equipo está apagado es no programarla. Usa tres capas: encajar en la ventana disponible, recuperar lo perdido y registrar la deuda. (aprendido de la base de experiencia interna)",
+          "Tres reglas duras para limpiar: siempre borrado lógico recuperable, tocar solo las rutas del listado, simulación por defecto. Añade «no tocar nada modificado en los últimos días»: juzgar «viejo» por la fecha de creación borra archivos vivos que se están escribiendo. (aprendido de la base de experiencia interna)",
+          "Un script que se reinicia a sí mismo no debe usar un bloqueo de archivo normal: el proceso nuevo hereda el bloqueo, nunca se libera y el script se encierra fuera. Usa un bloqueo con caducidad que permita tomar el relevo al vencer. (aprendido de la base de experiencia interna)",
+          "Antes de abrir cualquier tarea «cada N minutos», haz la cuenta de carga: frecuencia × duración. Por encima de 10 minutos por hora, desconfía: no arrastres los recursos compartidos. (aprendido de la base de experiencia interna)"
         ]
       }
     },
     "fr": {
-      "summary": "Hier (09-30), nous avons corrigé trois bugs —les agents ne pouvaient pas se connecter, la gestion des utilisateurs du forfait A tournait sans fin, et après un changement de mot de passe le côté Java ne pouvait plus se connecter— et aligné entièrement l'algorithme de mot de passe sur la connexion Java ; nous avons aussi mis en cache l'interface de données complètes, faisant passer une requête de 67 secondes à 0,3.",
+      "summary": "[Corrigé] 1. Correction du 404 chronique sur la recherche de journaux du panneau d'administration : le programme utilisait l'adresse d'entrée de la page comme adresse d'API, d'où un segment de chemin en trop dans le préfixe ; un identifiant temporaire de développement masquait l'erreur jusqu'à son expiration. Corrigé : 14 617 enregistrements s'affichent normalement. 2. Deux pièges d'empaquetage corrigés : un chemin de projet contenant des caractères non ASCII fait planter l'outil, et un marqueur BOM caché en tête de fichier fait échouer la compilation ; désormais chemins en anglais uniquement et écriture sans BOM.\n[Amélioré/Ajouté] 1. Ajout d'une synchronisation planifiée qui aurait dû exister depuis le début : aucune planification auparavant, les données ne se rafraîchissaient qu'à la main ; désormais incrémentale toutes les 15 minutes et complète une fois par jour, avec verrou anti-réentrance et journal d'exécution. 2. Répartition des modèles affinée d'un cran : selon la plage horaire, la complexité de la tâche et la présence d'images ; les tâches lourdes hors pointe passent sur un modèle plus capable. 3. Le dépannage d'équipements distants devient un manuel : six familles de pannes courantes, chacune avec ses critères et ses étapes.\n[Appris] 1. Ce qu'un mécanisme peut couvrir ne doit jamais dépendre de la mémoire : une tâche planifiée à une heure où la machine est éteinte est une planification perdue ; utilisez trois couches : la caler dans la fenêtre disponible, rattraper les oublis, consigner la dette. 2. Le nettoyage se fait toujours en suppression logique, uniquement sur les chemins listés, en simulation par défaut, plus une garde « ne rien toucher de modifié ces derniers jours » : juger « ancien » à la date de création supprime des fichiers vivants encore en écriture.",
       "sections": {
         "skills": [
-          "La gestion des utilisateurs du forfait A utilise un cache complet : le nouvel itvGetAllBox() met en cache toute la liste des boxes IPTV toutes les 600 secondes, la requête d'un agent passant de 67 s à 0,3 s.",
-          "L'algorithme de mot de passe de la gestion des permissions est raccordé : umHash d'agentapi a été réécrit pour correspondre octet par octet à PBEWithMD5AndDES de Java, et le côté Java se connecte normalement après une modification côté page."
+          "La synchronisation planifiée passe de « quelqu'un pense à rafraîchir à la main » à un dispositif : incrémentale toutes les 15 minutes, complète une fois par jour, avec verrou anti-réentrance (deux exécutions ne se marchent pas dessus) et journal consultable après coup.",
+          "Répartition affinée sur trois axes : plage horaire × complexité × présence d'images ; les tâches lourdes hors pointe utilisent un modèle plus capable, les heures de pointe gardent le modèle léger, pour concilier qualité et coût.",
+          "Dépannage d'équipements distants transformé en manuel : six familles de pannes avec critères et étapes ; avant livraison, trois vérifications dures : temps de fonctionnement, test réel de connectivité de bout en bout, marge de ressources.",
+          "Flux d'empaquetage et de compilation figé en règles dures : chemins en anglais uniquement, écriture toujours en UTF-8 sans BOM, et repartir chaque fois d'une compilation propre au lieu de réutiliser un dossier sale."
         ],
         "bugs": [
-          "Les agents ne pouvaient pas se connecter : l'ancien umHash PHP avait ses paramètres inversés et produisait des hachages de 32 caractères incompatibles avec Java ; recalculés avec Java RunPwd et compteur d'échecs Redis effacé, chuyi et dajin se connectent.",
-          "La gestion des utilisateurs du forfait A tournait sans fin : les agents interrogeaient getboxinfo un par un avec searchusername, et un ancien numéro court déclenchait une « erreur de paramètre » qui faisait tomber toute la page ; remplacé par la récupération complète et un filtrage local par stbMac, c'est rétabli.",
-          "Après un changement de mot de passe le côté Java ne pouvait plus se connecter : trois erreurs d'umHash corrigées (dérivation de clé, longueur de l'IV, objet chiffré) ; connexion vérifiée de bout en bout."
+          "La recherche de journaux du panneau renvoyait 404 : le programme traitait l'adresse d'entrée de la page comme adresse d'API, avec un segment de chemin en trop ; un identifiant temporaire de développement a masqué l'erreur jusqu'à expiration. Corrigé : 14 617 enregistrements s'affichent.",
+          "Un chemin de projet contenant des caractères non ASCII faisait planter l'outil d'empaquetage ; chemins en anglais uniquement désormais.",
+          "Un marqueur BOM caché en tête du fichier écrit faisait échouer le compilateur ; écriture sans BOM désormais.",
+          "La synchronisation planifiée n'avait aucune planification : les données n'étaient rafraîchies qu'à la main et un cache est resté figé un demi-mois ; intervalle fixe et journal d'exécution ajoutés."
         ],
         "lessons": [
-          "Croisez toujours les hachages avec Java RunPwd ; n'écrivez jamais umHash en PHP à la main ; passez les hachages à la base en base64, jamais en littéral.",
-          "JeecgBoot verrouille le compte 10 minutes après plus de 5 échecs de connexion ; pour déboguer, vérifiez d'abord les clés LOGIN_FAIL_* de Redis puis effacez-les après le test.",
-          "Filtrer des données complètes exige d'abord un cache, sinon la pagination bloque l'endpoint ; n'exposez jamais base de données/SSH sur Internet et n'utilisez pas de mot de passe faible."
+          "Ce qu'un mécanisme peut couvrir ne doit pas dépendre de la mémoire : planifier une tâche à une heure où l'équipement est éteint revient à ne pas la planifier. Trois couches : la caler dans la fenêtre disponible, rattraper les oublis, consigner la dette. (d'après la base d'expérience interne)",
+          "Trois règles dures pour le nettoyage : toujours une suppression logique récupérable, ne toucher que les chemins listés, simulation par défaut. Ajoutez « ne rien toucher de modifié ces derniers jours » : juger « ancien » à la date de création supprime des fichiers vivants en cours d'écriture. (d'après la base d'expérience interne)",
+          "Un script qui se redémarre lui-même ne doit pas utiliser un verrou de fichier ordinaire : le nouveau processus hérite du verrou, il n'est jamais libéré et le script s'enferme dehors. Utilisez un verrou avec expiration permettant la reprise. (d'après la base d'expérience interne)",
+          "Avant d'ouvrir une tâche « toutes les N minutes », faites le calcul de charge : fréquence × durée. Au-delà de 10 minutes par heure, méfiance : n'entraînez pas les ressources partagées. (d'après la base d'expérience interne)"
         ]
       }
     },
     "de": {
-      "summary": "Gestern (09-30) haben wir drei Fehler behoben — Agenten konnten sich nicht anmelden, die Benutzerverwaltung des A-Pakets lud endlos, und nach einer Passwortänderung konnte sich die Java-Seite nicht anmelden — und den Passwort-Algorithmus vollständig an die Java-Anmeldung angeglichen; außerdem haben wir die Voll-Daten-Schnittstelle gecacht und eine Abfrage von 67 Sekunden auf 0,3 gesenkt.",
+      "summary": "[Behoben] 1. Der seit Langem bestehende 404-Fehler bei der Logsuche im Admin-Panel ist behoben: Das Programm nutzte die Einstiegsadresse der Seite als API-Adresse, daher trug das API-Präfix ein zusätzliches Pfadsegment; ein temporäres Entwickler-Zugangstoken verdeckte den Fehler bis zu dessen Ablauf. Korrigiert – 14.617 Datensätze werden nun normal angezeigt. 2. Zwei Fallen beim Packen behoben: Ein Projektpfad mit Nicht-ASCII-Zeichen lässt das Packwerkzeug sofort abstürzen, und ein verstecktes BOM-Zeichen am Dateianfang lässt die Kompilierung scheitern; jetzt fest auf reine englische Pfade und Schreiben ohne BOM umgestellt.\n[Verbessert/Neu] 1. Ein geplanter Abgleich ergänzt, der schon immer hätte existieren müssen: Bisher gab es keine Planung, Daten wurden nur von Hand aktualisiert; jetzt alle 15 Minuten inkrementell und einmal täglich vollständig, mit Wiedereintritts-Sperre und Ausführungsprotokoll. 2. Modellzuweisung einen Schritt feiner: nach Zeitfenster, Aufgabenkomplexität und ob Bilder enthalten sind; schwere Aufgaben in Nebenzeiten gehen an ein leistungsfähigeres Modell. 3. Fehlersuche an entfernten Geräten als Handbuch: sechs häufige Fehlerklassen, jeweils mit Kriterien und Vorgehen.\n[Gelernt] 1. Was ein Mechanismus abfangen kann, darf nie vom Gedächtnis abhängen: eine geplante Aufgabe zu Stunden, in denen das Gerät aus ist, ist keine Planung; drei Schichten nutzen – in das verfügbare Fenster legen, Verpasstes nachholen, Schulden eintragen. 2. Aufräumarbeiten immer als logisches Löschen, nur die gelisteten Pfade, standardmäßig Probelauf, plus Schutz „nichts anfassen, was in den letzten Tagen geändert wurde“: „alt“ nach Erstellungszeit zu beurteilen löscht lebende Dateien, die noch geschrieben werden.",
       "sections": {
         "skills": [
-          "Die Benutzerverwaltung des A-Pakets nutzt einen Voll-Cache: das neue itvGetAllBox() cacht alle 600 Sekunden die komplette IPTV-Box-Liste, eine Agentenabfrage sinkt von 67 s auf 0,3 s.",
-          "Der Passwort-Algorithmus der Berechtigungsverwaltung ist angeschlossen: umHash in agentapi wurde neu geschrieben, um bytegenau zu Javas PBEWithMD5AndDES zu passen, und die Java-Seite meldet sich nach einer Änderung auf der Seite normal an."
+          "Geplanter Abgleich von „jemand denkt ans manuelle Aktualisieren“ zu einem Verfahren: alle 15 Minuten inkrementell, einmal täglich vollständig, mit Wiedereintritts-Sperre (zwei Läufe treten sich nicht auf die Füße) und nachträglich prüfbarem Ausführungsprotokoll.",
+          "Zuweisung auf drei Achsen verfeinert: Zeitfenster × Aufgabenkomplexität × ob Bilder dabei sind; schwere Aufgaben in Nebenzeiten nutzen ein leistungsfähigeres Modell, zu Spitzenzeiten bleibt das leichte, für Wirkung und Kosten zugleich.",
+          "Fehlersuche an entfernten Geräten als Handbuch: sechs häufige Fehlerklassen mit Kriterien und Schritten; vor der Übergabe drei harte Prüfungen: Laufzeit, echter Ende-zu-Ende-Verbindungstest, Ressourcenreserve.",
+          "Pack- und Build-Ablauf als harte Regeln festgeschrieben: nur englische Pfade, immer BOM-freies UTF-8 schreiben und jedes Mal sauber neu bauen statt ein verschmutztes Verzeichnis weiterzuverwenden."
         ],
         "bugs": [
-          "Agenten konnten sich nicht anmelden: das alte PHP-umHash hatte vertauschte Parameter und erzeugte 32-stellige Hashes, die mit Java inkompatibel sind; mit Java RunPwd neu berechnet und der Fehlerzähler in Redis gelöscht, chuyi und dajin können sich anmelden.",
-          "Die Benutzerverwaltung des A-Pakets lud endlos: Agenten fragten getboxinfo einzeln per searchusername ab, und eine alte Kurznummer löste einen „Parameterfehler“ aus, der die ganze Seite lahmlegte; umgestellt auf komplette Liste plus lokalen stbMac-Filter, wiederhergestellt.",
-          "Nach einer Passwortänderung konnte sich die Java-Seite nicht anmelden: drei Fehler in umHash (Schlüsselableitung, IV-Länge, verschlüsseltes Objekt) behoben; Anmeldung Ende-zu-Ende verifiziert."
+          "Die Logsuche im Admin-Panel lieferte 404: Das Programm behandelte die Einstiegsadresse der Seite als API-Adresse, das Präfix trug ein zusätzliches Pfadsegment; ein temporäres Entwickler-Token verdeckte den Fehler bis zum Ablauf. Korrigiert – 14.617 Datensätze werden angezeigt.",
+          "Ein Projektpfad mit Nicht-ASCII-Zeichen ließ das Packwerkzeug abstürzen; jetzt fest auf englische Pfade umgestellt.",
+          "Ein verstecktes BOM-Zeichen am Anfang der geschriebenen Datei ließ den Compiler mit Fehler abbrechen; jetzt BOM-freies Schreiben.",
+          "Der geplante Abgleich hatte überhaupt keine Planung: Daten wurden nur manuell aktualisiert, ein Cache stand einen halben Monat still; fester Intervall und Ausführungsprotokoll ergänzt."
         ],
         "lessons": [
-          "Hashes immer mit Java RunPwd gegenprüfen; niemals PHP-umHash von Hand schreiben; Hashes als base64 an die DB geben, nie als Literal.",
-          "JeecgBoot sperrt ein Konto nach mehr als 5 Fehlanmeldungen für 10 Minuten; beim Debuggen zuerst Redis LOGIN_FAIL_*-Schlüssel prüfen und sie nach dem Test löschen.",
-          "Voll-Daten-Filterung erfordert zuerst einen Cache, sonst blockiert das Paging die Schnittstelle; Datenbank/SSH niemals ins öffentliche Netz stellen und keine schwachen Zugangsdaten verwenden."
+          "Was ein Mechanismus abfangen kann, darf nicht vom Gedächtnis abhängen: eine Aufgabe zu Stunden zu planen, in denen das Gerät aus ist, ist keine Planung. Drei Schichten: ins verfügbare Fenster legen, Verpasstes nachholen, Schulden eintragen. (aus der internen Erfahrungsbasis)",
+          "Drei harte Regeln beim Aufräumen: immer rückholbares logisches Löschen, nur die gelisteten Pfade anfassen, standardmäßig Probelauf. Dazu „nichts anfassen, was in den letzten Tagen geändert wurde“: „alt“ nach Erstellungszeit zu beurteilen löscht lebende Dateien, die noch geschrieben werden. (aus der internen Erfahrungsbasis)",
+          "Skripte, die sich selbst neu starten, dürfen keine einfache Dateisperre nutzen: Der neue Prozess erbt die Sperre, sie wird nie freigegeben und das Skript sperrt sich selbst aus. Eine Sperre mit Ablaufzeit nutzen, die bei Zeitüberschreitung übernommen werden kann. (aus der internen Erfahrungsbasis)",
+          "Vor jedem „alle N Minuten“-Job die Lastrechnung machen: Frequenz × Dauer. Über 10 Minuten pro Stunde: Vorsicht, keine geteilten Ressourcen mitreißen. (aus der internen Erfahrungsbasis)"
         ]
       }
     },
     "ru": {
-      "summary": "Вчера (09-30) мы исправили три бага — агенты не могли войти, управление пользователями пакета A бесконечно грузилось, а после смены пароля сторона Java не пускала — и полностью выровняли алгоритм паролей со стороной входа Java; ещё мы добавили кэш интерфейсу полных данных, сократив запрос с 67 секунд до 0,3.",
+      "summary": "[Исправлено] 1. Устранена давняя ошибка 404 при поиске по журналам в панели управления: программа использовала адрес входа на страницу как адрес API, из-за чего в префиксе API появился лишний сегмент пути; временный отладочный токен скрывал ошибку до истечения срока. Исправлено — 14 617 записей отображаются нормально. 2. Устранены две ловушки сборки: путь проекта с не-ASCII символами роняет инструмент упаковки, а скрытая метка BOM в начале файла ломает компиляцию; теперь закреплены только английские пути и запись без BOM.\n[Улучшено/Добавлено] 1. Добавлена плановая синхронизация, которая должна была существовать давно: расписания не было вовсе, данные обновлялись только вручную; теперь каждые 15 минут инкрементально и раз в сутки полностью, с защитой от повторного запуска и журналом выполнения. 2. Распределение моделей стало на шаг точнее: по времени суток, сложности задачи и наличию изображений; тяжёлые задачи в непиковые часы уходят на более сильную модель. 3. Диагностика удалённых устройств оформлена как руководство: шесть частых классов неисправностей, для каждого критерии и порядок действий.\n[Усвоено] 1. То, что можно закрыть механизмом, нельзя оставлять на память: задача, запланированная на часы, когда устройство выключено, — это не план; нужны три слоя: вписать в доступное окно, догнать пропущенное, записать долг. 2. Уборка — всегда мягкое удаление, только пути из списка, по умолчанию пробный прогон, плюс защита «не трогать изменённое за последние дни»: судить о «старости» по времени создания значит удалять живые файлы, которые ещё пишутся.",
       "sections": {
         "skills": [
-          "В управлении пользователями пакета A появился полный кэш: новый itvGetAllBox() кэширует весь список IPTV-боксов каждые 600 секунд, запрос агента падает с 67 с до 0,3 с.",
-          "Алгоритм паролей в управлении правами подключён: umHash в agentapi переписан под побайтовое совпадение с PBEWithMD5AndDES в Java, и сторона Java нормально входит после изменения на странице."
+          "Плановая синхронизация переведена из «кто-то вспомнит обновить вручную» в систему: каждые 15 минут инкрементально, раз в сутки полностью, с защитой от повторного запуска (два прогона не наступают друг другу на ноги) и журналом, который можно проверить потом.",
+          "Распределение уточнено по трём осям: время суток × сложность задачи × наличие изображений; тяжёлые задачи в непиковые часы идут на более сильную модель, в пик остаётся лёгкая — баланс качества и затрат.",
+          "Диагностика удалённых устройств стала руководством: шесть частых классов неисправностей с критериями и шагами; перед сдачей обязательны три жёсткие проверки: время работы, реальный тест сквозного соединения, запас ресурсов.",
+          "Процесс упаковки и сборки закреплён жёсткими правилами: только английские пути, всегда запись UTF-8 без BOM и каждый раз чистая пересборка вместо грязного каталога."
         ],
         "bugs": [
-          "Агенты не могли войти: у старого PHP-umHash параметры были перепутаны, и он выдавал 32-символьные хеши, несовместимые с Java; хеши пересчитаны через Java RunPwd, счётчик неудач в Redis очищен — chuyi и dajin входят.",
-          "Управление пользователями пакета A грузилось бесконечно: агенты запрашивали getboxinfo по одному через searchusername, и старый короткий номер вызывал «ошибку параметра», роняющую всю страницу; перешли на полную выгрузку и локальную фильтрацию по stbMac — восстановлено.",
-          "После смены пароля сторона Java не пускала: исправлены три ошибки umHash (вывод ключа, длина IV, объект шифрования); вход проверен сквозным тестом."
+          "Поиск по журналам в панели отдавал 404: программа считала адрес входа на страницу адресом API, в префиксе был лишний сегмент пути; временный отладочный токен скрывал ошибку до истечения срока. Исправлено — 14 617 записей отображаются.",
+          "Путь проекта с не-ASCII символами ронял инструмент упаковки; закреплены только английские пути.",
+          "Скрытая метка BOM в начале записанного файла приводила к аварийному завершению компилятора; перешли на запись без BOM.",
+          "У плановой синхронизации вообще не было расписания: данные обновлялись только вручную, один кэш стоял полмесяца; добавлены фиксированный интервал и журнал выполнения."
         ],
         "lessons": [
-          "Всегда сверяйте хеши через Java RunPwd; не пишите PHP-umHash вручную; передавайте хеши в БД в base64, никогда литералом.",
-          "JeecgBoot блокирует аккаунт на 10 минут после более чем 5 неудачных входов; при разборе входа сначала проверьте ключи LOGIN_FAIL_* в Redis, а после теста удалите их.",
-          "Фильтрация полных данных требует сначала кэша, иначе постраничная выгрузка забивает интерфейс; никогда не выставляйте БД/SSH в публичную сеть и не используйте слабые учётные данные."
+          "То, что закрывается механизмом, не должно зависеть от памяти: задача на часы, когда устройство выключено, — это отсутствие плана. Три слоя: вписать в доступное окно, догнать пропущенное, записать долг. (из внутренней базы опыта)",
+          "Три жёстких правила уборки: всегда восстановимое мягкое удаление, трогать только пути из списка, по умолчанию пробный прогон. Добавьте «не трогать изменённое за последние дни»: судить о «старости» по времени создания — значит удалять живые файлы, которые ещё пишутся. (из внутренней базы опыта)",
+          "Скриптам, которые сами себя перезапускают, нельзя использовать обычную файловую блокировку: новый процесс наследует её, она никогда не снимается, и скрипт запирает сам себя. Нужна блокировка с истечением срока, допускающая перехват. (из внутренней базы опыта)",
+          "Перед запуском любой задачи «каждые N минут» посчитайте нагрузку: частота × длительность. Больше 10 минут в час — настораживайтесь, не тяните за собой общие ресурсы. (из внутренней базы опыта)"
         ]
       }
     },
     "pt": {
-      "summary": "Ontem (09-30) corrigimos três bugs — os agentes não conseguiam entrar, a gestão de usuários do pacote A girava sem parar e, após trocar a senha, o lado Java não entrava — e alinhamos totalmente o algoritmo de senha ao login Java; também adicionamos cache à interface de dados completos, reduzindo uma consulta de 67 segundos para 0,3.",
+      "summary": "[Corrigido] 1. Corrigido o 404 antigo da consulta de registros no painel: o programa usava o endereço de entrada da página como endereço da API, então o prefixo da API levava um segmento de caminho a mais; uma credencial temporária de desenvolvimento escondeu o erro até expirar. Corrigido — 14.617 registros agora aparecem normalmente. 2. Duas armadilhas do empacotamento: caminho de projeto com caracteres não ASCII derruba a ferramenta na hora, e um marcador BOM oculto no início do arquivo faz a compilação falhar; agora fixado em caminhos apenas em inglês e gravação sem BOM.\n[Melhorado/Adicionado] 1. Adicionada uma sincronização agendada que já deveria existir: antes não havia agendamento e os dados só eram atualizados à mão; agora sincroniza a cada 15 minutos de forma incremental e faz uma varredura completa por dia, com trava anti-reentrada e registro de execução. 2. A distribuição de modelos ficou um ponto mais fina: por faixa de horário, complexidade da tarefa e se há imagens; tarefas pesadas em horários vazios vão para um modelo mais capaz. 3. O diagnóstico de equipamentos remotos virou manual: seis classes de falha comuns, cada uma com critério e passos.\n[Aprendido] 1. O que um mecanismo pode cobrir nunca deve depender da memória: tarefa agendada para horas em que o equipamento está desligado é agendamento perdido; use três camadas: encaixar na janela disponível, recuperar o perdido, registrar a dívida. 2. Limpeza é sempre exclusão lógica, só os caminhos da lista, simulação por padrão, mais a proteção «não tocar no que foi alterado nos últimos dias»: julgar «antigo» pela data de criação apaga arquivos vivos que ainda estão sendo gravados.",
       "sections": {
         "skills": [
-          "A gestão de usuários do pacote A usa cache completo: o novo itvGetAllBox() faz cache de toda a lista de boxes IPTV a cada 600 segundos, e a consulta do agente cai de 67 s para 0,3 s.",
-          "O algoritmo de senha da gestão de permissões está ligado: o umHash do agentapi foi reescrito para bater byte a byte com o PBEWithMD5AndDES do Java, e o lado Java entra normalmente após uma alteração na página."
+          "Sincronização agendada passou de «alguém lembra de atualizar à mão» para sistema: incremental a cada 15 minutos, completa uma vez ao dia, com trava anti-reentrada (duas execuções não se atropelam) e registro consultável depois.",
+          "Distribuição afinada em três eixos: faixa de horário × complexidade × presença de imagens; tarefas pesadas em horários vazios usam modelo mais capaz, no pico fica o leve, equilibrando qualidade e custo.",
+          "Diagnóstico de equipamentos remotos virou manual: seis classes de falha com critérios e passos; antes da entrega, três verificações duras: tempo em operação, teste real de conectividade ponta a ponta e folga de recursos.",
+          "Fluxo de empacotamento e build fixado como regras duras: caminhos apenas em inglês, gravar sempre UTF-8 sem BOM e refazer sempre do zero em vez de reaproveitar diretório sujo."
         ],
         "bugs": [
-          "Os agentes não conseguiam entrar: o antigo umHash em PHP tinha os parâmetros trocados e gerava hashes de 32 caracteres incompatíveis com o Java; recalculados com Java RunPwd e contador de falhas no Redis apagado, chuyi e dajin entram.",
-          "A gestão de usuários do pacote A girava sem parar: os agentes consultavam o getboxinfo um a um com searchusername, e um número curto antigo provocava «erro de parâmetro» que derrubava a página inteira; passou a buscar a lista completa e filtrar por stbMac localmente, e recuperou.",
-          "Após trocar a senha o lado Java não entrava: corrigidos três erros do umHash (derivação de chave, tamanho do IV e objeto criptografado); login verificado de ponta a ponta."
+          "A consulta de registros do painel retornava 404: o programa tratava o endereço de entrada da página como endereço da API, com um segmento de caminho a mais; uma credencial temporária de desenvolvimento escondeu o erro até expirar. Corrigido — 14.617 registros aparecem.",
+          "Caminho de projeto com caracteres não ASCII derrubava a ferramenta de empacotamento; agora só caminhos em inglês.",
+          "Marcador BOM oculto no início do arquivo gravado fazia o compilador abortar; agora gravação sem BOM.",
+          "A sincronização agendada não tinha agendamento algum: os dados só eram atualizados à mão e um cache ficou parado meio mês; agora tem intervalo fixo e registro de execução."
         ],
         "lessons": [
-          "Sempre confira os hashes com o Java RunPwd; nunca escreva umHash em PHP à mão; passe os hashes ao banco em base64, nunca como literal.",
-          "O JeecgBoot bloqueia a conta por 10 minutos após mais de 5 falhas de login; ao depurar, primeiro confira se há chaves LOGIN_FAIL_* no Redis e apague-as depois do teste.",
-          "Filtrar dados completos exige cache primeiro, senão a paginação trava a interface; nunca exponha banco/SSH na internet nem use credenciais fracas."
+          "O que um mecanismo pode cobrir não deve depender da memória: agendar tarefa para horas em que o equipamento está desligado é não agendar. Três camadas: encaixar na janela disponível, recuperar o perdido, registrar a dívida. (da base de experiência interna)",
+          "Três regras duras na limpeza: sempre exclusão lógica recuperável, tocar só nos caminhos da lista, simulação por padrão. Acrescente «não tocar no alterado nos últimos dias»: julgar «antigo» pela data de criação apaga arquivos vivos em gravação. (da base de experiência interna)",
+          "Script que se reinicia sozinho não deve usar trava de arquivo comum: o processo novo herda a trava, ela nunca é liberada e o script se tranca para fora. Use trava com validade que permita assumir ao expirar. (da base de experiência interna)",
+          "Antes de abrir qualquer tarefa «a cada N minutos», faça a conta de carga: frequência × duração. Acima de 10 minutos por hora, desconfie: não arraste os recursos compartilhados. (da base de experiência interna)"
         ]
       }
     },
     "ar": {
-      "summary": "أمس (09-30) أصلحنا ثلاث مشكلات — تعذّر دخول الوكلاء، وبقاء إدارة مستخدمي باقة A في التحميل، وعدم تمكن جهة Java من الدخول بعد تغيير كلمة المرور — ووافقنا خوارزمية كلمة المرور مع جهة دخول Java تمامًا؛ كما أضفنا تخزينًا مؤقتًا لواجهة البيانات الكاملة، فانخفض الاستعلام من 67 ثانية إلى 0.3.",
+      "summary": "[إصلاح] 1. تم إصلاح خطأ 404 القديم في «بحث السجلات» بلوحة الإدارة: كان البرنامج يستخدم عنوان دخول الصفحة كعنوان واجهة API، فحمل بادئة الـ API مقطع مسار زائدًا؛ وقد أخفى رمز وصول مؤقت في مرحلة التطوير الخطأ حتى انتهت صلاحيته. تم التصحيح، و14,617 سجلًا تُعرض الآن بشكل طبيعي. 2. إصلاح مشكلتين في التغليف: مسار المشروع إذا احتوى حروفًا غير لاتينية يُسقط أداة التغليف فورًا، وعلامة BOM المخفية في بداية الملف تُفشل الترجمة؛ تم التثبيت على مسارات إنجليزية فقط وكتابة بدون BOM.\n[تحسين/إضافة] 1. إضافة مزامنة مجدولة كان يجب أن تكون موجودة من الأصل: لم يكن هناك جدولة إطلاقًا وكانت البيانات تُحدَّث يدويًا فقط؛ الآن مزامنة تزايدية كل 15 دقيقة ومسح كامل مرة يوميًا، مع قفل يمنع التشغيل المزدوج وسجل تنفيذ. 2. توزيع النماذج أصبح أدق بدرجة: حسب الفترة الزمنية وتعقيد المهمة ووجود صور؛ المهام الثقيلة في أوقات الهدوء تذهب إلى نموذج أقدر. 3. تحويل استكشاف أعطال الأجهزة البعيدة إلى دليل: ست فئات أعطال شائعة، لكل منها معيار وقواعد معالجة.\n[ما تعلمناه] 1. ما يمكن أن تغطيه آلية يجب ألا يعتمد على الذاكرة: مهمة مجدولة في ساعات يكون الجهاز فيها مغلقًا هي جدولة ضائعة؛ استخدم ثلاث طبقات: ضعها في النافذة المتاحة، وادرك ما فات، وسجّل الدين. 2. أعمال التنظيف دائمًا حذف منطقي قابل للاستعادة، وعلى المسارات المذكورة في القائمة فقط، وتشغيل تجريبي افتراضيًا، مع حماية «لا تلمس ما عُدّل في الأيام الأخيرة»: الحكم بالقدم من وقت الإنشاء يحذف ملفات حيّة لا تزال تُكتب.",
       "sections": {
         "skills": [
-          "إدارة مستخدمي باقة A تستخدم تخزينًا كاملًا: itvGetAllBox() الجديد يخزّن كامل قائمة صناديق IPTV كل 600 ثانية، فينخفض استعلام الوكيل من 67 ثانية إلى 0.3.",
-          "خوارزمية كلمة المرور في إدارة الصلاحيات موصولة: أُعيدت كتابة umHash في agentapi لتطابق PBEWithMD5AndDES في Java بايت ببايت، فتتمكن جهة Java من الدخول بعد التغيير من الصفحة."
+          "المزامنة المجدولة انتقلت من «شخص يتذكر التحديث اليدوي» إلى نظام: تزايدية كل 15 دقيقة، ومرة كاملة يوميًا، مع قفل يمنع التشغيل المزدوج (حتى لا يدوس تشغيلان على بعضهما) وسجل تنفيذ يمكن مراجعته لاحقًا.",
+          "التوزيع مضبوط على ثلاثة محاور: الفترة الزمنية × تعقيد المهمة × وجود صور؛ المهام الثقيلة في أوقات الهدوء تستخدم نموذجًا أقدر، وفي أوقات الذروة يبقى النموذج الخفيف، لموازنة الجودة والتكلفة.",
+          "استكشاف أعطال الأجهزة البعيدة أصبح دليلًا: ست فئات أعطال شائعة مع المعايير وخطوات المعالجة؛ وقبل التسليم يجب اجتياز ثلاثة فحوص صارمة: مدة التشغيل، واختبار اتصال فعلي من الطرف إلى الطرف، وهامش الموارد.",
+          "عملية التغليف والبناء مثبتة كقواعد صارمة: مسارات إنجليزية فقط، والكتابة دائمًا UTF-8 بدون BOM، والبدء كل مرة من بناء نظيف بدلًا من إعادة استخدام مجلد ملوث."
         ],
         "bugs": [
-          "تعذّر دخول الوكلاء: كانت وسائط umHash القديمة في PHP معكوسة فتنتج بصمات من 32 حرفًا غير متوافقة مع Java؛ أُعيد حساب البصمات بـ Java RunPwd وتم مسح عدّاد الفشل في Redis، فيدخل chuyi وdajin بنجاح.",
-          "بقاء إدارة مستخدمي باقة A في التحميل: كان الوكلاء يستعلمون عن getboxinfo واحدًا واحدًا عبر searchusername، فرقم قصير قديم يُحدث «خطأ في المعاملات» يُسقط الصفحة كلها؛ حُوّل إلى جلب القائمة الكاملة والتصفية محليًا حسب stbMac، وتم التعافي.",
-          "عدم تمكن جهة Java من الدخول بعد تغيير كلمة المرور: صُحّحت ثلاثة أخطاء في umHash (اشتقاق المفتاح، وطول IV، والكائن المشفّر)؛ وتحقّقنا من الدخول من الطرف إلى الطرف."
+          "«بحث السجلات» في لوحة الإدارة كان يعيد 404: البرنامج تعامل مع عنوان دخول الصفحة كعنوان API، فحملت البادئة مقطع مسار زائدًا؛ وأخفى رمز وصول تطويري مؤقت الخطأ حتى انتهت صلاحيته. تم التصحيح و14,617 سجلًا تُعرض الآن.",
+          "مسار مشروع يحتوي حروفًا غير لاتينية كان يُسقط أداة التغليف؛ تم التثبيت على مسارات إنجليزية فقط.",
+          "علامة BOM مخفية في بداية الملف المكتوب كانت تجعل المترجم يفشل ويخرج؛ تم التغيير إلى الكتابة بدون BOM.",
+          "المزامنة المجدولة لم تكن مجدولة إطلاقًا: كانت البيانات تُحدَّث يدويًا فقط وظل أحد المخازن المؤقتة متوقفًا نصف شهر؛ أضيفت فترة ثابتة وسجل تنفيذ."
         ],
         "lessons": [
-          "طابِق بصمات كلمات المرور دائمًا بـ Java RunPwd، ولا تكتب umHash في PHP يدويًا؛ ومرّر البصمات إلى قاعدة البيانات بصيغة base64 لا كنص حرفي.",
-          "يقفل JeecgBoot الحساب 10 دقائق بعد أكثر من 5 محاولات فاشلة؛ عند تشخيص الدخول افحص أولًا مفاتيح LOGIN_FAIL_* في Redis ثم امسحها بعد الاختبار.",
-          "تصفية البيانات الكاملة تتطلب تخزينًا مؤقتًا أولًا، وإلا عطّلت الترقيم الواجهة؛ ولا تكشف قاعدة البيانات/SSH على الشبكة العامة ولا تستخدم بيانات دخول ضعيفة."
+          "ما يمكن أن تغطيه آلية لا يجب أن يعتمد على الذاكرة: جدولة مهمة في ساعات إغلاق الجهاز تعني عدم جدولتها. استخدم ثلاث طبقات: ضعها في النافذة المتاحة، وادرك ما فات، وسجّل الدين. (من قاعدة الخبرة الداخلية)",
+          "ثلاث قواعد صارمة للتنظيف: دائمًا حذف منطقي قابل للاستعادة، ولمس المسارات المذكورة في القائمة فقط، وتشغيل تجريبي افتراضيًا. وأضف «لا تلمس ما عُدّل في الأيام الأخيرة»: الحكم بالقدم من وقت الإنشاء يحذف ملفات حيّة لا تزال تُكتب. (من قاعدة الخبرة الداخلية)",
+          "السكربتات التي تعيد تشغيل نفسها يجب ألا تستخدم قفل ملف عاديًا: العملية الجديدة ترث القفل، ولا يُحرَّر أبدًا، فيحبس السكربت نفسه خارجًا. استخدم قفلًا بصلاحية زمنية يسمح بالاستلام عند انتهائها. (من قاعدة الخبرة الداخلية)",
+          "قبل تشغيل أي مهمة «كل N دقيقة» احسب الحمل: التكرار × المدة. فوق 10 دقائق في الساعة توقف وتفحص: لا تجرّ الموارد المشتركة معك. (من قاعدة الخبرة الداخلية)"
         ]
       }
     }
