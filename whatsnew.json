@@ -1,142 +1,232 @@
 {
-  "ver": "1.5.7",
-  "date": "2026-10-29",
-  "summary": "【修了什么】今天没有对外的新功能改动，重点是把工作流程里几处「看着已经好了、其实没好」的坑挖到了底：等够固定时间不等于服务起来了；名单上写着在跑不等于真在跑；同一个「没变」其实是两种完全不同的病因。【优化/新增了什么】把上面这些整理成了一套固定检查步骤：启动先探活再动手、失败先量每步真实耗时、看状态分清楚三态、报异常先写清是谁造成的。以后同类活按这套走，不再靠「感觉差不多了」。【自我学习到了什么】四条精要已收进本期公告：固定秒数从来不是证据；「每次都失败」多半是某一步天生超时，往下再挖一层；登记表不能当真相；同一个「没变」先定性再动手。",
+  "ver": "1.5.9",
+  "date": "2026-10-30",
+  "summary": "【修了什么】把三件「看着已经好了、其实没好」的事挖到根：桌面客户端自动升级一直卡在旧版（发布包里的版本号没跟着改，客户端认定自己已是最新，于是每次都跳过更新）；表单里日期改完保存不生效（两类完全不同的病根，分头修）；财务面板上某一家供应商的支出恒显示 0（统计函数漏传月份参数，一直按错月份查）。【优化/新增了什么】界面里一个会误导人的按钮，连同它背后的逻辑整段删干净，不是只藏起来；发版流程补上一步：编译出的程序必须先验内部版本号，确认与对外版本一致才准发布。【自我学习到了什么】三条精要收进本期：定阈值之前先问自己是不是把两种不同情况用同一把尺子量了；「语法对」离「能用」还差一整条街；「装了」不等于「在跑」。",
   "sections": {
-    "skills": [],
-    "bugs": [],
+    "skills": [
+      "界面精简：把一个用不到的入口按钮连同它背后的整段逻辑删掉，只留真正需要的三项操作，界面不再误导人。",
+      "表单日期回填改走「保存出口统一覆写」：对已经被禁用的日期控件，不再指望组件值，校验结果直接在提交出口覆盖字段，改完就存得住。",
+      "发版流程新增一步「产物自检」：程序编译出来后先验内部版本字符串，和对外版本一致才允许发布。"
+    ],
+    "bugs": [
+      "客户端自动升级一直升不上去：根因是发布包内部版本号没跟着改，客户端认定自己已是最新，每次都跳过更新并进入一天冷却。修好后用旧版客户端实测，能一路升到最新（认版本→下载→校验→替换→重启→不再重试）。",
+      "表单里日期改完保存不生效：查清是两类不同的病根——一类是字段被禁用后组件值根本不随表单提交，另一类是保存成功后列表没重新取数，底下还显示旧数据。两处都已修，并在保存出口统一覆写兜底。",
+      "财务面板上某一家供应商的支出恒显示 0：统计函数漏传月份参数，内部按错的月份标签查缓存，永远匹配不上。修好后该家数字与实际消费一致。",
+      "清理临时目录时误删了运行时 socket 文件，导致页面报 502、数据库连不上：已重建 socket 并恢复服务，同时把清理规则改成一律跳过 socket 文件。"
+    ],
     "lessons": [
-      "别把「等够时间」当成「已经好了」：任何开机/启动动作，第一步先探活，探不通就等（有上限），探通了才往下走，固定秒数从来不是证据。（学自内部经验库）",
-      "「每次都失败」的活，先量一遍每一步的真实耗时再对超时线：很多故障不是等得不够，而是某一步天生就超时。往下再挖一层，第一层往往只是表象。（学自内部经验库）",
-      "登记表不能当真相：判断一个任务到底在不在跑，要分三态——真在跑、已停用、已收工。已停用的直接算收工，不许拿名单上的名字冒充在岗。（学自内部经验库）",
-      "报异常数字之前先写一句「这个数是谁造成的」：被自己重启打断的活记成系统故障，只会让看的人白紧张一场。（学自内部经验库）",
-      "同一个「没变」其实是两种病：一种是值根本没存进去（被禁用、只读的字段不会随表单提交），一种是列表没重新取数。先定性再动手，否则修三轮都在错的方向上。"
+      "定任何阈值（超时、重试、判活）之前先问一句：我是不是把两种完全不同的情况用同一把尺子量了？先怀疑尺子，再怀疑对象。（学自内部经验库）",
+      "「语法对」离「能用」还差一整条街：脚本和配置交付前必须自造一个场景真跑一遍，跑通才算交付；只验语法、只比哈希一律不算。（学自内部经验库）",
+      "「装了」不等于「在跑」：带定时任务的改动，验收必须核两样——定时行真的在、而且真的能出回执。只看到文件存在就报「已装好」，是假账。（学自内部经验库）",
+      "发版前必须验产物的内部版本号：在程序里数版本字符串出现的次数，光看文件名和构建脚本输出会骗人——「名字是新的、里头是旧的」这种假版本，会让自动更新永远卡住。",
+      "清理临时目录时，名字带 socket 的运行时文件一律跳过：删掉之后进程还活着、还攥着旧句柄，新连接却找不到入口，表现成「服务没挂但全都连不上」，极难一眼看出。"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "[Fixed] No user-facing feature changes today; the focus was digging several \"looks fixed but is not\" traps down to the root: waiting a fixed number of seconds does not mean a service is up; a name on a list does not mean the job is really running; and one \"nothing changed\" can be two completely different faults. [Improved] Those findings became a fixed set of check steps: probe for life before acting on startup, measure each step's real duration before blaming a timeout, judge status by three states, and say who caused an alarming number before reporting it. Same kind of work now follows these steps instead of \"feels about right\". [Learned] Four points are folded into this notice: a fixed number of seconds is never evidence; \"fails every time\" usually means one step is born over the limit, so dig one layer deeper; a registry is not the truth; and decide which kind of \"nothing changed\" it is before touching anything.",
+      "summary": "[Fixed] Three \"looks fixed but is not\" issues were chased to the root: the desktop client's auto-update was stuck on old versions (the version number inside the published build never changed, so the client believed it was already current and skipped every update); date fields looked saved but were not (two completely different root causes, fixed separately); and one supplier's spending on the finance panel always showed 0 (the statistics function never received the month argument, so it kept looking up the wrong month). [Improved] A misleading button in the interface was removed together with the logic behind it, not just hidden, and the release flow gained one step: a freshly built program must first verify its internal version string and match the public version before release. [Learned] Three points are folded into this notice: before setting any threshold, ask whether you are measuring two different situations with the same ruler; \"syntax is correct\" is a long way from \"it works\"; and \"installed\" is not \"running\".",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "Interface cleanup: an unused entry button was deleted together with the whole block of logic behind it, leaving only the three operations that are actually needed, so the interface no longer misleads.",
+          "Form date write-back now goes through a single override at the save exit: for date widgets that have been disabled, the component value is no longer trusted; the validated result is written straight onto the submitted field, so changes actually persist.",
+          "The release flow gained a build self-check step: once a program is compiled, its internal version string is verified and must match the public version before it may ship."
+        ],
+        "bugs": [
+          "Auto-update never got past old versions: the version number inside the published build was never changed, so the client concluded it was already current, skipped the update every time and entered a one-day cooldown. After the fix, an old client was tested for real and upgraded all the way (recognise version, download, verify, swap, restart, stop retrying).",
+          "Dates in forms seemed saved but were not: two different root causes were found - one is that a disabled field's component value is simply never submitted with the form, the other is that after a successful save the list never re-fetched its data and kept showing the old row. Both are fixed, with a single override at the save exit as a backstop.",
+          "On the finance panel one supplier's spending always showed 0: the statistics function never received the month argument, so it looked up the cache under a wrong month label and could never match. After the fix the figure agrees with actual spending.",
+          "Cleaning a temporary directory accidentally deleted runtime socket files, which made pages return 502 and the database unreachable: the sockets were rebuilt and services restored, and the cleanup rule now skips socket files unconditionally."
+        ],
         "lessons": [
-          "Never treat \"I waited long enough\" as \"it is up\": every startup step begins with a liveness probe. If it does not answer, wait (with a cap); only then continue. A fixed number of seconds is never evidence. (From the internal lessons library)",
-          "For anything that \"fails every single time\", measure how long each step really takes before blaming the timeout: often one step is born over the limit, so waiting longer can never help. Dig one layer deeper - the first explanation is usually just a symptom. (From the internal lessons library)",
-          "A registry is not the truth: to know whether a job is really running, separate three states - actually running, disabled, finished. A disabled job counts as finished; do not let a name on a list pretend to be on duty. (From the internal lessons library)",
-          "Before reporting an alarming number, say who caused it: work interrupted by our own restart recorded as a system failure only makes the reader worry for nothing. (From the internal lessons library)",
-          "The same \"nothing changed\" can be two different diseases: either the value never got saved (disabled and read-only fields are not submitted with the form), or the list never re-fetched its data. Decide which one first, or you will fix three rounds in the wrong direction."
+          "Before setting any threshold (timeout, retry, liveness), ask yourself: am I measuring two completely different situations with the same ruler? Doubt the ruler before you doubt the target. (From the internal lessons library)",
+          "\"Syntax is correct\" is a long way from \"it works\": before delivering a script or a config, build yourself a scenario and actually run it once; only then is it delivered. Checking syntax alone or comparing a hash alone does not count. (From the internal lessons library)",
+          "\"Installed\" is not \"running\": for any change that involves a scheduled job, verification must confirm two things - the schedule line really exists, and it really produces a receipt. Reporting \"all set up\" just because a file exists is a false account. (From the internal lessons library)",
+          "Before any release, verify the build's internal version: count how many times the version string appears inside the program. File names and build-script output can lie - a fake version whose \"name is new but insides are old\" makes auto-update stuck forever.",
+          "When cleaning a temporary directory, always skip runtime files whose name contains socket: after deletion the process is still alive and still holds the old handle, while new connections cannot find the entry point. It looks like \"the service is not down but everything is unreachable\", and it is very hard to spot."
         ]
       }
     },
     "ja": {
-      "summary": "【修正】本日は利用者向けの機能変更なし。中心は「直ったように見えて実は直っていない」落とし穴を根本まで追うことでした。決まった秒数待っても起動したことにはならない／一覧に名前があるだけで実際に動いているとは限らない／同じ「変わらない」でも原因は二種類ある、という点です。【改善/追加】そこで得た内容を固定の確認手順にしました。起動時はまず疎通確認をしてから動く、失敗時はタイムアウトを疑う前に各段階の実測時間を測る、状態は三つに分けて判断する、異常な数字は誰が作ったかを先に書く。今後は「なんとなく大丈夫そう」ではなくこの手順で進めます。【学んだこと】要点四つを本号に収録：決まった秒数は証拠にならない／「毎回失敗する」はある段階が構造的に間に合わないことが多いので一层深く掘る／台帳は真実ではない／同じ「変わらない」はまず種類を切り分ける。",
+      "summary": "【修正】「直ったように見えて実は直っていない」三件を根本まで追いました。デスクトップクライアントの自動更新が旧版で止まる（公開パッケージ内のバージョン番号が更新されておらず、クライアントは自分が最新だと思い込み、毎回更新を飛ばしていた）、日付を入れて保存しても反映されない（原因は二種類で、別々に修正）、財務パネルで一家だけ支出が常に 0（集計関数に月の引数が渡らず、ずれた月ラベルで検索していた）。【改善/追加】画面の紛らわしいボタンを、裏の処理ごと丸ごと削除しました（隠しただけではない）。リリース手順には「ビルドしたプログラムの内部バージョン文字列を確認する」工程を追加。【学んだこと】要点三つを本号に収録：しきい値を決める前に、まったく違う二つの状況を同じ物差しで測っていないか先に疑う／「文法が通る」は「使える」とは別物／「入れた」は「動いている」ではない。",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "画面の整理：使われていない入口ボタンを、裏の処理ごとまとめて削除し、本当に必要な三つの操作だけを残しました。もう誤解を招きません。",
+          "フォームの日付書き戻しを「保存出口での一括上書き」に変更：無効化された日付コントロールでは部品の値に頼らず、検証結果を送信直前に項目へ上書きするので、変更がそのまま残ります。",
+          "リリース手順に「成果物の自己検査」を追加：ビルド後に内部のバージョン文字列を確認し、公開バージョンと一致した場合のみリリースを許可します。"
+        ],
+        "bugs": [
+          "自動更新が旧版から抜け出せない：原因は公開パッケージ内のバージョン番号が更新されておらず、クライアントが自分を最新と判断して毎回更新を飛ばし、一日の待機に入っていたこと。修正後、旧版クライアントで実際に試し、最新まで一気に上がることを確認（版の認識→取得→検証→置換→再起動→再試行しない）。",
+          "フォームの日付が保存されない：原因は二種類ありました。ひとつは無効化された項目の部品値が送信内容に含まれないこと、もうひとつは保存成功後に一覧が再取得されず古い行が表示され続けること。両方を修正し、保存出口での上書きを保険として入れました。",
+          "財務パネルで一家だけ支出が常に 0：集計関数に月の引数が渡っておらず、ずれた月ラベルでキャッシュを引くため永久に一致しませんでした。修正後は実際の支出と一致します。",
+          "一時ディレクトリの整理で実行時の socket ファイルを誤って削除し、ページが 502、データベースにも接続できない状態に：socket を作り直して復旧し、整理ルールは socket ファイルを必ず除外する形に変更しました。"
+        ],
         "lessons": [
-          "「十分待った」を「動いている」と見なさない：起動時の動作はまず疎通確認から。応答がなければ（上限つきで）待ち、応答してから先へ進む。決まった秒数は証拠にならない。（社内の経験ライブラリより）",
-          "「毎回必ず失敗する」作業は、タイムアウトを疑う前に各段階の実測時間を測る：待ち時間不足ではなく、ある段階が構造的に間に合わないことが多い。もう一層深く掘ると、最初の説明はたいてい表面にすぎない。（社内の経験ライブラリより）",
-          "台帳は真実ではない：動いているかどうかは「実際に稼働中／停止済み／完了済み」の三状態で判断する。停止済みは完了扱いで、名簿の名前を稼働の代わりにしてはいけない。（社内の経験ライブラリより）",
-          "異常な数字を報告する前に「この数字は誰が作ったか」を一言添える：自分の再起動で中断した作業をシステム障害として報告すると、読む人を無駄に心配させるだけ。（社内の経験ライブラリより）",
-          "同じ「変わらない」でも二種類ある：値がそもそも保存されていない（無効化・読み取り専用の項目はフォーム送信に含まれない）か、一覧が再取得されていないか。先に切り分けないと、三回直しても全部見当違いになる。"
+          "しきい値（タイムアウト・再試行・死活判定）を決める前に自問する：まったく違う二つの状況を同じ物差しで測っていないか。対象を疑う前に、まず物差しを疑う。（社内の経験ライブラリより）",
+          "「文法が通る」は「使える」とは別物：スクリプトや設定を納品する前に、自分でシナリオを作って一度本当に動かす。動いたときだけ納品。文法だけ、ハッシュ比較だけでは不十分。（社内の経験ライブラリより）",
+          "「入れた」は「動いている」ではない：定期実行が絡む変更は、検証で二点を確認する——実行行が本当にあるか、そして本当に結果を返すか。ファイルがあるだけで「設定済み」と報告するのは虚偽の報告。（社内の経験ライブラリより）",
+          "リリース前に成果物の内部バージョンを必ず確認：プログラム内にバージョン文字列が何回現れるかを数える。ファイル名やビルドスクリプトの出力は嘘をつく——「名前は新しいが中身は古い」偽バージョンは、自動更新を永久に止めてしまう。",
+          "一時ディレクトリを整理するとき、名前に socket を含む実行時ファイルは必ず除外：削除してもプロセスは生きていて古いハンドルを握り続け、新しい接続だけが入口を見つけられない。「サービスは落ちていないのに全部つながらない」という分かりにくい症状になる。"
         ]
       }
     },
     "ko": {
-      "summary": "[수정] 오늘은 사용자 대상 기능 변경 없음. 핵심은 '고쳐진 것처럼 보이지만 실제로는 아닌' 함정을 뿌리까지 파는 일이었습니다. 정해진 시간을 기다린다고 서비스가 뜬 것은 아니고, 명단에 이름이 있다고 실제로 돌고 있는 것도 아니며, 같은 '변화 없음'이 사실은 전혀 다른 두 원인일 수 있습니다. [개선/추가] 거기서 얻은 것을 고정 점검 절차로 만들었습니다. 기동 시에는 먼저 응답을 확인하고 움직이고, 실패 시에는 타임아웃을 의심하기 전에 각 단계 실제 소요 시간을 재고, 상태는 세 가지로 나눠 판단하고, 이상한 숫자는 누가 만들었는지 먼저 적습니다. 앞으로는 '대충 된 것 같다' 대신 이 절차를 따릅니다. [배운 것] 네 가지 요점을 이번 공지에 담았습니다: 고정된 초는 증거가 아니다 / '매번 실패'는 특정 단계가 구조적으로 초과하는 경우가 많으니 한 겹 더 파라 / 장부는 진실이 아니다 / 같은 '변화 없음'은 먼저 종류를 가른다.",
+      "summary": "[수정] '고쳐진 것처럼 보이지만 실제로는 아닌' 세 가지를 뿌리까지 파고들었습니다. 데스크톱 클라이언트 자동 업데이트가 옛 버전에 멈춰 있던 문제(배포 패키지 안의 버전 번호가 바뀌지 않아 클라이언트가 자기가 최신이라고 믿고 매번 업데이트를 건너뜀), 날짜를 입력해 저장해도 반영되지 않던 문제(원인이 두 가지라 각각 수정), 재무 패널에서 한 업체 지출만 항상 0으로 나오던 문제(집계 함수에 월 인자가 빠져 엉뚱한 월 라벨로 조회). [개선/추가] 화면의 혼란스러운 버튼을 뒤쪽 로직까지 통째로 삭제했습니다(숨긴 것이 아님). 배포 절차에는 '빌드 산출물의 내부 버전 문자열 확인' 단계를 추가. [배운 것] 세 가지 요점을 이번 공지에 담았습니다: 기준값을 정하기 전에 전혀 다른 두 상황을 같은 자로 재고 있지 않은지 먼저 의심하라 / '문법이 맞다'와 '쓸 수 있다'는 전혀 다르다 / '설치했다'는 '돌고 있다'가 아니다.",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "화면 정리: 쓰이지 않는 진입 버튼을 뒤쪽 로직 블록까지 함께 삭제하고, 정말 필요한 세 가지 동작만 남겨 더 이상 오해를 부르지 않게 했습니다.",
+          "폼 날짜 되쓰기를 '저장 출구에서 일괄 덮어쓰기'로 변경: 비활성화된 날짜 컨트롤은 컴포넌트 값을 믿지 않고, 검증 결과를 제출 직전에 필드에 덮어써서 변경이 실제로 남습니다.",
+          "배포 절차에 '산출물 자체 점검' 단계 추가: 빌드 후 내부 버전 문자열을 확인해 공개 버전과 일치할 때만 배포를 허용합니다."
+        ],
+        "bugs": [
+          "자동 업데이트가 옛 버전에서 벗어나지 못함: 배포 패키지 안의 버전 번호가 바뀌지 않아 클라이언트가 자신을 최신으로 판단하고 매번 업데이트를 건너뛰며 하루 대기 상태로 들어갔습니다. 수정 후 옛 클라이언트로 실제 시험해 최신까지 한 번에 올라가는 것을 확인(버전 인식→다운로드→검증→교체→재시작→재시도 없음).",
+          "폼의 날짜가 저장되지 않음: 원인이 두 가지였습니다. 하나는 비활성화된 필드의 컴포넌트 값이 제출 내용에 아예 포함되지 않는 것, 다른 하나는 저장 성공 후 목록이 데이터를 다시 가져오지 않아 옛 행이 계속 보이는 것. 둘 다 수정하고 저장 출구의 덮어쓰기를 안전장치로 넣었습니다.",
+          "재무 패널에서 한 업체 지출이 항상 0: 집계 함수에 월 인자가 전달되지 않아 엉뚱한 월 라벨로 캐시를 조회해 영원히 일치하지 않았습니다. 수정 후 실제 지출과 일치합니다.",
+          "임시 디렉터리 정리 중 런타임 socket 파일을 잘못 삭제해 페이지가 502, 데이터베이스 연결 불가: socket을 다시 만들고 서비스를 복구했으며, 정리 규칙은 socket 파일을 무조건 건너뛰도록 변경했습니다."
+        ],
         "lessons": [
-          "'충분히 기다렸다'를 '이미 떴다'로 보지 말 것: 어떤 기동 동작이든 첫 단계는 응답 확인이다. 응답이 없으면 (상한을 두고) 기다리고, 응답한 뒤에 다음으로 넘어간다. 고정된 초는 증거가 아니다. (내부 경험 라이브러리에서)",
-          "'매번 반드시 실패하는' 작업은 타임아웃을 의심하기 전에 각 단계의 실제 소요 시간을 재본다: 기다림이 부족해서가 아니라 특정 단계가 구조적으로 초과하는 경우가 많다. 한 겹 더 파고들면 첫 번째 설명은 대개 표면일 뿐이다. (내부 경험 라이브러리에서)",
-          "장부는 진실이 아니다: 작업이 실제로 도는지는 '실제 가동 중 / 중지됨 / 종료됨' 세 상태로 나눠 판단한다. 중지된 것은 종료로 치고, 명단의 이름을 근무 중인 것처럼 쓰면 안 된다. (내부 경험 라이브러리에서)",
-          "이상한 숫자를 보고하기 전에 '이 숫자는 누가 만든 것인지' 한 줄 먼저 쓴다: 스스로 재시작해 끊긴 작업을 시스템 장애로 적으면 보는 사람만 괜히 놀란다. (내부 경험 라이브러리에서)",
-          "같은 '변화 없음'도 두 가지 병이다: 값이 애초에 저장되지 않았거나(비활성·읽기 전용 항목은 폼 전송에 포함되지 않는다), 목록이 데이터를 다시 가져오지 않았거나. 먼저 판별하지 않으면 세 번 고쳐도 모두 엉뚱한 방향이다."
+          "어떤 기준값(타임아웃·재시도·생존 판정)을 정하기 전에 자문하라: 전혀 다른 두 상황을 같은 자로 재고 있지 않은가. 대상을 의심하기 전에 자를 먼저 의심하라. (내부 경험 라이브러리에서)",
+          "'문법이 맞다'와 '쓸 수 있다'는 전혀 다르다: 스크립트나 설정을 넘기기 전에 스스로 시나리오를 만들어 한 번 실제로 돌려라. 돌아간 뒤에야 납품이다. 문법 검사만, 해시 비교만으로는 부족하다. (내부 경험 라이브러리에서)",
+          "'설치했다'는 '돌고 있다'가 아니다: 정기 실행이 걸린 변경은 검증에서 두 가지를 확인해야 한다. 실행 줄이 실제로 있는가, 그리고 실제로 결과를 내는가. 파일이 있다는 이유만으로 '설정 완료'라고 보고하는 것은 거짓 장부다. (내부 경험 라이브러리에서)",
+          "배포 전 반드시 산출물의 내부 버전을 확인하라: 프로그램 안에 버전 문자열이 몇 번 나오는지 세라. 파일 이름과 빌드 스크립트 출력은 거짓말을 한다. '이름은 새것, 속은 옛것'인 가짜 버전은 자동 업데이트를 영원히 막는다.",
+          "임시 디렉터리를 정리할 때 이름에 socket이 들어간 런타임 파일은 반드시 건너뛰어라: 삭제해도 프로세스는 살아서 옛 핸들을 쥐고 있고, 새 연결만 입구를 찾지 못한다. '서비스는 죽지 않았는데 모두 연결이 안 된다'는 알아채기 어려운 증상이 된다."
         ]
       }
     },
     "es": {
-      "summary": "[Corregido] Hoy no hubo cambios de funciones para el usuario; el foco fue llevar hasta la raíz varias trampas de \"parece arreglado pero no lo está\": esperar un número fijo de segundos no significa que el servicio esté levantado; un nombre en una lista no significa que la tarea corra de verdad; y un mismo \"no cambió\" puede ser dos fallos totalmente distintos. [Mejorado] De ahí salió un conjunto fijo de pasos de comprobación: probar vida antes de actuar en el arranque, medir la duración real de cada paso antes de culpar al tiempo de espera, juzgar el estado por tres valores y decir quién causó un número alarmante antes de reportarlo. El mismo tipo de trabajo ya sigue estos pasos en vez de \"parece que ya está\". [Aprendido] Cuatro puntos quedaron en este aviso: un número fijo de segundos nunca es prueba; \"falla todas las veces\" suele significar que un paso nace por encima del límite, así que cava una capa más; un registro no es la verdad; y decide qué clase de \"no cambió\" es antes de tocar nada.",
+      "summary": "[Corregido] Tres asuntos de \"parece arreglado pero no lo está\" se llevaron hasta la raíz: la actualización automática del cliente de escritorio se quedaba en versiones viejas (el número de versión dentro del paquete publicado nunca cambiaba, así que el cliente creía estar al día y se saltaba la actualización siempre); las fechas de los formularios parecían guardarse y no se guardaban (dos causas distintas, corregidas por separado); y el gasto de un proveedor en el panel financiero mostraba siempre 0 (la función de estadísticas no recibía el mes y consultaba la etiqueta equivocada). [Mejorado] Se eliminó un botón confuso de la interfaz junto con toda la lógica que tenía detrás, no solo se ocultó, y el flujo de publicación ganó un paso: el programa compilado debe verificar su cadena de versión interna y coincidir con la pública antes de publicarse. [Aprendido] Tres puntos quedan en este aviso: antes de fijar cualquier umbral, pregúntate si estás midiendo dos situaciones distintas con la misma regla; \"la sintaxis es correcta\" está muy lejos de \"funciona\"; y \"instalado\" no es \"funcionando\".",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "Limpieza de interfaz: se borró un botón de entrada que no se usaba junto con todo el bloque de lógica que tenía detrás, dejando solo las tres operaciones realmente necesarias, para que la interfaz no confunda.",
+          "La escritura de fechas en formularios pasa a una sobrescritura única en la salida de guardado: en los controles de fecha deshabilitados ya no se confía en el valor del componente; el resultado validado se escribe directamente en el campo enviado, así el cambio persiste.",
+          "El flujo de publicación incorpora una autocomprobación del artefacto: tras compilar, se verifica la cadena de versión interna y solo se publica si coincide con la versión pública."
+        ],
+        "bugs": [
+          "La actualización automática nunca salía de las versiones viejas: el número de versión dentro del paquete publicado no se cambió, así que el cliente concluía que ya estaba al día, se saltaba la actualización cada vez y entraba en un día de espera. Tras el arreglo se probó de verdad con un cliente viejo y subió hasta la última versión (reconocer versión, descargar, verificar, sustituir, reiniciar, no reintentar).",
+          "Las fechas de los formularios parecían guardarse y no se guardaban: se encontraron dos causas distintas; una es que el valor de un campo deshabilitado simplemente no se envía con el formulario, la otra es que tras guardar la lista no volvía a pedir los datos y seguía mostrando la fila antigua. Ambas corregidas, con la sobrescritura en la salida de guardado como red de seguridad.",
+          "En el panel financiero el gasto de un proveedor mostraba siempre 0: la función de estadísticas no recibía el mes y consultaba la caché con una etiqueta equivocada, sin coincidir nunca. Tras el arreglo la cifra coincide con el gasto real.",
+          "Al limpiar un directorio temporal se borraron por error archivos socket de ejecución, lo que provocó errores 502 y la base de datos inaccesible: se recrearon los sockets y se restauraron los servicios, y la regla de limpieza ahora omite siempre los archivos socket."
+        ],
         "lessons": [
-          "Nunca tomes \"esperé lo suficiente\" como \"ya está levantado\": cada paso de arranque empieza con una prueba de vida. Si no responde, espera (con un tope); solo entonces continúa. Un número fijo de segundos nunca es prueba. (De la biblioteca interna de lecciones)",
-          "Con algo que \"falla todas las veces\", mide cuánto tarda de verdad cada paso antes de culpar al tiempo de espera: a menudo un paso nace por encima del límite, así que esperar más nunca ayudará. Cava una capa más: la primera explicación suele ser solo un síntoma. (De la biblioteca interna de lecciones)",
-          "Un registro no es la verdad: para saber si una tarea corre de verdad, separa tres estados: corriendo, desactivada, terminada. Una tarea desactivada cuenta como terminada; no dejes que un nombre en una lista finja estar en servicio. (De la biblioteca interna de lecciones)",
-          "Antes de reportar un número alarmante, di quién lo causó: trabajo interrumpido por nuestro propio reinicio anotado como fallo del sistema solo hace que quien lee se preocupe sin motivo. (De la biblioteca interna de lecciones)",
-          "El mismo \"no cambió\" puede ser dos enfermedades distintas: o el valor nunca se guardó (los campos deshabilitados y de solo lectura no se envían con el formulario), o la lista nunca volvió a pedir los datos. Decide cuál primero, o arreglarás tres rondas en la dirección equivocada."
+          "Antes de fijar cualquier umbral (tiempo de espera, reintentos, prueba de vida), pregúntate: ¿estoy midiendo dos situaciones completamente distintas con la misma regla? Duda de la regla antes que del objetivo. (De la biblioteca interna de lecciones)",
+          "\"La sintaxis es correcta\" está muy lejos de \"funciona\": antes de entregar un script o una configuración, créate un escenario y ejecútalo de verdad una vez; solo entonces está entregado. Comprobar solo la sintaxis o solo el hash no cuenta. (De la biblioteca interna de lecciones)",
+          "\"Instalado\" no es \"funcionando\": en cualquier cambio con tareas programadas, la verificación debe confirmar dos cosas: que la línea de programación existe de verdad y que realmente produce un recibo. Informar \"ya está listo\" solo porque el archivo existe es una cuenta falsa. (De la biblioteca interna de lecciones)",
+          "Antes de publicar, verifica la versión interna del artefacto: cuenta cuántas veces aparece la cadena de versión dentro del programa. Los nombres de archivo y la salida del script de compilación mienten: una versión falsa con \"nombre nuevo y interior viejo\" deja la actualización automática atascada para siempre.",
+          "Al limpiar un directorio temporal, omite siempre los archivos de ejecución cuyo nombre contenga socket: tras borrarlos el proceso sigue vivo y conserva el descriptor antiguo, pero las conexiones nuevas no encuentran la entrada. Se manifiesta como \"el servicio no está caído pero todo está inaccesible\" y cuesta mucho verlo."
         ]
       }
     },
     "fr": {
-      "summary": "[Corrigé] Pas de changement de fonctionnalité visible aujourd'hui ; le travail a consisté à creuser jusqu'à la racine plusieurs pièges du type « ça a l'air réparé mais non » : attendre un nombre fixe de secondes ne prouve pas qu'un service est lancé ; un nom sur une liste ne prouve pas qu'une tâche tourne vraiment ; et un même « rien n'a changé » peut cacher deux pannes totalement différentes. [Amélioré] Ces constats sont devenus une série fixe d'étapes de vérification : tester la vie avant d'agir au démarrage, mesurer la durée réelle de chaque étape avant d'accuser le délai, juger l'état selon trois valeurs, et dire qui a causé un chiffre inquiétant avant de le rapporter. Le même type de travail suit désormais ces étapes au lieu de « ça devrait aller ». [Appris] Quatre points sont repris dans cette annonce : un nombre fixe de secondes n'est jamais une preuve ; « échoue à chaque fois » signifie souvent qu'une étape dépasse par nature la limite, alors creusez un niveau de plus ; un registre n'est pas la vérité ; et tranchez d'abord de quel type de « rien n'a changé » il s'agit.",
+      "summary": "[Corrigé] Trois cas de « ça a l'air réparé mais non » ont été creusés jusqu'à la racine : la mise à jour automatique du client de bureau restait bloquée sur d'anciennes versions (le numéro de version à l'intérieur du paquet publié n'était jamais modifié, donc le client se croyait à jour et sautait chaque mise à jour) ; les dates des formulaires semblaient enregistrées sans l'être (deux causes totalement différentes, corrigées séparément) ; et la dépense d'un fournisseur restait à 0 dans le panneau financier (la fonction de statistiques ne recevait pas le mois et interrogeait le mauvais libellé). [Amélioré] Un bouton trompeur de l'interface a été supprimé avec toute la logique derrière, pas seulement masqué, et le processus de publication gagne une étape : le programme compilé doit vérifier sa chaîne de version interne et correspondre à la version publique avant publication. [Appris] Trois points figurent dans cette annonce : avant de fixer un seuil, demandez-vous si vous mesurez deux situations différentes avec la même règle ; « la syntaxe est correcte » est très loin de « ça fonctionne » ; et « installé » n'est pas « en marche ».",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "Nettoyage de l'interface : un bouton d'entrée inutilisé a été supprimé avec tout le bloc de logique derrière, ne laissant que les trois opérations réellement nécessaires, pour ne plus induire en erreur.",
+          "L'écriture des dates de formulaire passe par une surcharge unique à la sortie d'enregistrement : pour les contrôles de date désactivés, la valeur du composant n'est plus prise en compte ; le résultat validé est écrit directement dans le champ envoyé, donc la modification persiste.",
+          "Le processus de publication ajoute une auto-vérification du livrable : après compilation, la chaîne de version interne est contrôlée et doit correspondre à la version publique avant publication."
+        ],
+        "bugs": [
+          "La mise à jour automatique ne sortait jamais des anciennes versions : le numéro de version à l'intérieur du paquet publié n'avait pas été modifié, le client se croyait donc à jour, sautait la mise à jour à chaque fois et entrait en attente pour une journée. Après correction, un ancien client a été testé pour de vrai et est monté jusqu'à la dernière version (reconnaître la version, télécharger, vérifier, remplacer, redémarrer, ne plus réessayer).",
+          "Les dates des formulaires semblaient enregistrées sans l'être : deux causes distinctes ont été trouvées ; l'une est que la valeur d'un champ désactivé n'est tout simplement pas envoyée avec le formulaire, l'autre est qu'après un enregistrement réussi la liste ne rechargeait pas ses données et affichait encore l'ancienne ligne. Les deux sont corrigées, avec la surcharge à la sortie d'enregistrement comme filet de sécurité.",
+          "Dans le panneau financier, la dépense d'un fournisseur restait à 0 : la fonction de statistiques ne recevait pas le mois et interrogeait le cache sous un mauvais libellé, sans jamais correspondre. Après correction, le chiffre concorde avec la dépense réelle.",
+          "Le nettoyage d'un répertoire temporaire a supprimé par erreur des fichiers socket d'exécution, provoquant des erreurs 502 et une base de données injoignable : les sockets ont été recréés et les services restaurés, et la règle de nettoyage ignore désormais toujours les fichiers socket."
+        ],
         "lessons": [
-          "Ne prenez jamais « j'ai attendu assez » pour « c'est lancé » : chaque étape de démarrage commence par un test de vie. Sans réponse, on attend (avec une limite) ; ensuite seulement on continue. Un nombre fixe de secondes n'est jamais une preuve. (De la bibliothèque interne de leçons)",
-          "Pour ce qui « échoue à chaque fois », mesurez la durée réelle de chaque étape avant d'accuser le délai : souvent une étape dépasse par nature la limite, donc attendre plus ne servira jamais. Creusez un niveau de plus - la première explication n'est généralement qu'un symptôme. (De la bibliothèque interne de leçons)",
-          "Un registre n'est pas la vérité : pour savoir si une tâche tourne vraiment, distinguez trois états - en cours, désactivée, terminée. Une tâche désactivée compte comme terminée ; ne laissez pas un nom sur une liste faire semblant d'être en service. (De la bibliothèque interne de leçons)",
-          "Avant d'annoncer un chiffre inquiétant, dites qui l'a causé : un travail interrompu par notre propre redémarrage noté comme panne système ne fait qu'inquiéter le lecteur pour rien. (De la bibliothèque interne de leçons)",
-          "Le même « rien n'a changé » peut être deux maladies : soit la valeur n'a jamais été enregistrée (les champs désactivés ou en lecture seule ne partent pas avec le formulaire), soit la liste n'a pas rechargé ses données. Tranchez d'abord, sinon vous corrigerez trois fois dans la mauvaise direction."
+          "Avant de fixer un seuil (délai, nouvelle tentative, test de vie), demandez-vous : suis-je en train de mesurer deux situations totalement différentes avec la même règle ? Doutez de la règle avant de douter de la cible. (De la bibliothèque interne de leçons)",
+          "« La syntaxe est correcte » est très loin de « ça fonctionne » : avant de livrer un script ou une configuration, créez-vous un scénario et exécutez-le vraiment une fois ; alors seulement c'est livré. Vérifier la syntaxe seule ou un hash seul ne compte pas. (De la bibliothèque interne de leçons)",
+          "« Installé » n'est pas « en marche » : pour tout changement impliquant une tâche planifiée, la vérification doit confirmer deux choses - la ligne de planification existe vraiment, et elle produit vraiment un reçu. Annoncer « c'est en place » simplement parce qu'un fichier existe est un faux bilan. (De la bibliothèque interne de leçons)",
+          "Avant toute publication, vérifiez la version interne du livrable : comptez combien de fois la chaîne de version apparaît dans le programme. Les noms de fichiers et la sortie du script de compilation mentent : une fausse version « nom neuf, contenu ancien » bloque définitivement la mise à jour automatique.",
+          "Lors du nettoyage d'un répertoire temporaire, ignorez toujours les fichiers d'exécution dont le nom contient socket : après suppression le processus est toujours vivant et garde l'ancien descripteur, alors que les nouvelles connexions ne trouvent plus l'entrée. Cela se manifeste par « le service n'est pas tombé mais tout est injoignable », très difficile à repérer."
         ]
       }
     },
     "de": {
-      "summary": "[Behoben] Heute keine sichtbaren Funktionsänderungen; der Schwerpunkt lag darauf, mehrere Fallen der Art „sieht behoben aus, ist es aber nicht“ bis zur Wurzel zu verfolgen: eine feste Zahl Sekunden zu warten heißt nicht, dass ein Dienst läuft; ein Name auf einer Liste heißt nicht, dass eine Aufgabe wirklich läuft; und ein und dasselbe „hat sich nicht geändert“ kann zwei völlig verschiedene Fehler sein. [Verbessert] Daraus wurde eine feste Reihe von Prüfschritten: beim Start erst auf Leben prüfen, dann handeln; bei Fehlern erst die echte Dauer jedes Schritts messen, bevor man die Zeitüberschreitung beschuldigt; Status über drei Werte beurteilen; und vor dem Melden einer beunruhigenden Zahl sagen, wer sie verursacht hat. Gleichartige Arbeit folgt nun diesen Schritten statt „passt schon“. [Gelernt] Vier Punkte stehen in dieser Meldung: eine feste Sekundenzahl ist nie ein Beweis; „schlägt jedes Mal fehl“ heißt oft, dass ein Schritt von Natur aus über dem Limit liegt, also eine Ebene tiefer graben; ein Register ist nicht die Wahrheit; und erst klären, welche Art von „hat sich nicht geändert“ vorliegt.",
+      "summary": "[Behoben] Drei Fälle von „sieht behoben aus, ist es aber nicht“ wurden bis zur Wurzel verfolgt: die automatische Aktualisierung des Desktop-Clients blieb auf alten Versionen hängen (die Versionsnummer im veröffentlichten Paket wurde nie geändert, der Client hielt sich für aktuell und übersprang jedes Update); Datumsfelder in Formularen wirkten gespeichert, waren es aber nicht (zwei völlig verschiedene Ursachen, getrennt behoben); und die Ausgaben eines Anbieters im Finanzpanel zeigten immer 0 (die Statistikfunktion bekam den Monat nicht und suchte unter dem falschen Monatslabel). [Verbessert] Eine irreführende Schaltfläche wurde samt der dahinterliegenden Logik entfernt, nicht nur versteckt, und der Release-Ablauf hat einen Schritt mehr: ein frisch kompiliertes Programm muss zuerst seine interne Versionszeichenkette prüfen, die zur öffentlichen Version passen muss. [Gelernt] Drei Punkte stehen in dieser Meldung: bevor man einen Schwellenwert setzt, fragen, ob man zwei völlig verschiedene Situationen mit demselben Maßstab misst; „Syntax ist korrekt“ ist weit von „es funktioniert“ entfernt; und „installiert“ ist nicht „läuft“.",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "Oberfläche aufgeräumt: eine ungenutzte Einstiegsschaltfläche wurde samt des ganzen Logikblocks dahinter gelöscht, übrig bleiben nur die drei wirklich nötigen Aktionen, damit die Oberfläche nicht mehr in die Irre führt.",
+          "Das Zurückschreiben von Datumsfeldern läuft nun über eine einzige Überschreibung am Speicher-Ausgang: bei deaktivierten Datumsfeldern wird dem Komponentenwert nicht mehr vertraut, das geprüfte Ergebnis wird direkt in das gesendete Feld geschrieben, sodass die Änderung bleibt.",
+          "Der Release-Ablauf enthält eine Selbstprüfung des Artefakts: nach dem Kompilieren wird die interne Versionszeichenkette geprüft und muss zur öffentlichen Version passen, bevor veröffentlicht werden darf."
+        ],
+        "bugs": [
+          "Die automatische Aktualisierung kam nie aus alten Versionen heraus: die Versionsnummer im veröffentlichten Paket war nie geändert worden, der Client schloss daraus, bereits aktuell zu sein, übersprang jedes Update und ging in eine Tages-Wartezeit. Nach der Korrektur wurde mit einem alten Client echt getestet: er stieg bis zur neuesten Version auf (Version erkennen, laden, prüfen, ersetzen, neu starten, nicht erneut versuchen).",
+          "Datumsangaben in Formularen wirkten gespeichert, waren es aber nicht: zwei verschiedene Ursachen wurden gefunden - bei einem deaktivierten Feld wird der Komponentenwert schlicht nicht mitgesendet, und nach erfolgreichem Speichern holt die Liste ihre Daten nicht neu und zeigt weiter die alte Zeile. Beides ist behoben, mit der Überschreibung am Speicher-Ausgang als Sicherheitsnetz.",
+          "Im Finanzpanel zeigten die Ausgaben eines Anbieters immer 0: die Statistikfunktion bekam den Monat nicht übergeben und suchte den Cache unter einem falschen Monatslabel, sodass nie ein Treffer entstand. Nach der Korrektur stimmt die Zahl mit den tatsächlichen Ausgaben überein.",
+          "Beim Aufräumen eines temporären Verzeichnisses wurden Laufzeit-Socketdateien versehentlich gelöscht, was zu 502-Fehlern und einer nicht erreichbaren Datenbank führte: die Sockets wurden neu erzeugt und die Dienste wiederhergestellt, und die Aufräumregel überspringt nun grundsätzlich Socketdateien."
+        ],
         "lessons": [
-          "„Lange genug gewartet“ ist nie „läuft schon“: Jeder Startschritt beginnt mit einer Lebendprüfung. Antwortet nichts, wird (mit Obergrenze) gewartet; erst dann geht es weiter. Eine feste Sekundenzahl ist niemals ein Beweis. (Aus der internen Lernbibliothek)",
-          "Bei etwas, das „jedes Mal fehlschlägt“, erst die echte Dauer jedes Schritts messen, bevor man die Zeitüberschreitung beschuldigt: oft ist ein Schritt von Natur aus über dem Limit, längeres Warten hilft dann nie. Eine Ebene tiefer graben - die erste Erklärung ist meist nur ein Symptom. (Aus der internen Lernbibliothek)",
-          "Ein Register ist nicht die Wahrheit: Ob eine Aufgabe wirklich läuft, entscheidet sich in drei Zuständen - läuft, deaktiviert, abgeschlossen. Deaktiviert zählt als abgeschlossen; ein Name auf einer Liste darf nicht als Dienst tun. (Aus der internen Lernbibliothek)",
-          "Vor dem Melden einer beunruhigenden Zahl erst sagen, wer sie verursacht hat: durch unseren eigenen Neustart unterbrochene Arbeit als Systemfehler zu notieren, beunruhigt den Leser nur unnötig. (Aus der internen Lernbibliothek)",
-          "Dasselbe „hat sich nicht geändert“ kann zwei Krankheiten sein: entweder wurde der Wert nie gespeichert (deaktivierte und schreibgeschützte Felder gehen nicht mit dem Formular mit), oder die Liste hat die Daten nicht neu geholt. Erst entscheiden, sonst repariert man drei Runden in die falsche Richtung."
+          "Bevor man einen Schwellenwert festlegt (Zeitlimit, Wiederholung, Lebendprüfung), ehrlich fragen: Messe ich zwei völlig verschiedene Situationen mit demselben Maßstab? Erst den Maßstab anzweifeln, dann das Ziel. (Aus der internen Lernbibliothek)",
+          "„Syntax ist korrekt“ ist weit von „es funktioniert“ entfernt: vor der Übergabe eines Skripts oder einer Konfiguration selbst ein Szenario bauen und einmal wirklich laufen lassen; erst dann ist es übergeben. Nur Syntax prüfen oder nur einen Hash vergleichen zählt nicht. (Aus der internen Lernbibliothek)",
+          "„Installiert“ ist nicht „läuft“: bei jeder Änderung mit geplanten Aufgaben muss die Prüfung zwei Dinge bestätigen - die Zeitplanzeile existiert wirklich, und sie liefert wirklich einen Beleg. Nur weil eine Datei existiert „alles eingerichtet“ zu melden, ist ein falscher Abschluss. (Aus der internen Lernbibliothek)",
+          "Vor jeder Veröffentlichung die interne Version des Artefakts prüfen: zählen, wie oft die Versionszeichenkette im Programm vorkommt. Dateinamen und Build-Ausgaben lügen - eine Scheinversion mit „neuem Namen, altem Inhalt“ blockiert die automatische Aktualisierung dauerhaft.",
+          "Beim Aufräumen eines temporären Verzeichnisses Laufzeitdateien mit socket im Namen immer überspringen: nach dem Löschen lebt der Prozess weiter und hält das alte Handle, während neue Verbindungen den Einstiegspunkt nicht mehr finden. Es zeigt sich als „der Dienst ist nicht abgestürzt, aber alles ist unerreichbar“ und ist sehr schwer zu erkennen."
         ]
       }
     },
     "ru": {
-      "summary": "[Исправлено] Сегодня заметных изменений функций нет; главным было докопаться до корня нескольких ловушек «выглядит исправленным, а на деле нет»: подождать фиксированное число секунд не значит, что сервис поднялся; имя в списке не значит, что задача действительно работает; и одно и то же «ничего не изменилось» может быть двумя совершенно разными сбоями. [Улучшено] Из этого сложился фиксированный набор шагов проверки: при запуске сначала проверить живость, потом действовать; при сбоях сначала измерить реальное время каждого шага, а не винить таймаут; судить о состоянии по трём значениям; и перед сообщением тревожной цифры сказать, кто её создал. Похожая работа теперь идёт по этим шагам, а не по принципу «кажется, уже нормально». [Усвоено] Четыре пункта вошли в это сообщение: фиксированное число секунд — не доказательство; «падает каждый раз» часто значит, что один шаг изначально дольше лимита, копайте на слой глубже; реестр — не истина; и сначала определите, какой именно это случай «ничего не изменилось».",
+      "summary": "[Исправлено] Три случая «выглядит исправленным, а на деле нет» доведены до корня: автообновление настольного клиента застревало на старых версиях (номер версии внутри опубликованного пакета не менялся, клиент считал себя актуальным и каждый раз пропускал обновление); даты в формах выглядели сохранёнными, но не сохранялись (две совершенно разные причины, исправлены отдельно); а расход одного поставщика на финансовой панели всегда показывал 0 (функция статистики не получала месяц и искала по неверной метке). [Улучшено] Вводящая в заблуждение кнопка удалена вместе со всей логикой за ней, а не просто скрыта, а в процесс выпуска добавлен шаг: собранная программа должна проверить свою внутреннюю строку версии и совпасть с публичной. [Усвоено] Три пункта вошли в это сообщение: прежде чем задавать порог, спросите, не измеряете ли вы две разные ситуации одной линейкой; «синтаксис верный» далеко от «работает»; и «установлено» — не «работает».",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "Чистка интерфейса: неиспользуемая кнопка входа удалена вместе со всем блоком логики за ней, остались только три действительно нужные операции, интерфейс больше не вводит в заблуждение.",
+          "Запись дат в формах переведена на единую перезапись на выходе сохранения: для отключённых элементов даты значение компонента больше не используется, проверенный результат пишется прямо в отправляемое поле, поэтому изменение сохраняется.",
+          "В процесс выпуска добавлена самопроверка артефакта: после сборки проверяется внутренняя строка версии и должна совпадать с публичной версией, только тогда разрешён выпуск."
+        ],
+        "bugs": [
+          "Автообновление никогда не выходило из старых версий: номер версии внутри опубликованного пакета не менялся, клиент делал вывод, что уже актуален, каждый раз пропускал обновление и уходил в суточное ожидание. После исправления старый клиент проверен по-настоящему и поднялся до последней версии (распознать версию, скачать, проверить, заменить, перезапустить, не повторять).",
+          "Даты в формах выглядели сохранёнными, но не были: найдены две разные причины — значение отключённого поля просто не отправляется вместе с формой, а после успешного сохранения список не перезапрашивает данные и продолжает показывать старую строку. Исправлено и то и другое, плюс перезапись на выходе сохранения как страховка.",
+          "На финансовой панели расход одного поставщика всегда показывал 0: функция статистики не получала месяц и искала в кэше по неверной метке, совпадения не было никогда. После исправления цифра совпадает с фактическим расходом.",
+          "При очистке временного каталога случайно удалились рабочие socket-файлы: страницы отдавали 502, база данных стала недоступна. Сокеты пересозданы, сервисы восстановлены, а правило очистки теперь всегда пропускает socket-файлы."
+        ],
         "lessons": [
-          "Никогда не считайте «подождал достаточно» признаком «уже поднялось»: любой шаг запуска начинается с проверки живости. Нет ответа — ждём (с ограничением), и только потом идём дальше. Фиксированное число секунд — не доказательство. (Из внутренней библиотеки уроков)",
-          "Для того, что «падает каждый раз», сначала измерьте реальное время каждого шага, а потом вините таймаут: часто один шаг изначально дольше лимита, и ждать дольше бесполезно. Копайте на слой глубже — первое объяснение обычно лишь симптом. (Из внутренней библиотеки уроков)",
-          "Реестр — не истина: чтобы понять, работает ли задача, разделяйте три состояния — работает, отключена, завершена. Отключённая считается завершённой; имя в списке не должно выдавать себя за дежурного. (Из внутренней библиотеки уроков)",
-          "Прежде чем сообщать тревожную цифру, скажите, кто её создал: работа, прерванная нашим же перезапуском и записанная как системный сбой, лишь зря пугает читателя. (Из внутренней библиотеки уроков)",
-          "Одно и то же «ничего не изменилось» может быть двумя болезнями: либо значение вообще не сохранилось (отключённые и доступные только для чтения поля не уходят вместе с формой), либо список не перезапросил данные. Сначала определите, иначе три круга починки уйдут не туда."
+          "Прежде чем задавать любой порог (таймаут, повтор, проверка живости), спросите себя: не измеряю ли я две совершенно разные ситуации одной линейкой? Сначала сомневайтесь в линейке, потом в объекте. (Из внутренней библиотеки уроков)",
+          "«Синтаксис верный» далеко от «работает»: перед сдачей скрипта или конфигурации создайте себе сценарий и один раз действительно прогоните его; только тогда это сдача. Проверить только синтаксис или только хеш — не считается. (Из внутренней библиотеки уроков)",
+          "«Установлено» — не «работает»: при любом изменении с задачами по расписанию проверка должна подтвердить две вещи — строка расписания действительно есть, и она действительно даёт отчёт. Сообщать «всё настроено» только потому, что файл существует, — ложный отчёт. (Из внутренней библиотеки уроков)",
+          "Перед выпуском обязательно проверяйте внутреннюю версию артефакта: посчитайте, сколько раз строка версии встречается в программе. Имена файлов и вывод сборочного скрипта лгут — поддельная версия «имя новое, внутри старое» навсегда блокирует автообновление.",
+          "При очистке временного каталога всегда пропускайте рабочие файлы, в имени которых есть socket: после удаления процесс жив и держит старый дескриптор, а новые подключения не находят точку входа. Это выглядит как «сервис не упал, но всё недоступно» и очень трудно замечается."
         ]
       }
     },
     "pt": {
-      "summary": "[Corrigido] Hoje n?o houve mudan?as visíveis de recursos; o foco foi levar até a raiz várias armadilhas do tipo \"parece corrigido mas n?o está\": esperar um número fixo de segundos n?o significa que o servi?o subiu; um nome numa lista n?o significa que a tarefa roda de verdade; e o mesmo \"n?o mudou\" pode ser dois defeitos completamente diferentes. [Melhorado] Daí saiu um conjunto fixo de passos de verifica??o: testar vida antes de agir na inicializa??o, medir a dura??o real de cada passo antes de culpar o tempo limite, julgar o estado por três valores e dizer quem causou um número assustador antes de relatá-lo. Trabalho do mesmo tipo agora segue esses passos em vez de \"parece que já está\". [Aprendido] Quatro pontos ficaram neste aviso: um número fixo de segundos nunca é prova; \"falha todas as vezes\" costuma significar que um passo já nasce acima do limite, ent?o cave uma camada mais fundo; um registro n?o é a verdade; e decida qual tipo de \"n?o mudou\" é antes de mexer em qualquer coisa.",
+      "summary": "[Corrigido] Três casos de \"parece corrigido mas não está\" foram levados até a raiz: a atualização automática do cliente de desktop ficava presa em versões antigas (o número de versão dentro do pacote publicado nunca era alterado, então o cliente acreditava estar atualizado e pulava a atualização sempre); datas em formulários pareciam salvas e não eram (duas causas totalmente diferentes, corrigidas separadamente); e o gasto de um fornecedor no painel financeiro mostrava sempre 0 (a função de estatísticas não recebia o mês e consultava o rótulo errado). [Melhorado] Um botão enganoso da interface foi removido junto com toda a lógica por trás, não apenas escondido, e o fluxo de publicação ganhou uma etapa: o programa compilado precisa verificar sua string de versão interna e coincidir com a versão pública antes de ser publicado. [Aprendido] Três pontos estão neste aviso: antes de definir qualquer limite, pergunte se está medindo duas situações diferentes com a mesma régua; \"a sintaxe está correta\" está muito longe de \"funciona\"; e \"instalado\" não é \"funcionando\".",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "Limpeza da interface: um botão de entrada sem uso foi apagado junto com todo o bloco de lógica por trás, restando apenas as três operações realmente necessárias, para a interface não enganar mais.",
+          "A gravação de datas em formulários passa a usar uma sobrescrita única na saída de salvamento: em controles de data desabilitados o valor do componente não é mais usado; o resultado validado é escrito direto no campo enviado, então a alteração realmente fica.",
+          "O fluxo de publicação ganhou uma autoverificação do artefato: após compilar, a string de versão interna é verificada e precisa coincidir com a versão pública para liberar a publicação."
+        ],
+        "bugs": [
+          "A atualização automática nunca saía das versões antigas: o número de versão dentro do pacote publicado nunca foi alterado, o cliente concluía que já estava atualizado, pulava a atualização todas as vezes e entrava em espera de um dia. Depois da correção, um cliente antigo foi testado de verdade e subiu até a última versão (reconhecer versão, baixar, verificar, substituir, reiniciar, não tentar de novo).",
+          "Datas em formulários pareciam salvas e não eram: duas causas distintas foram encontradas — uma é que o valor de um campo desabilitado simplesmente não vai junto com o formulário, a outra é que após salvar a lista não busca os dados de novo e continua mostrando a linha antiga. As duas foram corrigidas, com a sobrescrita na saída de salvamento como rede de segurança.",
+          "No painel financeiro o gasto de um fornecedor mostrava sempre 0: a função de estatísticas não recebia o mês e consultava o cache com um rótulo errado, sem nunca coincidir. Depois da correção o número bate com o gasto real.",
+          "Ao limpar um diretório temporário, arquivos socket de execução foram apagados por engano, causando erros 502 e banco de dados inacessível: os sockets foram recriados e os servi?os restaurados, e a regra de limpeza agora ignora sempre arquivos socket."
+        ],
         "lessons": [
-          "Nunca trate \"esperei o suficiente\" como \"já subiu\": todo passo de inicializa??o come?a com um teste de vida. Se n?o responde, espere (com limite); só ent?o siga adiante. Um número fixo de segundos nunca é prova. (Da biblioteca interna de li??es)",
-          "Para algo que \"falha todas as vezes\", me?a quanto cada passo realmente leva antes de culpar o tempo limite: muitas vezes um passo já nasce acima do limite, ent?o esperar mais nunca resolve. Cave mais uma camada - a primeira explica??o costuma ser apenas um sintoma. (Da biblioteca interna de li??es)",
-          "Um registro n?o é a verdade: para saber se uma tarefa roda de fato, separe três estados - rodando, desativada, concluída. Desativada conta como concluída; n?o deixe um nome numa lista fingir estar de plant?o. (Da biblioteca interna de li??es)",
-          "Antes de relatar um número assustador, diga quem o causou: trabalho interrompido pelo nosso próprio reinício anotado como falha do sistema só faz quem lê se preocupar à toa. (Da biblioteca interna de li??es)",
-          "O mesmo \"n?o mudou\" pode ser duas doen?as: ou o valor nunca foi salvo (campos desabilitados e somente leitura n?o v?o junto com o formulário), ou a lista n?o buscou os dados de novo. Decida primeiro, ou vai corrigir três rodadas na dire??o errada."
+          "Antes de definir qualquer limite (tempo de espera, nova tentativa, teste de vida), pergunte-se: estou medindo duas situações completamente diferentes com a mesma régua? Duvide da régua antes de duvidar do alvo. (Da biblioteca interna de lições)",
+          "\"A sintaxe está correta\" está muito longe de \"funciona\": antes de entregar um script ou uma configura??o, crie um cenário você mesmo e realmente execute uma vez; só ent?o está entregue. Verificar só a sintaxe ou só o hash n?o conta. (Da biblioteca interna de lições)",
+          "\"Instalado\" n?o é \"funcionando\": em qualquer mudan?a com tarefas agendadas, a verifica??o precisa confirmar duas coisas — a linha de agendamento existe de fato e ela realmente gera um recibo. Relatar \"tudo configurado\" só porque o arquivo existe é um relatório falso. (Da biblioteca interna de lições)",
+          "Antes de qualquer publica??o, verifique a vers?o interna do artefato: conte quantas vezes a string de vers?o aparece dentro do programa. Nomes de arquivo e a saída do script de build mentem — uma vers?o falsa com \"nome novo, conteúdo velho\" trava a atualiza??o automática para sempre.",
+          "Ao limpar um diretório temporário, ignore sempre arquivos de execu??o cujo nome contenha socket: após apagar, o processo continua vivo e segurando o handle antigo, enquanto as novas conex?es n?o acham a entrada. Aparece como \"o servi?o n?o caiu mas tudo está inacessível\" e é muito difícil de perceber."
         ]
       }
     },
     "ar": {
-      "summary": "【ما تم إصلاحه】لا تغييرات مرئية في الميزات اليوم؛ كان التركيز على تتبع عدة فخاخ من نوع «يبدو أنه أُصلح وهو ليس كذلك» حتى الجذر: انتظار عدد ثابت من الثواني لا يعني أن الخدمة قامت؛ ووجود اسم في قائمة لا يعني أن المهمة تعمل فعلاً؛ ونفس «لم يتغير شيء» قد يكون عطلين مختلفين تماماً. 【ما تم تحسينه/إضافته】خرج من ذلك مجموعة ثابتة من خطوات الفحص: فحص الاستجابة قبل التصرف عند التشغيل، وقياس الزمن الحقيقي لكل خطوة قبل لوم مهلة الانتظار، والحكم على الحالة بثلاث حالات، وذكر من تسبب في الرقم المقلق قبل الإبلاغ عنه. الأعمال المشابهة تسير الآن بهذه الخطوات بدل «يبدو أنه صار جيداً». 【ما تعلمته】أربع نقاط مشمولة في هذا الإعلان: العدد الثابت من الثواني ليس دليلاً أبداً؛ و«يفشل في كل مرة» غالباً يعني أن إحدى الخطوات أطول من الحد بطبيعتها فاحفر طبقة أعمق؛ والسجل ليس الحقيقة؛ وحدّد نوع «لم يتغير شيء» قبل أن تلمس أي شيء.",
+      "summary": "【ما تم إصلاحه】ثلاث حالات من نوع «يبدو أنه أُصلح وهو ليس كذلك» تُوبعت حتى الجذر: تحديث العميل التلقائي ظل عالقاً على إصدارات قديمة (رقم الإصدار داخل الحزمة المنشورة لم يُغيَّر، فاعتبر العميل نفسه محدثاً وتخطّى التحديث كل مرة)؛ حقول التاريخ في النماذج بدت محفوظة ولم تكن (سببان مختلفان تماماً، عُولج كل منهما على حدة)؛ ومصروف أحد المزوّدين في لوحة المالية ظهر دائماً صفراً (دالة الإحصاء لم تستلم الشهر فبحثت تحت وسم شهر خاطئ). 【ما تم تحسينه/إضافته】حُذف زر مضلّل من الواجهة مع كل المنطق الذي خلفه، لا مجرد إخفائه، وأُضيفت خطوة إلى مسار الإصدار: البرنامج المترجَم يجب أن يتحقق من سلسلة إصداره الداخلية ويطابق الإصدار العام قبل النشر. 【ما تعلمته】ثلاث نقاط في هذا الإعلان: قبل تحديد أي عتبة اسأل نفسك هل تقيس حالتين مختلفتين تماماً بمسطرة واحدة؛ «الصياغة صحيحة» بعيدة جداً عن «يعمل»؛ و«مُثبَّت» ليس «يعمل».",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "تبسيط الواجهة: حُذف زر دخول غير مستخدم مع كل كتلة المنطق التي خلفه، ولم يتبقَّ سوى العمليات الثلاث المطلوبة فعلاً، فلم تعد الواجهة تضلّل.",
+          "كتابة التاريخ في النماذج صارت تمرّ بتجاوز واحد عند مخرج الحفظ: في حقول التاريخ المعطّلة لم تعد قيمة المكوّن موثوقة، بل تُكتب نتيجة التحقق مباشرة في الحقل المُرسل، فيبقى التغيير محفوظاً.",
+          "أُضيفت إلى مسار الإصدار خطوة فحص ذاتي للمخرَج: بعد الترجمة تُفحص سلسلة الإصدار الداخلية ويجب أن تطابق الإصدار العام قبل السماح بالنشر."
+        ],
+        "bugs": [
+          "التحديث التلقائي لم يخرج أبداً من الإصدارات القديمة: رقم الإصدار داخل الحزمة المنشورة لم يُغيَّر، فاستنتج العميل أنه محدَّث، وتخطّى التحديث في كل مرة ودخل في انتظار يوم كامل. بعد الإصلاح جُرّب عميل قديم فعلياً وارتقى حتى أحدث إصدار (تعرّف الإصدار، تنزيل، تحقق، استبدال، إعادة تشغيل، بلا إعادة محاولة).",
+          "التواريخ في النماذج بدت محفوظة ولم تكن: وُجد سببان مختلفان — الأول أن قيمة الحقل المعطّل لا تُرسل أصلاً مع النموذج، والثاني أن القائمة بعد نجاح الحفظ لا تعيد جلب البيانات فتُظهر السطر القديم. أُصلح الاثنان، مع التجاوز عند مخرج الحفظ كشبكة أمان.",
+          "في لوحة المالية ظهر مصروف أحد المزوّدين دائماً صفراً: دالة الإحصاء لم تستلم الشهر فبحثت في الذاكرة المؤقتة تحت وسم شهر خاطئ فلم تتطابق أبداً. بعد الإصلاح يطابق الرقم المصروف الفعلي.",
+          "عند تنظيف مجلد مؤقت حُذفت بالخطأ ملفات socket وقت التشغيل، فأعادت الصفحات الخطأ 502 وصارت قاعدة البيانات غير قابلة للاتصال: أُعيد إنشاء الـ socket واستُعيدت الخدمات، وصارت قاعدة التنظيف تتجاوز ملفات socket دائماً."
+        ],
         "lessons": [
-          "لا تعتبر «انتظرت بما يكفي» دليلاً على «أنه يعمل»: كل خطوة تشغيل تبدأ بفحص الاستجابة. إن لم تكن هناك استجابة فانتظر (بحد أقصى)، ثم تابع بعدها فقط. العدد الثابت من الثواني ليس دليلاً أبداً. (من مكتبة الدروس الداخلية)",
-          "في أي عمل «يفشل في كل مرة»، قِس الزمن الحقيقي لكل خطوة قبل لوم مهلة الانتظار: غالباً تكون إحدى الخطوات أطول من الحد بطبيعتها، فلا يفيد الانتظار أكثر. احفر طبقة أعمق، فالشرح الأول عادةً مجرد عَرَض. (من مكتبة الدروس الداخلية)",
-          "السجل ليس الحقيقة: لمعرفة هل تعمل المهمة فعلاً، افصل ثلاث حالات: تعمل، معطّلة، منتهية. المعطّلة تُحسب منتهية، ولا تدع اسماً في قائمة يتظاهر بالعمل. (من مكتبة الدروس الداخلية)",
-          "قبل الإبلاغ عن رقم مقلق، اكتب أولاً من تسبب فيه: عمل انقطع بسبب إعادة تشغيلنا وسُجّل كعطل في النظام لا يفعل سوى إقلاق القارئ بلا سبب. (من مكتبة الدروس الداخلية)",
-          "نفس «لم يتغير شيء» قد يكون مرضين: إما أن القيمة لم تُحفظ أصلاً (الحقول المعطّلة والقراءة فقط لا تُرسل مع النموذج)، أو أن القائمة لم تُعد جلب البيانات. حدّد أيّهما أولاً، وإلا ستصلح ثلاث مرات في الاتجاه الخطأ."
+          "قبل تحديد أي عتبة (مهلة، إعادة محاولة، فحص حياة) اسأل نفسك: هل أقيس حالتين مختلفتين تماماً بمسطرة واحدة؟ شكّ في المسطرة قبل أن تشكّ في الهدف. (من مكتبة الدروس الداخلية)",
+          "«الصياغة صحيحة» بعيدة جداً عن «يعمل»: قبل تسليم أي سكربت أو إعداد، اصنع لنفسك سيناريو وشغّله فعلاً مرة واحدة، وعندها فقط يكون مُسلَّماً. التحقق من الصياغة وحدها أو مقارنة بصمة وحدها لا يُحسب. (من مكتبة الدروس الداخلية)",
+          "«مُثبَّت» ليس «يعمل»: في أي تغيير يتضمن مهام مجدولة يجب أن يتحقق الفحص من أمرين — سطر الجدولة موجود فعلاً، وهو فعلاً يُخرج إيصالاً. الإبلاغ بأن «كل شيء جاهز» لمجرد وجود ملف هو حساب زائف. (من مكتبة الدروس الداخلية)",
+          "قبل أي نشر تحقق من الإصدار الداخلي للمخرَج: عُدّ كم مرة تظهر سلسلة الإصدار داخل البرنامج. أسماء الملفات ومخرجات سكربت البناء تكذب — الإصدار الزائف «اسمه جديد وداخله قديم» يُبقي التحديث التلقائي عالقاً للأبد.",
+          "عند تنظيف مجلد مؤقت تجاوز دائماً ملفات التشغيل التي يحتوي اسمها على socket: بعد الحذف تبقى العملية حيّة وتحتفظ بالمقبض القديم، بينما لا تجد الاتصالات الجديدة نقطة الدخول. يظهر كأن «الخدمة لم تسقط لكن كل شيء غير متاح»، ويصعب ملاحظته جداً."
         ]
       }
     }
