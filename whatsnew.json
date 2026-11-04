@@ -1,378 +1,212 @@
 {
-  "ver": "1.5.17",
-  "date": "2026-11-02",
-  "summary": "【新增】手机版加了「任务结束」按钮：就在加号菜单里「文件」右边。以前一个会话挂着「需要确认、等待结案」，您点进去看完觉得这活已经完了、不想再回一句话让它知道，那盏黄灯就一直亮着，电脑端也跟着挂。现在点一下「任务结束」（两下确认防误触），这一轮当场真停、后台补跑票一并撤掉，手机和电脑两头的灯同时变结案，不用再回一个字。以后想继续，直接发新消息就自动复工。\n\n【修复】电脑版也补上了「登录状态过期」提示：以前电脑端换过安全钥匙后，桌面网页会安静地连不上，点任何东西都没反应，也不说为什么。现在同样的橙色提示卡也会在电脑上弹出来，写明登录已过期、点一下就能回登录页重新登录，聊天记录一条都不会丢。手机上那张同样的提示卡，也一并把「还是不行？看看怎么连」的小字写清楚了。\n\n【修复】手机版土拨鼠「登录过期后一脸茫然」：以前您在手机上点「智能巡检」「数据报告」「远程提醒」，如果电脑端换过安全钥匙，手机里存的那把旧钥匙早就失效了，点下去没有任何反应，或者只弹一句看不懂的英文提示，很容易以为软件坏了。现在旧钥匙一过期，屏幕上会直接盖一层橙色引导卡，写清「登录状态已过期、需要重新登录一次」，下面是个大按钮「重新登录」，点一下立刻回到登录页；卡片底部还有一行小字「还是不行？看看怎么连」，点开会告诉您该用哪个网址。顺手还堵了一个会让手机来回跳的坑：以前手机上存的旧钥匙失效后，页面会在登录页和自己之间反复弹跳，永远进不去；现在第一次跳不过去就自动清掉旧钥匙，安安稳稳停在登录页等您登录。\n\n【修复】手机版土拨鼠「不理人、得打继续才动」：以前服务重启或刷新页面后，屏幕上那个「处理中」的秒表会从小数字重新数，您明明已经等了十几分钟，屏幕一直显示「0分26秒」，看着像刚开工，只能打「继续」催它。现在秒表改认服务端记下的真实开工时刻，重启、刷新都不再归零，等多久就显示多久。另外工具在后台跑长命令时，以前只报一次「工具正在跑」就再没声音，最长要静等二十分钟，现在每三分钟报一次「还在跑，已X分钟，没卡死」，不会再让您干等着猜。\n\n【修复】手机版创作中心：图生视频、抠图、修图这类「带图创作」以前一上传就失败，屏幕上飘红字 The request failed because the image format is not supported。查到底是因为上传接口把图片内容解码错了，存到服务器上的是乱码文件，AI 那边自然认不出这是张图。现在改成按文件真实格式识别并保存，同一张图上传后逐字节比对与原图完全一致，实测从上传到出图、出视频全链路跑通。\n\n【优化】手机版创作中心排版：以前卡片网格超宽，右边一列被屏幕裁掉半个，分类条和内容挤在一起。现在改成适配手机宽度的两列布局，实测 390 像素屏宽下两列都完整显示、页面不再横向溢出；分类条改成滚动时吸顶，滑到哪都能随时切分类；标题描述最多两行自动省略，卡片高度整齐；创作中会在底部浮一个「XX 创作中…」胶囊，切到别的页面也知道后台还在跑；失败原因改成完整换行显示，不再是半截省略号；表单输入框字号提到 16 像素，苹果手机上点进去不会强制放大页面。",
+  "ver": "1.5.33",
+  "date": "2026-11-04",
+  "summary": "今天把手机上几件容易看误会的事一次理顺。①充值页面正式可用：档位、赠送点数、实际到账三处对齐，按 1 元 = 100 点入账；②「我的」页不再把算力点和余额并排显示——以前会写「700 点 ≈ 0.00 元」，两个独立账本混在一行，看着像点数算错，现在主卡只显示余额，点进去才看算力点和签到；③会话列表里刚做完的任务紧贴在「干活中」下面，不再回原位沉底。",
   "sections": {
     "skills": [
-      "桌面网页钥匙过期也弹橙色提示卡，一键回登录页，不再静默失联",
-      "手机版旧钥匙过期时出橙色引导卡，一键跳回登录页，不再一脸茫然",
-      "引导卡附「还是不行？看看怎么连」小字，直接告诉您该用 fclow.marmot.top 而不是废弃的老域名",
-      "旧钥匙失效后页面不再来回弹跳，自动清掉失效钥匙停在登录页",
-      "带参考图的画图和图生视频共用同一套解码，一处修好两条链路都通",
-      "分类条滚动吸顶，长列表里随时能切分类",
-      "手机版「处理中」秒表改认服务端真实开工时刻，重启或刷新页面都不再归零",
-      "工具跑长命令期间每三分钟播报一次「还在跑，已X分钟」，不再长时间无声音",
-      "手机加号菜单新增「任务结束」按钮，点一下结案，手机和电脑两端灯同时灭，不必再回话",
-      "结案后直接发新消息即自动复工，不用手动解除"
+      "新增充值页面：一个页面看清各档位赠送点数与实际到账，下单按 1 元 = 100 点入账",
+      "手机版「我的」页：主卡只显余额，点主卡进二级页看算力点余额与签到，并说明两者用途不同",
+      "手机版会话列表：刚做完的任务紧跟「干活中」下面，同灯色内按最近活动时间倒序",
+      "充值档位显示与云端到账表一致：¥50/100/200/500/1000 各档赠送比例不同，按档位分别计算"
     ],
     "bugs": [
-      "修：电脑端钥匙过期后页面静默无反应，用户不知道是掉线还是软件坏了",
-      "修：手机上存着过期的旧钥匙，点首页「智能巡检/数据报告/远程提醒」毫无反应，只得到一句看不懂的 401",
-      "修：旧钥匙失效后访问手机版，页面在登录页和自己之间无限来回跳转，永远进不去",
-      "修：钥匙过期只用 alert 弹窗提示，在手机 WebView 里容易被吞掉，用户看不到任何说明",
-      "修：上传接口 DataURL 解码判据写错，图片被存成乱码文件，导致图生视频、智能抠图、修图、扩图全部报 image format is not supported",
-      "修：创作页卡片网格右列被裁切、页面横向溢出",
-      "修：失败原因被省略号截断，手机上只看到半截，看不到真实报错",
-      "修：表单输入框字号小于 16 像素，苹果手机会强制放大页面",
-      "修：前端秒表存在页面变量里，服务重启或刷新就清空，已等十几分钟仍显示「0分26秒」，误导成刚开工",
-      "修：工具在跑时只推一次「工具正在跑」，之后到二十分钟判死前一片死寂，用户以为卡死只能打「继续」",
-      "修：会话挂着「需要确认、等待结案」时，手机上没法就地结案，只能回一句话或一直亮黄灯",
-      "修：在手机端结束的活，电脑端不知道，灯照旧挂着，后台票还可能把它复活"
+      "修：手机版充值页的点数以前取自本地硬编码，与真实到账对不上（同一笔钱在不同档位算出不同单价）；现改为「1 元 = 100 点 + 档位赠送」，与入账口径完全一致",
+      "修：旧版把「算力点」和「≈元」并排显示，700 点配 0.00 元，用户以为点数算错；其实点用于生成功能、元用于聊天扣费，是两个独立账本",
+      "修：会话列表以前只按灯色排序，同种灯色之间保持旧顺序，刚做完的会话会回原位沉底；现在同灯色内按最近活动时间倒序"
     ],
     "lessons": [
-      "钥匙过期的提示要手机、电脑两边一致，只修一边等于没修",
-      "钥匙过期要给人看得懂的界面，不能只回 401 或弹 alert，手机 WebView 经常把弹窗吞掉",
-      "自动跳转必须带次数闸，否则旧凭据会把自己锁在死循环里",
-      "校验上传文件别信后缀，要看文件头，否则前端压缩改名一动就全线崩",
-      "界面改动必须用真实手机宽度截图核对，光看代码看不出被裁切",
-      "计时器不能存在前端页面变量里，要以后端持久化的真实时刻为准，否则一重启就骗人",
-      "同一件事的状态要有一份落盘的唯一真相、两端都认它，否则各说各话"
+      "两个不同单位的数字不要并排做换算，要么分页面，要么明确标注各自用途（学自内部经验库）",
+      "凡是靠记性才能不变的事，必须做成机制：先想清楚漏了由谁兜住，兜不住就别把规矩写成口头承诺（学自内部经验库）",
+      "收工只认证据不认感觉：答不出「改了什么 + 结果是什么」，就不算做完（学自内部经验库）"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "[New] The mobile app now has an \"End task\" button, right next to \"File\" in the plus menu. A chat stuck on \"waiting for your confirmation\" used to keep its yellow light on — and the desktop too — even when you had already read it and considered the job done. One tap (double-tap to confirm) really stops that round, cancels background retries, and clears the light on both phone and desktop. Send a new message anytime to resume. [Fixed] The desktop version now shows the login-expired notice too: after the security key changed, the desktop page used to go quiet and refuse every action without saying why. The same orange card now appears on desktop, explains that the login expired and offers a one-click return to the login page, with no chat history lost. The mobile card also spells out the \"Still stuck?\" link.\n\n[Fixed] Mobile Marmot showed nothing when your login key expired: tapping Smart Patrol, Data Report or Remote Reminder did nothing at all, or flashed an unreadable English error, so it looked like the app was broken. Now, the moment the old key expires, the screen shows an orange guide card that states the login has expired and one login is needed, with a big \"Log in again\" button that returns you straight to the login page. A small line at the bottom, \"Still stuck? See how to connect\", tells you which address to use. Also fixed a loop that could trap the phone: an expired key used to bounce the page back and forth between the login screen and itself forever. It now clears the dead key on the first failed hop and waits on the login page.\n\n[Fixed] Mobile Marmot \"ignores you until you type continue\": after a service restart or page refresh the working timer restarted from a small number, so after 15+ minutes the screen still showed \"0m 26s\" and looked like it had just started. The timer now uses the true start time recorded by the server and never resets. Long background commands now report \"still running, Xm in, not stuck\" every three minutes instead of total silence.\n\n[Fixed] Mobile creation center: image-to-video, cutout and retouch used to fail right after upload with \"The request failed because the image format is not supported\". The upload endpoint decoded image data incorrectly and stored garbage files. It now detects the real format from the file header; a byte-for-byte comparison confirms the stored file matches the original, and the whole upload-to-output chain passes.\n\n[Improved] Mobile creation center layout: card grid no longer overflows and clips the right column, categories stick to the top while scrolling, descriptions clamp to two lines, a floating \"XX creating…\" pill shows background work, failure reasons wrap fully, and inputs use 16px so iOS does not zoom.",
+      "summary": "Today we cleaned up a few things on the phone that were easy to misread. (1) The top-up page is now live: tiers, bonus points and real credits finally agree, credited at 1 yuan = 100 points. (2) The Me page no longer shows points and balance side by side - it used to say \"700 points = 0.00 yuan\", mixing two separate ledgers on one line and making the numbers look wrong. The main card now shows balance only; tap it for points and check-in. (3) In the session list, a task you just finished now sits right under the running one instead of sinking back to its old slot.",
       "sections": {
         "skills": [
-          "New \"End task\" button in the mobile plus menu: one tap closes the task on phone and desktop",
-          "Sending a new message resumes the task automatically",
-          "Desktop pages show an orange expiry card with one-click re-login instead of failing silently",
-          "Expired mobile key now shows an orange guide card with a one-tap return to login",
-          "Card's small link tells you to use fclow.marmot.top instead of the retired hostname",
-          "No more bounce loop: the dead key is cleared and you land on the login page",
-          "Image creation and image-to-video share one decoder, so one fix covers both",
-          "Sticky category bar while scrolling",
-          "Working timer follows the server's real start time and survives restarts",
-          "Long commands report progress every three minutes instead of staying silent"
+          "New top-up page: tiers, bonus points and real credits in one view, credited at 1 yuan = 100 points",
+          "Phone Me page: the main card shows balance only; tap it for points balance and check-in, with a note that the two are different ledgers",
+          "Phone session list: a finished task stays right under the running one, sorted by latest activity within the same status colour",
+          "Top-up tiers now match the official credit table: each tier (50/100/200/500/1000 yuan) has its own bonus rate"
         ],
         "bugs": [
-          "Fixed: a chat waiting for confirmation could not be closed from the phone without replying",
-          "Fixed: ending a task on the phone left the desktop light on, and background retries could revive it",
-          "Fixed: an expired key left the desktop page silently unresponsive with no explanation",
-          "Fixed: tapping Smart Patrol, Data Report or Remote Reminder did nothing when the stored key was expired, only a raw 401",
-          "Fixed: an expired key made the mobile page bounce between login and itself forever",
-          "Fixed: expiry was announced with alert(), which mobile WebViews often swallow",
-          "Fixed: upload DataURL decoding stored garbage, breaking every image-based creation flow",
-          "Fixed: creation card grid clipped the right column and overflowed the page",
-          "Fixed: failure reasons were truncated, hiding the real error on phones",
-          "Fixed: inputs under 16px made iOS zoom the page",
-          "Fixed: the front-end timer lived in a page variable and reset on restart",
-          "Fixed: long-running tools announced once and then went silent for up to twenty minutes"
+          "Fixed: phone top-up points came from a hard-coded local table and did not match real credits (the same money produced different unit prices per tier); they are now calculated as 1 yuan = 100 points plus the tier bonus, identical to what actually arrives",
+          "Fixed: the old Me page showed \"points\" and \"about X yuan\" side by side, e.g. 700 points next to 0.00 yuan, which looked like a calculation error; points are for generation features and yuan is for chat billing - two separate ledgers",
+          "Fixed: the session list only sorted by status colour and kept the old order inside the same colour, so a just-finished session jumped back to its old slot and sank; now sorted by latest activity within each colour"
         ],
         "lessons": [
-          "Keep one persisted source of truth for a shared state, or each device tells a different story",
-          "An expiry notice must be identical on phone and desktop; fixing one side is not fixing it",
-          "An expired credential needs a human-readable screen, never a bare 401 or an alert()",
-          "Auto-redirect needs an attempt guard or stale credentials lock the user in a loop",
-          "Validate uploads by file header, not extension",
-          "Check UI work at real phone widths, not just in code",
-          "Keep timers on server-side truth, not page variables"
+          "Never put two numbers in different units side by side as a conversion - either split them onto separate pages or label each one's purpose clearly (learned from our internal experience base)",
+          "Anything that only stays true if you remember it must be turned into a mechanism: first ask who catches it when you forget, and if nobody does, do not write the rule as a verbal promise (learned from our internal experience base)",
+          "Finishing work is judged by evidence, not by feeling: if you cannot say what changed and what the result was, it is not done (learned from our internal experience base)"
         ]
       }
     },
     "ja": {
-      "summary": "【新機能】スマホ版に「タスク終了」ボタンを追加しました（＋メニューの「ファイル」の右）。「確認待ち・結案待ち」の会話は、内容を見て終わったと判断しても黄色いランプが点いたままで、PC側も同じでした。ワンタップ（二回押しで確定）でその回を本当に停止し、バックグラウンドの再試行も取り消し、両方のランプが消えます。続けたい時は新しくメッセージを送れば自動で再開します。 【修正】モバイル版マーモットでログインキーが切れたときに何も起きない問題：スマート巡回・データレポート・リモートリマインダーを押しても無反応、あるいは読めない英語のエラーが出るだけで、アプリが壊れたように見えていました。現在はキーが切れた瞬間にオレンジ色の案内カードが表示され、「ログインの有効期限が切れました。もう一度ログインしてください」と大きな「再ログイン」ボタンが出て、押せばすぐログイン画面に戻ります。カード下部の小さなリンク「それでもだめな場合」を押すと、使うべきアドレスが表示されます。あわせて、期限切れのキーによってログイン画面と本体の間を永遠に行き来してしまうループも修正しました。一度跳ね返されたら古いキーを自動で消し、ログイン画面で待機します。\n\n【修正】「続けてと言うまで動かない」問題：再起動や再読み込みで処理中のタイマーが小さい数字に戻り、15分待っても「0分26秒」と表示されていました。現在はサーバーが記録した実際の開始時刻を使うため、再起動してもゼロに戻りません。長時間のコマンドも3分ごとに「まだ実行中、X分経過」と通知します。\n\n【修正】制作センターの画像系機能：アップロード直後に image format is not supported で失敗していました。原因はアップロード処理が画像データを誤ってデコードし、壊れたファイルを保存していたことです。現在はファイルヘッダーから実際の形式を判定して保存し、元画像とバイト単位で一致することを確認済みです。\n\n【改善】制作センターのレイアウト：カードの右列が画面外に切れる問題を解消し、カテゴリーバーはスクロール時に上部固定、説明は2行で省略、実行中は下部に「XX 作成中…」を表示、失敗理由は折り返して全文表示、入力欄は16pxにしてiOSの自動拡大を防ぎます。",
+      "summary": "今日はスマホ側で誤解を招きやすい点をまとめて整理しました。①チャージ画面が正式に使えるようになり、料金プラン・ボーナスポイント・実際の反映額の3つが一致し、1元＝100ポイントで反映されます。②「マイページ」ではポイントと残高を並べて表示しなくなりました。以前は「700ポイント ≈ 0.00元」と、別々の台帳を一行に混ぜていたため計算ミスに見えていました。現在はメインカードは残高のみ、タップするとポイント残高とチェックインが開きます。③セッション一覧では、終わったばかりのタスクが「作業中」のすぐ下に並び、元の位置に沈みません。",
       "sections": {
         "skills": [
-          "スマホの＋メニューに「タスク終了」ボタン、押すと両端で結案",
-          "新しくメッセージを送れば自動で再開",
-          "キー期限切れ時にオレンジの案内カードを表示し、ワンタップでログインへ戻れる",
-          "案内カードの小さなリンクが正しい接続先アドレスを案内",
-          "期限切れキーによる無限リダイレクトを解消",
-          "画像制作と画像からの動画生成が同じデコーダーを共有",
-          "スクロール時にカテゴリーバーを上部固定",
-          "処理中タイマーがサーバーの実開始時刻を参照し再起動でも戻らない",
-          "長時間コマンドは3分ごとに進捗を通知"
+          "チャージ画面を追加：各プランのボーナスと実際の反映額が一画面で分かり、1元＝100ポイントで反映",
+          "スマホの「マイページ」：メインカードは残高のみ。タップでポイント残高とチェックインを表示し、双方の用途が違うことを明記",
+          "スマホのセッション一覧：終わったタスクは「作業中」のすぐ下に表示、同じステータス色の中では最近の活動順",
+          "チャージプランの表示を公式の反映表と一致：50/100/200/500/1000元の各プランでボーナス率が異なるため個別計算"
         ],
         "bugs": [
-          "修正：確認待ちの会話を、返信せずにスマホから終了できなかった",
-          "修正：スマホで終了してもPCのランプが残り、再試行で復活することがあった",
-          "修正：キー期限切れ時にスマート巡回・データレポート・リモートリマインダーが無反応",
-          "修正：期限切れキーでログイン画面と本体を無限に行き来していた",
-          "修正：期限切れを alert() で通知していたため WebView で飲み込まれていた",
-          "修正：アップロードのデコード誤りで画像系の制作がすべて失敗",
-          "修正：制作カードのグリッドが右列を切っていた",
-          "修正：失敗理由が省略記号で切れていた",
-          "修正：入力欄が16px未満でiOSが拡大していた",
-          "修正：タイマーがページ変数にあり再起動でリセットされていた",
-          "修正：長時間ツールが一度だけ通知して以後20分無音だった"
+          "修正：スマホのチャージ画面のポイントはローカルの固定値で、実際の反映額と一致していませんでした（同じ金額でもプランごとに単価が違う状態）。「1元＝100ポイント＋プランボーナス」に変更し、実際の入金と完全に一致",
+          "修正：旧版は「ポイント」と「約○元」を並べて表示し、700ポイントの隣に0.00元と出ていたため計算ミスに見えていました。ポイントは生成機能用、元はチャット課金用という別々の台帳です",
+          "修正：一覧はステータス色だけで並べていたため、同じ色の中では古い順のままで、終わったばかりのセッションが元の位置に戻って沈んでいました。同じ色の中では最近の活動順に変更"
         ],
         "lessons": [
-          "共有する状態は永続化した単一の真実を一本持ち、両端がそれを見る",
-          "資格情報の期限切れは人が読める画面で伝える。生の401やalert()は不可",
-          "自動リダイレクトには試行回数の制限が必要",
-          "アップロードは拡張子ではなくファイルヘッダーで検証する",
-          "UIは実機のスマホ幅で確認する",
-          "タイマーはサーバー側の真実を参照する"
+          "単位の違う数字を並べて換算表示しない。ページを分けるか、それぞれの用途を明記する（社内の経験ベースから学ぶ）",
+          "覚えていないと守れないことは仕組みにする。忘れたとき誰が拾うかを先に決め、拾う人がいないなら口約束のルールにしない（社内の経験ベースから学ぶ）",
+          "作業の完了は感覚ではなく証拠で判断する。「何を変えて結果どうなったか」を言えないなら未完了（社内の経験ベースから学ぶ）"
         ]
       }
     },
     "ko": {
-      "summary": "[신규] 모바일 버전에 \"작업 종료\" 버튼을 추가했습니다(+ 메뉴의 \"파일\" 오른쪽). \"확인 대기/결산 대기\" 상태인 대화는 이미 끝났다고 판단해도 노란 램프가 계속 켜져 있었고 PC도 마찬가지였습니다. 한 번 누르면(두 번 눌러 확인) 해당 회차를 실제로 중지하고 백그라운드 재시도까지 취소하며 양쪽 램프가 꺼집니다. 계속하려면 새 메시지를 보내면 자동으로 재개됩니다. [수정] 모바일 마모트에서 로그인 키가 만료되면 아무 반응이 없던 문제: 스마트 점검, 데이터 리포트, 원격 알림을 눌러도 반응이 없거나 읽기 힘든 영어 오류만 떠서 앱이 고장 난 것처럼 보였습니다. 이제 키가 만료되는 순간 주황색 안내 카드가 뜨고 \"로그인이 만료되었습니다. 다시 로그인해 주세요\"라는 문구와 큰 \"다시 로그인\" 버튼이 나타나며, 누르면 바로 로그인 화면으로 돌아갑니다. 카드 아래 작은 링크 \"그래도 안 되나요?\"를 누르면 사용해야 할 주소를 알려 줍니다. 만료된 키 때문에 로그인 화면과 본문 사이를 무한히 오가던 루프도 함께 고쳤습니다.\n\n[수정] \"계속이라고 입력해야 움직이는\" 문제: 재시작이나 새로고침 후 처리 중 타이머가 작은 숫자로 되돌아가 15분을 기다려도 \"0분 26초\"로 표시되었습니다. 이제 서버가 기록한 실제 시작 시각을 사용해 재시작해도 0으로 돌아가지 않습니다. 긴 명령은 3분마다 \"아직 실행 중, X분 경과\"를 알립니다.\n\n[수정] 모바일 제작 센터: 이미지 기반 제작이 업로드 직후 image format is not supported 오류로 실패했습니다. 업로드 처리에서 이미지 데이터를 잘못 디코딩해 깨진 파일을 저장한 것이 원인이었습니다. 이제 파일 헤더로 실제 형식을 판별해 저장하며 원본과 바이트 단위로 일치함을 확인했습니다.\n\n[개선] 제작 센터 레이아웃: 카드 오른쪽 열이 잘리던 문제를 해결하고, 카테고리 바는 스크롤 시 상단 고정, 설명은 두 줄로 말줄임, 실행 중에는 하단에 \"XX 제작 중…\" 표시, 실패 사유는 줄바꿈해 전체 표시, 입력창은 16px로 키워 iOS 자동 확대를 막습니다.",
+      "summary": "오늘은 휴대폰에서 오해하기 쉬운 부분을 한 번에 정리했습니다. ①충전 페이지가 정식으로 사용 가능해졌고, 요금제·보너스 포인트·실제 적립액 세 가지가 일치하며 1위안 = 100포인트로 적립됩니다. ②'내 정보' 페이지에서 포인트와 잔액을 나란히 보여주지 않습니다. 예전에는 '700포인트 ≈ 0.00위안'처럼 서로 다른 장부를 한 줄에 섞어 계산 오류처럼 보였습니다. 이제 메인 카드는 잔액만 보여주고, 누르면 포인트 잔액과 출석 체크를 볼 수 있습니다. ③세션 목록에서 방금 끝난 작업이 '작업 중' 바로 아래에 붙고, 원래 자리로 돌아가 아래로 가라앉지 않습니다.",
       "sections": {
         "skills": [
-          "모바일 + 메뉴에 \"작업 종료\" 버튼 추가, 한 번에 양쪽 결산",
-          "새 메시지를 보내면 자동으로 재개",
-          "키 만료 시 주황색 안내 카드로 한 번에 로그인 화면 복귀",
-          "안내 카드의 작은 링크가 올바른 접속 주소를 알려 줌",
-          "만료 키로 인한 무한 리다이렉트 제거",
-          "이미지 제작과 이미지→영상이 같은 디코더를 공유",
-          "스크롤 시 카테고리 바 상단 고정",
-          "처리 중 타이머가 서버의 실제 시작 시각을 사용",
-          "긴 명령은 3분마다 진행 상황 알림"
+          "충전 페이지 추가: 요금제별 보너스 포인트와 실제 적립액을 한 화면에서 확인, 1위안 = 100포인트 적립",
+          "휴대폰 '내 정보': 메인 카드는 잔액만 표시, 누르면 포인트 잔액과 출석 체크를 보여주고 두 장부의 용도가 다름을 안내",
+          "휴대폰 세션 목록: 방금 끝난 작업은 '작업 중' 바로 아래에 표시, 같은 상태 색 안에서는 최근 활동 순",
+          "충전 요금제 표시를 공식 적립표와 일치: 50/100/200/500/1000위안 각 요금제의 보너스 비율이 달라 개별 계산"
         ],
         "bugs": [
-          "수정: 확인 대기 중인 대화를 답장 없이 휴대폰에서 종료할 수 없었음",
-          "수정: 휴대폰에서 종료해도 PC 램프가 남고 재시도로 되살아날 수 있었음",
-          "수정: 키 만료 시 점검·리포트·알림 타일이 무반응",
-          "수정: 만료 키로 로그인 화면과 본문을 무한 왕복",
-          "수정: 만료를 alert()로 알려 WebView에서 묻혔음",
-          "수정: 업로드 디코딩 오류로 모든 이미지 제작 실패",
-          "수정: 제작 카드 그리드가 오른쪽 열을 잘라냄",
-          "수정: 실패 사유가 말줄임표로 잘렸음",
-          "수정: 입력창이 16px 미만이라 iOS가 확대했음",
-          "수정: 타이머가 페이지 변수에 있어 재시작 시 초기화",
-          "수정: 장시간 도구가 한 번만 알리고 20분간 무음이었음"
+          "수정: 휴대폰 충전 페이지의 포인트가 로컬 하드코딩 값이라 실제 적립액과 맞지 않았습니다(같은 금액인데 요금제마다 단가가 달랐음). '1위안 = 100포인트 + 요금제 보너스'로 바꿔 실제 입금과 완전히 일치",
+          "수정: 예전 '내 정보'는 '포인트'와 '약 ○위안'을 나란히 보여줘 700포인트 옆에 0.00위안이 붙어 계산 오류처럼 보였습니다. 포인트는 생성 기능용, 위안은 채팅 과금용으로 서로 다른 장부입니다",
+          "수정: 목록이 상태 색으로만 정렬되고 같은 색 안에서는 예전 순서를 유지해, 방금 끝난 세션이 원래 자리로 돌아가 가라앉았습니다. 이제 같은 색 안에서 최근 활동 순으로 정렬"
         ],
         "lessons": [
-          "공유 상태는 영속화된 단일 진실을 두고 양쪽이 그것을 봐야 한다",
-          "만료된 자격 증명은 사람이 읽을 수 있는 화면으로 안내해야 한다",
-          "자동 리다이렉트에는 시도 횟수 제한이 필요하다",
-          "업로드는 확장자가 아니라 파일 헤더로 검증한다",
-          "UI는 실제 휴대폰 너비로 확인한다",
-          "타이머는 서버의 실제 시각을 기준으로 한다"
+          "단위가 다른 두 숫자를 나란히 두고 환산하지 말 것. 페이지를 나누거나 각각의 용도를 분명히 표시한다 (사내 경험 저장소에서 배움)",
+          "기억해야만 지켜지는 일은 반드시 구조로 만든다. 잊었을 때 누가 받아주는지 먼저 정하고, 받아줄 사람이 없으면 구두 약속으로 규칙을 만들지 않는다 (사내 경험 저장소에서 배움)",
+          "마무리는 느낌이 아니라 증거로 판단한다. '무엇을 바꿨고 결과가 어땠는지' 말할 수 없으면 끝난 것이 아니다 (사내 경험 저장소에서 배움)"
         ]
       }
     },
     "es": {
-      "summary": "[Nuevo] La versión móvil incorpora el botón \"Terminar tarea\", junto a \"Archivo\" en el menú +. Un chat en \"esperando tu confirmación\" mantenía la luz amarilla encendida —y el escritorio también— aunque ya lo hubieras leído y dieras el trabajo por terminado. Un toque (doble para confirmar) detiene esa ronda de verdad, cancela los reintentos en segundo plano y apaga la luz en móvil y escritorio. Envía un mensaje nuevo para reanudar. [Corregido] La versión móvil de Marmot no hacía nada cuando la clave de acceso caducaba: al pulsar Inspección inteligente, Informe de datos o Recordatorio remoto no ocurría nada, o aparecía un error en inglés ilegible, y parecía que la app estaba rota. Ahora, en cuanto la clave caduca, aparece una tarjeta naranja que indica que la sesión ha caducado y que hay que iniciar sesión otra vez, con un botón grande «Iniciar sesión» que devuelve directamente a la pantalla de acceso. Una línea pequeña al pie, «¿Sigue sin funcionar?», indica qué dirección usar. También se corrigió un bucle que atrapaba el teléfono: una clave caducada hacía saltar la página entre el acceso y sí misma sin fin. Ahora borra la clave muerta al primer salto fallido y espera en la pantalla de acceso.\n\n[Corregido] «No hace caso hasta que escribes continúa»: tras reiniciar el servicio o refrescar, el cronómetro volvía a números pequeños y tras 15 minutos seguía mostrando «0m 26s». Ahora usa la hora real de inicio guardada en el servidor y no se reinicia. Los comandos largos informan cada tres minutos «sigue en marcha, Xm».\n\n[Corregido] Centro de creación móvil: la creación con imágenes fallaba al subir con image format is not supported porque el endpoint de subida decodificaba mal los datos y guardaba archivos corruptos. Ahora detecta el formato real por la cabecera del archivo; la comparación byte a byte confirma que coincide con el original.\n\n[Mejorado] Diseño del centro de creación: la rejilla ya no recorta la columna derecha, la barra de categorías se fija al desplazar, las descripciones se limitan a dos líneas, aparece una píldora «XX creando…», los errores se muestran completos y los campos usan 16px para evitar el zoom en iOS.",
+      "summary": "Hoy ordenamos varias cosas del móvil que se prestaban a confusión. (1) La página de recarga ya está disponible: planes, puntos de regalo y saldo real por fin coinciden, con 1 yuan = 100 puntos. (2) La página «Mi cuenta» ya no muestra puntos y saldo uno al lado del otro: antes ponía «700 puntos ≈ 0,00 yuan», mezclando dos libros contables distintos en una línea y parecía un error de cálculo. Ahora la tarjeta principal solo muestra el saldo; al tocarla ves los puntos y el registro diario. (3) En la lista de sesiones, la tarea recién terminada queda justo debajo de la que está en marcha, sin volver a hundirse en su posición anterior.",
       "sections": {
         "skills": [
-          "Nuevo botón \"Terminar tarea\" en el menú + del móvil: cierra la tarea en ambos dispositivos",
-          "Enviar un mensaje nuevo reanuda la tarea automáticamente",
-          "Clave móvil caducada muestra tarjeta naranja con retorno al acceso en un toque",
-          "El enlace de la tarjeta indica usar fclow.marmot.top y no el dominio retirado",
-          "Sin bucle: la clave muerta se borra y quedas en la pantalla de acceso",
-          "Creación con imagen y vídeo desde imagen comparten decodificador",
-          "Barra de categorías fija al desplazar",
-          "Cronómetro basado en la hora real del servidor y resistente a reinicios",
-          "Comandos largos informan cada tres minutos"
+          "Nueva página de recarga: planes, puntos de regalo y saldo real en una sola vista, con 1 yuan = 100 puntos",
+          "Página «Mi cuenta» del móvil: la tarjeta principal solo muestra el saldo; al tocarla se ven los puntos y el registro diario, aclarando que son cuentas distintas",
+          "Lista de sesiones del móvil: la tarea terminada queda justo debajo de la que está en marcha, ordenada por actividad reciente dentro del mismo color",
+          "Los planes de recarga coinciden con la tabla oficial de abono: cada plan (50/100/200/500/1000 yuan) tiene su propio porcentaje de regalo"
         ],
         "bugs": [
-          "Corregido: no se podía cerrar desde el móvil un chat en espera de confirmación sin responder",
-          "Corregido: terminar en el móvil dejaba la luz del escritorio encendida y los reintentos podían revivirlo",
-          "Corregido: las tarjetas no respondían con la clave caducada, solo un 401 crudo",
-          "Corregido: la clave caducada hacía rebotar la página sin fin",
-          "Corregido: el aviso usaba alert(), que los WebView móviles suelen ignorar",
-          "Corregido: la subida guardaba datos corruptos y rompía toda creación con imágenes",
-          "Corregido: la rejilla recortaba la columna derecha y desbordaba la página",
-          "Corregido: los errores se truncaban y ocultaban el motivo real",
-          "Corregido: campos menores de 16px provocaban zoom en iOS",
-          "Corregido: el cronómetro vivía en una variable de página y se reiniciaba",
-          "Corregido: las herramientas largas avisaban una vez y callaban veinte minutos"
+          "Corregido: los puntos de la página de recarga del móvil venían de una tabla fija local y no coincidían con el abono real (el mismo dinero daba precios distintos según el plan); ahora se calculan como 1 yuan = 100 puntos más el regalo del plan, igual que lo que llega de verdad",
+          "Corregido: la versión anterior mostraba «puntos» y «≈ yuan» juntos, por ejemplo 700 puntos junto a 0,00 yuan, y parecía un error de cálculo; los puntos son para funciones de generación y el yuan para el cobro del chat: son dos cuentas separadas",
+          "Corregido: la lista solo se ordenaba por color de estado y mantenía el orden antiguo dentro del mismo color, así que la sesión recién terminada volvía a su hueco y se hundía; ahora se ordena por actividad reciente dentro de cada color"
         ],
         "lessons": [
-          "Mantén una única verdad persistida para un estado compartido; si no, cada dispositivo cuenta otra historia",
-          "Una credencial caducada necesita una pantalla legible, nunca un 401 crudo",
-          "La redirección automática necesita un límite de intentos",
-          "Valida las subidas por cabecera de archivo, no por extensión",
-          "Revisa la interfaz a anchos reales de teléfono",
-          "Los cronómetros deben basarse en la verdad del servidor"
+          "No pongas dos cifras en unidades distintas una al lado de la otra como si fueran convertibles: sepáralas en páginas distintas o indica claramente para qué sirve cada una (aprendido de nuestra base de experiencia interna)",
+          "Todo lo que solo se cumple si uno se acuerda debe convertirse en un mecanismo: primero pregunta quién lo cubre si se olvida y, si nadie lo cubre, no lo dejes como promesa verbal (aprendido de nuestra base de experiencia interna)",
+          "El trabajo se cierra con pruebas, no con sensaciones: si no puedes decir qué cambiaste y qué resultado dio, no está hecho (aprendido de nuestra base de experiencia interna)"
         ]
       }
     },
     "fr": {
-      "summary": "[Nouveau] La version mobile ajoute le bouton « Terminer la tâche », à droite de « Fichier » dans le menu +. Une conversation en « en attente de votre confirmation » gardait son voyant jaune allumé — ainsi que le bureau — même après lecture et travail terminé. Un appui (double pour confirmer) arrête réellement ce tour, annule les reprises en arrière-plan et éteint le voyant sur mobile et bureau. Envoyez un nouveau message pour reprendre. [Corrigé] La version mobile de Marmot ne réagissait plus quand la clé de connexion expirait : toucher Inspection intelligente, Rapport de données ou Rappel à distance ne faisait rien, ou affichait une erreur anglaise illisible, donnant l'impression que l'application était cassée. Désormais, dès l'expiration, une carte orange indique que la session a expiré et qu'une reconnexion est nécessaire, avec un grand bouton « Se reconnecter » qui ramène directement à l'écran de connexion. Une petite ligne en bas, « Toujours bloqué ? », indique l'adresse à utiliser. Un boucle qui piégeait le téléphone a aussi été corrigée : une clé expirée faisait rebondir la page entre l'écran de connexion et elle-même sans fin. Elle efface maintenant la clé morte au premier échec et attend sur l'écran de connexion.\n\n[Corrigé] « Ignore jusqu'à ce qu'on écrive continuer » : après un redémarrage ou un rafraîchissement, le chronomètre repartait de petits nombres et affichait encore « 0m 26s » après quinze minutes. Il utilise maintenant l'heure de début réelle enregistrée par le serveur. Les commandes longues signalent toutes les trois minutes « toujours en cours, Xm ».\n\n[Corrigé] Centre de création mobile : la création à partir d'images échouait à l'envoi avec image format is not supported, car l'endpoint décodait mal les données et stockait des fichiers corrompus. Il détecte désormais le vrai format via l'en-tête du fichier, avec une comparaison octet par octet confirmant l'identité avec l'original.\n\n[Amélioré] Mise en page du centre de création : la grille ne coupe plus la colonne de droite, la barre de catégories reste fixe au défilement, les descriptions sont limitées à deux lignes, une pastille « XX en création… » s'affiche, les erreurs sont affichées en entier et les champs passent à 16px pour éviter le zoom iOS.",
+      "summary": "Aujourd'hui, nous avons remis d'aplomb plusieurs choses sur mobile qui prêtaient à confusion. (1) La page de rechargement est en service : palier, points offerts et crédit réel concordent enfin, avec 1 yuan = 100 points. (2) La page « Mon compte » n'affiche plus les points et le solde côte à côte : avant, on lisait « 700 points ≈ 0,00 yuan », deux comptabilités différentes sur une seule ligne, ce qui donnait l'impression d'une erreur. La carte principale n'affiche plus que le solde ; un appui ouvre les points et le pointage. (3) Dans la liste des sessions, la tâche qui vient de finir reste juste sous celle en cours au lieu de retomber à sa place.",
       "sections": {
         "skills": [
-          "Nouveau bouton « Terminer la tâche » dans le menu + mobile : clôture sur mobile et bureau",
-          "Un nouveau message relance automatiquement la tâche",
-          "Clé expirée : carte orange avec retour à la connexion en un geste",
-          "Le lien de la carte indique d'utiliser fclow.marmot.top",
-          "Plus de boucle : la clé morte est effacée et vous restez sur la connexion",
-          "Création d'images et vidéo depuis image partagent un décodeur",
-          "Barre de catégories fixe au défilement",
-          "Chronomètre basé sur l'heure réelle du serveur",
-          "Commandes longues : un point toutes les trois minutes"
+          "Nouvelle page de rechargement : paliers, points offerts et crédit réel sur un seul écran, avec 1 yuan = 100 points",
+          "Page « Mon compte » mobile : la carte principale n'affiche que le solde ; un appui ouvre les points et le pointage, en précisant que ce sont deux comptes distincts",
+          "Liste des sessions mobile : la tâche terminée reste juste sous celle en cours, triée par activité récente à l'intérieur d'une même couleur d'état",
+          "Les paliers de rechargement suivent la table officielle de crédit : chaque palier (50/100/200/500/1000 yuan) a son propre taux de bonus"
         ],
         "bugs": [
-          "Corrigé : impossible de clôturer depuis le mobile une conversation en attente de confirmation sans répondre",
-          "Corrigé : terminer sur mobile laissait le voyant du bureau allumé et les reprises pouvaient la relancer",
-          "Corrigé : les tuiles ne réagissaient pas avec une clé expirée, seulement un 401 brut",
-          "Corrigé : une clé expirée faisait rebondir la page sans fin",
-          "Corrigé : l'expiration utilisait alert(), souvent ignoré par les WebView",
-          "Corrigé : l'envoi stockait des données corrompues et cassait toute création avec image",
-          "Corrigé : la grille coupait la colonne de droite",
-          "Corrigé : les erreurs étaient tronquées",
-          "Corrigé : des champs sous 16px déclenchaient le zoom iOS",
-          "Corrigé : le chronomètre vivait dans une variable de page",
-          "Corrigé : les outils longs ne signalaient qu'une fois puis se taisaient"
+          "Corrigé : les points de la page de rechargement mobile venaient d'une table figée en local et ne correspondaient pas au crédit réel (la même somme donnait des prix unitaires différents selon le palier) ; le calcul est désormais 1 yuan = 100 points plus le bonus du palier, identique à ce qui est réellement crédité",
+          "Corrigé : l'ancienne page affichait « points » et « ≈ yuan » côte à côte, par exemple 700 points à côté de 0,00 yuan, ce qui ressemblait à une erreur de calcul ; les points servent aux fonctions de génération et le yuan à la facturation du chat : deux comptabilités séparées",
+          "Corrigé : la liste ne triait que par couleur d'état et gardait l'ancien ordre à l'intérieur d'une même couleur, si bien qu'une session tout juste terminée revenait à sa place et retombait ; le tri se fait maintenant par activité récente dans chaque couleur"
         ],
         "lessons": [
-          "Gardez une seule vérité persistée pour un état partagé, sinon chaque appareil raconte autre chose",
-          "Un identifiant expiré mérite un écran lisible, jamais un 401 brut",
-          "Une redirection automatique doit être limitée en tentatives",
-          "Validez les envois par en-tête de fichier, pas par extension",
-          "Vérifiez l'interface à de vraies largeurs de téléphone",
-          "Les chronomètres doivent suivre la vérité côté serveur"
+          "Ne placez jamais deux nombres d'unités différentes côte à côte comme s'ils étaient convertibles : séparez-les sur deux pages ou indiquez clairement l'usage de chacun (appris de notre base d'expérience interne)",
+          "Tout ce qui ne tient que par la mémoire doit devenir un mécanisme : demandez d'abord qui rattrape l'oubli, et si personne ne le fait, n'en faites pas une promesse verbale (appris de notre base d'expérience interne)",
+          "On clôture sur des preuves, pas sur une impression : si vous ne pouvez pas dire ce qui a changé et quel en est le résultat, ce n'est pas terminé (appris de notre base d'expérience interne)"
         ]
       }
     },
     "de": {
-      "summary": "[Neu] Die Mobilversion hat jetzt die Schaltfläche „Aufgabe beenden“, rechts neben „Datei“ im Plus-Menü. Ein Chat im Zustand „wartet auf Bestätigung“ ließ die gelbe Lampe an – auch am Desktop –, obwohl man ihn gelesen und die Arbeit als erledigt angesehen hatte. Ein Tippen (zwei zum Bestätigen) stoppt diese Runde wirklich, verwirft Hintergrund-Wiederholungen und löscht die Lampe auf Handy und Desktop. Eine neue Nachricht setzt fort. [Behoben] Die Mobilversion von Marmot reagierte nicht mehr, wenn der Anmeldeschlüssel ablief: Ein Tippen auf Intelligente Prüfung, Datenbericht oder Remote-Erinnerung tat nichts oder zeigte eine unlesbare englische Fehlermeldung, sodass die App defekt wirkte. Jetzt erscheint beim Ablauf sofort eine orange Hinweiskarte mit dem Hinweis, dass die Sitzung abgelaufen ist und eine erneute Anmeldung nötig ist, samt großem Knopf „Erneut anmelden“, der direkt zur Anmeldeseite führt. Eine kleine Zeile unten, „Weiterhin blockiert?“, nennt die zu verwendende Adresse. Zusätzlich wurde eine Schleife behoben, die das Telefon gefangen hielt: Ein abgelaufener Schlüssel ließ die Seite endlos zwischen Anmeldung und sich selbst springen. Jetzt wird der tote Schlüssel beim ersten Fehlversuch gelöscht und die Anmeldeseite bleibt stehen.\n\n[Behoben] „Reagiert erst, wenn man weiter schreibt“: Nach Neustart oder Neuladen begann die Verarbeitungsuhr wieder bei kleinen Zahlen und zeigte nach 15 Minuten noch „0m 26s“. Sie nutzt nun die echte Startzeit vom Server. Lange Befehle melden alle drei Minuten „läuft noch, Xm“.\n\n[Behoben] Mobiles Kreativzentrum: Bildbasierte Erstellung scheiterte beim Upload mit image format is not supported, weil der Upload-Endpunkt Bilddaten falsch dekodierte und beschädigte Dateien speicherte. Nun wird das echte Format über den Dateikopf erkannt; ein Byte-Vergleich bestätigt die Identität mit dem Original.\n\n[Verbessert] Layout des Kreativzentrums: Das Raster schneidet die rechte Spalte nicht mehr ab, die Kategorieleiste bleibt beim Scrollen oben, Beschreibungen werden auf zwei Zeilen begrenzt, eine Pille „XX wird erstellt…“ erscheint, Fehler werden vollständig umgebrochen und Eingabefelder nutzen 16px gegen iOS-Zoom.",
+      "summary": "Heute haben wir ein paar leicht missverständliche Dinge in der Handy-Ansicht aufgeräumt. (1) Die Aufladeseite ist jetzt nutzbar: Stufen, Bonuspunkte und tatsächliche Gutschrift stimmen überein, gerechnet mit 1 Yuan = 100 Punkte. (2) Die Seite „Mein Konto“ zeigt Punkte und Guthaben nicht mehr nebeneinander: Vorher stand dort „700 Punkte ≈ 0,00 Yuan“, zwei getrennte Konten in einer Zeile, was wie ein Rechenfehler aussah. Die Hauptkarte zeigt jetzt nur das Guthaben; ein Tippen öffnet Punkte und Check-in. (3) In der Sitzungsliste steht eine gerade beendete Aufgabe direkt unter der laufenden, statt an ihren alten Platz zurückzurutschen.",
       "sections": {
         "skills": [
-          "Neue Schaltfläche „Aufgabe beenden“ im Plus-Menü: schließt auf Handy und Desktop",
-          "Eine neue Nachricht setzt die Aufgabe automatisch fort",
-          "Abgelaufener Schlüssel zeigt orange Hinweiskarte mit Ein-Tipp-Rückkehr zur Anmeldung",
-          "Der Kartenlink nennt fclow.marmot.top statt der alten Adresse",
-          "Keine Schleife mehr: toter Schlüssel wird gelöscht, Anmeldeseite bleibt",
-          "Bilderstellung und Bild-zu-Video teilen einen Dekoder",
-          "Kategorieleiste bleibt beim Scrollen fixiert",
-          "Verarbeitungsuhr nutzt die echte Server-Startzeit",
-          "Lange Befehle melden sich alle drei Minuten"
+          "Neue Aufladeseite: Stufen, Bonuspunkte und tatsächliche Gutschrift auf einen Blick, gerechnet mit 1 Yuan = 100 Punkte",
+          "Handy-Seite „Mein Konto“: Die Hauptkarte zeigt nur das Guthaben; ein Tippen öffnet Punktestand und Check-in, mit Hinweis, dass beides getrennte Konten sind",
+          "Handy-Sitzungsliste: Eine beendete Aufgabe bleibt direkt unter der laufenden, innerhalb derselben Statusfarbe nach letzter Aktivität sortiert",
+          "Aufladestufen entsprechen der offiziellen Gutschrifttabelle: Jede Stufe (50/100/200/500/1000 Yuan) hat einen eigenen Bonusanteil"
         ],
         "bugs": [
-          "Behoben: Ein Chat, der auf Bestätigung wartete, ließ sich am Handy nicht ohne Antwort schließen",
-          "Behoben: Beenden am Handy ließ die Desktop-Lampe an, und Wiederholungen konnten ihn wiederbeleben",
-          "Behoben: Kacheln reagierten mit abgelaufenem Schlüssel nicht, nur roher 401",
-          "Behoben: abgelaufener Schlüssel ließ die Seite endlos springen",
-          "Behoben: Ablauf wurde per alert() gemeldet, das mobile WebViews oft schlucken",
-          "Behoben: Upload speicherte beschädigte Daten und brach jede Bilderstellung",
-          "Behoben: Raster schnitt die rechte Spalte ab",
-          "Behoben: Fehlergründe wurden abgeschnitten",
-          "Behoben: Felder unter 16px lösten iOS-Zoom aus",
-          "Behoben: Die Uhr lag in einer Seitenvariable und wurde zurückgesetzt",
-          "Behoben: Lange Tools meldeten einmal und schwiegen dann zwanzig Minuten"
+          "Behoben: Die Punkte auf der Handy-Aufladeseite kamen aus einer fest verdrahteten lokalen Tabelle und passten nicht zur echten Gutschrift (dasselbe Geld ergab je Stufe unterschiedliche Stückpreise); jetzt gilt 1 Yuan = 100 Punkte plus Stufenbonus, genau wie tatsächlich gutgeschrieben wird",
+          "Behoben: Die alte Ansicht zeigte „Punkte“ und „≈ Yuan“ nebeneinander, etwa 700 Punkte neben 0,00 Yuan, und wirkte wie ein Rechenfehler; Punkte gelten für Generator-Funktionen, Yuan für die Chat-Abrechnung – zwei getrennte Konten",
+          "Behoben: Die Liste sortierte nur nach Statusfarbe und behielt innerhalb einer Farbe die alte Reihenfolge, sodass eine gerade beendete Sitzung an ihren alten Platz zurücksprang und nach unten rutschte; jetzt wird innerhalb jeder Farbe nach letzter Aktivität sortiert"
         ],
         "lessons": [
-          "Für einen geteilten Zustand eine persistierte einzige Wahrheit halten, sonst erzählt jedes Gerät etwas anderes",
-          "Ein abgelaufenes Credential braucht einen lesbaren Bildschirm, nie rohes 401",
-          "Automatische Weiterleitungen brauchen eine Versuchsgrenze",
-          "Uploads über den Dateikopf prüfen, nicht über die Endung",
-          "Oberflächen bei echten Telefonbreiten prüfen",
-          "Uhren müssen der Server-Wahrheit folgen"
+          "Zwei Zahlen in verschiedenen Einheiten nie nebeneinander als Umrechnung zeigen – entweder auf getrennte Seiten legen oder den Zweck jeder Zahl klar benennen (gelernt aus unserer internen Erfahrungsbasis)",
+          "Alles, was nur durch Erinnern gilt, muss ein Mechanismus werden: Erst fragen, wer es auffängt, wenn man es vergisst – fängt es niemand auf, keine mündliche Regel daraus machen (gelernt aus unserer internen Erfahrungsbasis)",
+          "Arbeit wird mit Belegen abgeschlossen, nicht mit Gefühl: Wer nicht sagen kann, was geändert wurde und was dabei herauskam, ist nicht fertig (gelernt aus unserer internen Erfahrungsbasis)"
         ]
       }
     },
     "ru": {
-      "summary": "[Новое] В мобильной версии появилась кнопка «Завершить задачу» — справа от «Файл» в меню +. Чат в состоянии «ожидает вашего подтверждения» продолжал гореть жёлтым — и на компьютере тоже, — даже если вы всё прочитали и считаете работу законченной. Одно нажатие (двойное для подтверждения) реально останавливает этот круг, отменяет фоновые повторы и гасит индикатор на телефоне и компьютере. Новое сообщение возобновит работу. [Исправлено] Мобильная версия Marmot никак не реагировала, когда ключ входа истекал: нажатие на «Умную проверку», «Отчёт по данным» или «Удалённое напоминание» ничего не делало либо показывало нечитаемую английскую ошибку, и казалось, что приложение сломалось. Теперь при истечении ключа сразу появляется оранжевая карточка с сообщением, что сеанс истёк и нужен повторный вход, и большая кнопка «Войти снова», которая возвращает на страницу входа. Маленькая строка внизу «Всё равно не работает?» подсказывает нужный адрес. Также устранён цикл, ловивший телефон: просроченный ключ заставлял страницу бесконечно прыгать между входом и самой собой. Теперь мёртвый ключ удаляется при первом неудачном переходе и страница входа остаётся.\n\n[Исправлено] «Не реагирует, пока не напишешь продолжай»: после перезапуска или обновления таймер сбрасывался и через 15 минут показывал «0м 26с». Теперь он берёт реальное время начала с сервера. Долгие команды сообщают каждые три минуты «всё ещё выполняется, Xм».\n\n[Исправлено] Мобильный центр творчества: создание по изображению падало при загрузке с image format is not supported, потому что обработчик загрузки неверно декодировал данные и сохранял повреждённые файлы. Теперь формат определяется по заголовку файла, побайтовое сравнение подтверждает совпадение с оригиналом.\n\n[Улучшено] Вёрстка центра творчества: сетка больше не обрезает правый столбец, панель категорий закрепляется при прокрутке, описания ограничены двумя строками, появляется плашка «XX создаётся…», ошибки показываются полностью, поля ввода используют 16px, чтобы iOS не масштабировал страницу.",
+      "summary": "Сегодня мы привели в порядок несколько мест в мобильной версии, которые легко было понять неправильно. (1) Страница пополнения теперь работает: тарифы, бонусные баллы и реальное зачисление наконец совпадают, расчёт 1 юань = 100 баллов. (2) На странице «Мой профиль» баллы и баланс больше не показываются рядом: раньше там было «700 баллов ≈ 0,00 юаня», два разных учёта в одной строке, и это выглядело как ошибка расчёта. Теперь основная карточка показывает только баланс, а по нажатию открываются баллы и отметка. (3) В списке сессий только что завершённая задача стоит сразу под текущей, а не уезжает обратно на старое место.",
       "sections": {
         "skills": [
-          "Новая кнопка «Завершить задачу» в меню + мобильной версии: закрывает на телефоне и компьютере",
-          "Новое сообщение автоматически возобновляет задачу",
-          "Просроченный ключ показывает оранжевую карточку с возвратом ко входу в один тап",
-          "Ссылка на карточке подсказывает использовать fclow.marmot.top",
-          "Цикл устранён: мёртвый ключ удаляется, остаётся страница входа",
-          "Создание по картинке и видео из картинки используют один декодер",
-          "Панель категорий закрепляется при прокрутке",
-          "Таймер опирается на реальное время сервера",
-          "Долгие команды сообщают о ходе каждые три минуты"
+          "Новая страница пополнения: тарифы, бонусные баллы и реальное зачисление на одном экране, расчёт 1 юань = 100 баллов",
+          "Мобильная страница «Мой профиль»: основная карточка показывает только баланс, по нажатию открываются баллы и отметка с пояснением, что это разные счета",
+          "Мобильный список сессий: завершённая задача остаётся сразу под текущей, внутри одного цвета статуса сортировка по последней активности",
+          "Тарифы пополнения совпадают с официальной таблицей зачисления: у каждого тарифа (50/100/200/500/1000 юаней) свой процент бонуса"
         ],
         "bugs": [
-          "Исправлено: чат в ожидании подтверждения нельзя было закрыть с телефона без ответа",
-          "Исправлено: завершение на телефоне оставляло индикатор на компьютере, а повторы могли его оживить",
-          "Исправлено: плитки не реагировали с просроченным ключом, только сырой 401",
-          "Исправлено: просроченный ключ заставлял страницу бесконечно прыгать",
-          "Исправлено: истечение сообщалось через alert(), который мобильные WebView часто глотают",
-          "Исправлено: загрузка сохраняла повреждённые данные и ломала всё создание по картинке",
-          "Исправлено: сетка обрезала правый столбец",
-          "Исправлено: причины ошибок обрезались",
-          "Исправлено: поля меньше 16px вызывали масштабирование в iOS",
-          "Исправлено: таймер жил в переменной страницы и сбрасывался",
-          "Исправлено: долгие инструменты сообщали один раз и молчали двадцать минут"
+          "Исправлено: баллы на мобильной странице пополнения брались из жёстко заданной локальной таблицы и не совпадали с реальным зачислением (одни и те же деньги давали разную цену балла в разных тарифах); теперь считается как 1 юань = 100 баллов плюс бонус тарифа, ровно как приходит на счёт",
+          "Исправлено: раньше «баллы» и «≈ юани» стояли рядом, например 700 баллов и 0,00 юаня, и это выглядело ошибкой расчёта; баллы нужны для функций генерации, а юани — для оплаты чата, это два разных счёта",
+          "Исправлено: список сортировался только по цвету статуса и внутри одного цвета сохранял старый порядок, поэтому только что завершённая сессия возвращалась на прежнее место и уходила вниз; теперь внутри каждого цвета сортировка по последней активности"
         ],
         "lessons": [
-          "Для общего состояния нужна одна сохранённая истина, иначе каждое устройство говорит своё",
-          "Просроченные учётные данные требуют понятного экрана, а не сырого 401",
-          "Автопереходу нужен ограничитель попыток",
-          "Проверяйте загрузки по заголовку файла, а не по расширению",
-          "Проверяйте интерфейс на реальной ширине телефона",
-          "Таймеры должны опираться на серверную истину"
+          "Никогда не ставьте два числа в разных единицах рядом как пересчёт: либо разнесите их по разным страницам, либо ясно подпишите назначение каждого (из нашей внутренней базы опыта)",
+          "Всё, что держится только на памяти, должно стать механизмом: сначала решите, кто подстрахует при забывании, а если некому — не превращайте правило в устное обещание (из нашей внутренней базы опыта)",
+          "Работа закрывается по доказательствам, а не по ощущению: если не можете сказать, что изменено и какой результат, значит не сделано (из нашей внутренней базы опыта)"
         ]
       }
     },
     "pt": {
-      "summary": "[Novo] A versão móvel ganhou o botão \"Encerrar tarefa\", à direita de \"Arquivo\" no menu +. Uma conversa em \"aguardando sua confirmação\" mantinha a luz amarela acesa — e o desktop também — mesmo depois de você ler e considerar o trabalho concluído. Um toque (duplo para confirmar) realmente para essa rodada, cancela repetições em segundo plano e apaga a luz no celular e no desktop. Envie uma nova mensagem para retomar. [Corrigido] A versão móvel do Marmot não fazia nada quando a chave de acesso expirava: tocar em Inspeção inteligente, Relatório de dados ou Lembrete remoto não respondia, ou mostrava um erro em inglês ilegível, parecendo que o aplicativo tinha quebrado. Agora, assim que a chave expira, aparece um cartão laranja informando que a sessão expirou e que é preciso entrar de novo, com um botão grande «Entrar novamente» que volta direto à tela de login. Uma linha pequena no rodapé, «Ainda não funciona?», indica qual endereço usar. Também foi corrigido um laço que prendia o telefone: uma chave expirada fazia a página pular sem fim entre o login e ela mesma. Agora a chave morta é apagada no primeiro salto falho e a tela de login permanece.\n\n[Corrigido] «Só responde quando você escreve continuar»: após reiniciar ou atualizar, o cronômetro voltava a números pequenos e, após 15 minutos, ainda mostrava «0m 26s». Agora usa a hora real de início gravada no servidor. Comandos longos informam a cada três minutos «ainda em execução, Xm».\n\n[Corrigido] Central de criação móvel: a criação com imagens falhava no envio com image format is not supported, pois o endpoint decodificava os dados errado e gravava arquivos corrompidos. Agora detecta o formato real pelo cabeçalho do arquivo, com comparação byte a byte confirmando a igualdade com o original.\n\n[Melhorado] Layout da central de criação: a grade não corta mais a coluna da direita, a barra de categorias fixa ao rolar, as descrições ficam em duas linhas, aparece uma pílula «XX criando…», os erros são exibidos por inteiro e os campos usam 16px para evitar zoom no iOS.",
+      "summary": "Hoje arrumamos várias coisas no celular que davam margem a confusão. (1) A página de recarga está no ar: planos, pontos de bônus e crédito real agora batem, com 1 yuan = 100 pontos. (2) A página «Minha conta» não mostra mais pontos e saldo lado a lado: antes aparecia «700 pontos ≈ 0,00 yuan», misturando duas contas diferentes na mesma linha e parecendo erro de cálculo. Agora o cartão principal mostra só o saldo; ao tocar, você vê os pontos e o check-in. (3) Na lista de sessões, a tarefa recém-concluída fica logo abaixo da que está em execução, em vez de voltar e afundar no lugar antigo.",
       "sections": {
         "skills": [
-          "Novo botão \"Encerrar tarefa\" no menu + do celular: encerra nos dois dispositivos",
-          "Enviar nova mensagem retoma a tarefa automaticamente",
-          "Chave expirada mostra cartão laranja com retorno ao login em um toque",
-          "O link do cartão indica usar fclow.marmot.top",
-          "Sem laço: a chave morta é apagada e você fica na tela de login",
-          "Criação com imagem e vídeo a partir de imagem usam o mesmo decodificador",
-          "Barra de categorias fixa ao rolar",
-          "Cronômetro baseado na hora real do servidor",
-          "Comandos longos informam a cada três minutos"
+          "Nova página de recarga: planos, pontos de bônus e crédito real em uma só tela, com 1 yuan = 100 pontos",
+          "Página «Minha conta» no celular: o cartão principal mostra só o saldo; ao tocar, abre pontos e check-in, explicando que são duas contas diferentes",
+          "Lista de sessões no celular: a tarefa concluída fica logo abaixo da que está em execução, ordenada pela atividade mais recente dentro da mesma cor de status",
+          "Os planos de recarga seguem a tabela oficial de crédito: cada plano (50/100/200/500/1000 yuan) tem seu próprio percentual de bônus"
         ],
         "bugs": [
-          "Corrigido: não dava para encerrar pelo celular uma conversa aguardando confirmação sem responder",
-          "Corrigido: encerrar no celular deixava a luz do desktop acesa e as repetições podiam revivê-la",
-          "Corrigido: os atalhos não respondiam com a chave expirada, apenas um 401 cru",
-          "Corrigido: a chave expirada fazia a página pular sem fim",
-          "Corrigido: a expiração usava alert(), que WebViews móveis costumam ignorar",
-          "Corrigido: o envio gravava dados corrompidos e quebrava toda criação com imagem",
-          "Corrigido: a grade cortava a coluna da direita",
-          "Corrigido: os motivos de erro eram truncados",
-          "Corrigido: campos abaixo de 16px causavam zoom no iOS",
-          "Corrigido: o cronômetro vivia numa variável de página e zerava",
-          "Corrigido: ferramentas longas avisavam uma vez e silenciavam por vinte minutos"
+          "Corrigido: os pontos da página de recarga vinham de uma tabela fixa local e não batiam com o crédito real (o mesmo dinheiro dava preços por ponto diferentes em cada plano); agora o cálculo é 1 yuan = 100 pontos mais o bônus do plano, igual ao que realmente entra na conta",
+          "Corrigido: a versão antiga mostrava «pontos» e «≈ yuan» lado a lado, por exemplo 700 pontos ao lado de 0,00 yuan, e parecia erro de cálculo; pontos servem para funções de geração e yuan para a cobrança do chat: são duas contas separadas",
+          "Corrigido: a lista ordenava só pela cor de status e mantinha a ordem antiga dentro da mesma cor, então a sessão recém-concluída voltava ao lugar de antes e afundava; agora a ordem dentro de cada cor é por atividade mais recente"
         ],
         "lessons": [
-          "Mantenha uma única verdade persistida para um estado compartilhado, senão cada aparelho conta outra história",
-          "Credencial expirada precisa de tela legível, nunca um 401 cru",
-          "Redirecionamento automático precisa de limite de tentativas",
-          "Valide envios pelo cabeçalho do arquivo, não pela extensão",
-          "Verifique a interface em larguras reais de telefone",
-          "Cronômetros devem seguir a verdade do servidor"
+          "Nunca coloque dois números de unidades diferentes lado a lado como se fossem conversão: separe em páginas distintas ou diga claramente para que serve cada um (aprendido com nossa base de experiência interna)",
+          "Tudo o que só se mantém pela memória precisa virar mecanismo: primeiro pergunte quem cobre a falha se alguém esquecer e, se ninguém cobre, não transforme a regra em promessa verbal (aprendido com nossa base de experiência interna)",
+          "O trabalho se encerra com evidência, não com sensação: se você não consegue dizer o que mudou e qual foi o resultado, não está pronto (aprendido com nossa base de experiência interna)"
         ]
       }
     },
     "ar": {
-      "summary": "[جديد] أضفنا في إصدار الجوال زر \"إنهاء المهمة\" بجوار \"ملف\" في قائمة +. المحادثة التي تنتظر تأكيدك كانت تُبقي الضوء الأصفر مضاءً — وكذلك على الحاسوب — حتى بعد قراءتها واعتبار العمل منتهيًا. ضغطة واحدة (ضغطتان للتأكيد) توقف هذه الجولة فعليًا وتلغي إعادة المحاولة في الخلفية وتُطفئ الضوء على الجهازين. أرسل رسالة جديدة للاستئناف. [إصلاح] لم تكن نسخة الهاتف من Marmot تستجيب عند انتهاء صلاحية مفتاح الدخول: الضغط على الفحص الذكي أو تقرير البيانات أو التذكير عن بُعد لا يفعل شيئًا، أو يعرض خطأ إنجليزيًا غير مفهوم، فيبدو التطبيق معطلًا. الآن بمجرد انتهاء الصلاحية تظهر بطاقة برتقالية توضح أن الجلسة انتهت وأنه يلزم تسجيل الدخول من جديد، مع زر كبير «تسجيل الدخول مجددًا» يعيدك مباشرة إلى صفحة الدخول. وسطر صغير في الأسفل «ما زال لا يعمل؟» يخبرك بالعنوان الصحيح. كما تم إصلاح حلقة كانت تحبس الهاتف: المفتاح المنتهي كان يجعل الصفحة تتنقل بلا نهاية بين صفحة الدخول ونفسها. الآن يُحذف المفتاح الميت عند أول انتقال فاشل وتبقى صفحة الدخول.\n\n[إصلاح] «لا يستجيب حتى تكتب تابع»: بعد إعادة التشغيل أو التحديث كان مؤقت المعالجة يعود إلى أرقام صغيرة ويظهر «0د 26ث» بعد خمس عشرة دقيقة. الآن يعتمد على وقت البدء الحقيقي المسجل على الخادم. الأوامر الطويلة تعلن كل ثلاث دقائق «ما زال يعمل، Xد».\n\n[إصلاح] مركز الإبداع في الهاتف: كان الإبداع بالصور يفشل عند الرفع بخطأ image format is not supported لأن نقطة الرفع تفك ترميز بيانات الصور خطأً وتحفظ ملفات تالفة. الآن يُكتشف التنسيق الحقيقي من ترويسة الملف، ومقارنة بايت ببايت تؤكد تطابق الملف مع الأصل.\n\n[تحسين] تنسيق مركز الإبداع: لم تعد الشبكة تقص العمود الأيمن، وشريط التصنيفات يثبت عند التمرير، والوصف يُختصر في سطرين، وتظهر كبسولة «XX قيد الإنشاء…»، وتُعرض أسباب الفشل كاملة، وحقول الإدخال بحجم 16 بكسل لمنع تكبير iOS.",
+      "summary": "اليوم رتّبنا عدة أمور في نسخة الهاتف كانت تُفهم خطأً. (1) صفحة الشحن أصبحت جاهزة: الفئات ونقاط الهدايا والرصيد الفعلي أصبحت متوافقة، باحتساب 1 يوان = 100 نقطة. (2) صفحة «حسابي» لم تعد تعرض النقاط والرصيد جنبًا إلى جنب: سابقًا كانت تكتب «700 نقطة ≈ 0.00 يوان»، أي دفترين مستقلين في سطر واحد، فبدا الأمر كخطأ حسابي. الآن تعرض البطاقة الرئيسية الرصيد فقط، وعند الضغط عليها تظهر النقاط وتسجيل الحضور. (3) في قائمة الجلسات، المهمة التي انتهت للتو تبقى أسفل المهمة الجارية مباشرة بدل أن تعود إلى مكانها القديم وتغوص.",
       "sections": {
         "skills": [
-          "زر \"إنهاء المهمة\" في قائمة + بالجوال: ينهي المهمة على الجهازين",
-          "إرسال رسالة جديدة يستأنف المهمة تلقائيًا",
-          "المفتاح المنتهي يعرض بطاقة برتقالية مع عودة للدخول بلمسة واحدة",
-          "رابط البطاقة يوضح استخدام fclow.marmot.top",
-          "لا حلقة: يُحذف المفتاح الميت وتبقى صفحة الدخول",
-          "الإبداع بالصورة والفيديو من صورة يستخدمان نفس المفكك",
-          "شريط التصنيفات يثبت أثناء التمرير",
-          "المؤقت يعتمد على وقت البدء الحقيقي من الخادم",
-          "الأوامر الطويلة تعلن التقدم كل ثلاث دقائق"
+          "صفحة شحن جديدة: الفئات ونقاط الهدايا والرصيد الفعلي في شاشة واحدة، باحتساب 1 يوان = 100 نقطة",
+          "صفحة «حسابي» في الهاتف: البطاقة الرئيسية تعرض الرصيد فقط، والضغط عليها يفتح رصيد النقاط وتسجيل الحضور مع توضيح أن لكل منهما استخدامًا مختلفًا",
+          "قائمة الجلسات في الهاتف: المهمة المنتهية تبقى أسفل الجارية مباشرة، ومرتبة حسب آخر نشاط داخل اللون نفسه",
+          "عرض فئات الشحن يطابق جدول الإيداع الرسمي: لكل فئة (50/100/200/500/1000 يوان) نسبة هدية مختلفة وتُحسب على حدة"
         ],
         "bugs": [
-          "إصلاح: لم يكن ممكنًا إنهاء محادثة تنتظر التأكيد من الجوال دون الرد",
-          "إصلاح: الإنهاء من الجوال كان يُبقي ضوء الحاسوب مضاءً ويمكن أن تُعيده المحاولات",
-          "إصلاح: البطاقات لم تستجب مع مفتاح منتهٍ، فقط 401 خام",
-          "إصلاح: المفتاح المنتهي جعل الصفحة تتنقل بلا نهاية",
-          "إصلاح: الإشعار كان عبر alert() الذي تتجاهله متصفحات الهاتف غالبًا",
-          "إصلاح: الرفع حفظ بيانات تالفة وأفسد كل إبداع بالصور",
-          "إصلاح: الشبكة قصت العمود الأيمن",
-          "إصلاح: أسباب الفشل كانت مبتورة",
-          "إصلاح: الحقول أقل من 16 بكسل تسبب تكبير iOS",
-          "إصلاح: المؤقت كان في متغير صفحة ويُصفَّر عند إعادة التشغيل",
-          "إصلاح: الأدوات الطويلة تعلنت مرة ثم صمتت عشرين دقيقة"
+          "إصلاح: نقاط صفحة الشحن في الهاتف كانت تأتي من جدول ثابت محلي ولا تطابق الرصيد الفعلي (المبلغ نفسه يعطي سعرًا مختلفًا للنقطة حسب الفئة)؛ أصبح الحساب 1 يوان = 100 نقطة بالإضافة إلى هدية الفئة، مطابقًا تمامًا لما يُودع فعلًا",
+          "إصلاح: النسخة القديمة كانت تعرض «النقاط» و«≈ يوان» جنبًا إلى جنب، مثل 700 نقطة بجانب 0.00 يوان، فبدا كخطأ حسابي؛ النقاط تُستخدم لميزات التوليد واليوان لخصم المحادثة، وهما دفتران منفصلان",
+          "إصلاح: القائمة كانت تُرتّب حسب لون الحالة فقط وتحتفظ بالترتيب القديم داخل اللون نفسه، فتعود الجلسة المنتهية للتو إلى مكانها القديم وتغوص؛ الآن الترتيب داخل كل لون حسب آخر نشاط"
         ],
         "lessons": [
-          "اجعل لحالة مشتركة حقيقة واحدة محفوظة يراها الطرفان، وإلا روى كل جهاز رواية مختلفة",
-          "بيانات الاعتماد المنتهية تحتاج شاشة مفهومة، لا 401 خامًا",
-          "إعادة التوجيه التلقائي تحتاج حدًا لعدد المحاولات",
-          "تحقق من المرفوعات بترويسة الملف لا بالامتداد",
-          "راجع الواجهة بعرض هاتف حقيقي",
-          "المؤقتات يجب أن تعتمد على حقيقة الخادم"
+          "لا تضع رقمين بوحدتين مختلفتين جنبًا إلى جنب كأنهما تحويل؛ إما افصلهما في صفحات مختلفة أو وضّح استخدام كل منهما بوضوح (تعلّمناها من قاعدة الخبرة الداخلية)",
+          "كل ما لا يستمر إلا بالتذكّر يجب أن يتحول إلى آلية: اسأل أولًا من يغطيه إذا نُسي، وإن لم يغطّه أحد فلا تكتب القاعدة كوعد شفهي (تعلّمناها من قاعدة الخبرة الداخلية)",
+          "إنهاء العمل يُقاس بالدليل لا بالإحساس: إذا لم تستطع قول ماذا تغيّر وما النتيجة، فهو غير منجز (تعلّمناها من قاعدة الخبرة الداخلية)"
         ]
       }
     }
