@@ -1,214 +1,206 @@
 {
-  "ver": "1.5.33",
-  "date": "2026-11-04",
-  "summary": "【修了什么】手机版充值页的点数以前取自本地硬编码，与真实到账对不上，同一笔钱在不同档位算出不同单价；现已改为 1 元 = 100 点 + 档位赠送，与入账口径完全一致。另外「我的」页以前把算力点和余额并排显示（700 点 ≈ 0.00 元），两个独立账本混在一行看着像算错；现在主卡只显示余额。会话列表以前只按灯色排序，刚做完的任务会回原位沉底，现在同灯色内按最近活动时间倒序。【优化/新增了什么】新增充值页面，一个页面看清各档位赠送点数与实际到账，下单按 1 元 = 100 点入账；「我的」页主卡只显余额，点主卡进二级页看算力点余额与签到，并说明两者用途不同；手机版会话列表里刚做完的任务紧贴在「干活中」下面。【自我学习到了什么】两个不同单位的数字不要并排做换算，要么分页面要么明确标注用途；凡是靠记性才能不变的事，必须做成机制，先想清楚漏了由谁兜住；收工只认证据不认感觉，答不出改了什么和结果是什么就不算做完。",
+  "ver": "1.5.46",
+  "date": "2026-11-06",
+  "summary": "【改了什么】这次只治一件事：要您确认的话被腰斩。①「等待主人确认」后面那段说明/选项清单，以前只留前 60 个字，后面全切掉加个\"…\"，四问只剩两问、两步操作只剩半步，主人根本没法答。现在整段给全，编号和换行原样保留。②多行的确认清单不再塞进一颗小圆胶囊里挤成一行，改成左侧竖条的清单块，一行一条。",
   "sections": {
     "skills": [
-      "新增充值页面：一个页面看清各档位赠送点数与实际到账，下单按 1 元 = 100 点入账",
-      "手机版「我的」页：主卡只显余额，点主卡进二级页看算力点余额与签到，并说明两者用途不同",
-      "手机版会话列表：刚做完的任务紧跟「干活中」下面，同灯色内按最近活动时间倒序",
-      "充值档位显示与云端到账表一致：¥50/100/200/500/1000 各档赠送比例不同，按档位分别计算"
+      "「等待主人确认」章：要您做的事一条不落全显示，编号、换行都保留（以前超过 60 字就切）",
+      "好几条要确认时，章会变成一块清单（左边一道竖条），一行一条，不再挤成一行",
+      "确认什么就写什么：不会再把\"2.…\"这种半截话端给您",
+      "真超长（1400 字以上）才收口，而且是按整行收，绝不切在半个词上，末尾明写\"后面还有，全文见上面这条回话\""
     ],
     "bugs": [
-      "修：手机版充值页的点数以前取自本地硬编码，与真实到账对不上（同一笔钱在不同档位算出不同单价）；现改为「1 元 = 100 点 + 档位赠送」，与入账口径完全一致",
-      "修：旧版把「算力点」和「≈元」并排显示，700 点配 0.00 元，用户以为点数算错；其实点用于生成功能、元用于聊天扣费，是两个独立账本",
-      "修：会话列表以前只按灯色排序，同种灯色之间保持旧顺序，刚做完的会话会回原位沉底；现在同灯色内按最近活动时间倒序"
+      "黄章只显示「…换节点、装…」就断了，后面\"调 TCP 缓冲区并实测报数\"和\"把管理密码发我\"全看不见——已修",
+      "四问拍板只显示第 1 问和「2.…」，后两问直接消失，主人没法选——已修",
+      "「要您做的」抽取正则里还有个 160 字的字数上限，长清单照样被削——已去掉",
+      "A/B 选项兜底只取前 3 条且用斜杠拼成一行——已改成最多 8 条、按行列"
     ],
     "lessons": [
-      "两个不同单位的数字不要并排做换算，要么分页面，要么明确标注各自用途（学自内部经验库）",
-      "凡是靠记性才能不变的事，必须做成机制：先想清楚漏了由谁兜住，兜不住就别把规矩写成口头承诺（学自内部经验库）",
-      "收工只认证据不认感觉：答不出「改了什么 + 结果是什么」，就不算做完（学自内部经验库）"
+      "给主人看的确认清单少一行，主人就没法答——宁可长，不许残",
+      "任何\"只显示前 N 个字\"的展示上限，都要问一句：截断的会不会正好是要回答的东西",
+      "服务端和页面抽同一段话必须同一套口径，各切各的就会两脸打架"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "Today we cleaned up a few things on the phone that were easy to misread. (1) The top-up page is now live: tiers, bonus points and real credits finally agree, credited at 1 yuan = 100 points. (2) The Me page no longer shows points and balance side by side - it used to say \"700 points = 0.00 yuan\", mixing two separate ledgers on one line and making the numbers look wrong. The main card now shows balance only; tap it for points and check-in. (3) In the session list, a task you just finished now sits right under the running one instead of sinking back to its old slot.",
-      "sections": {
-        "skills": [
-          "New top-up page: tiers, bonus points and real credits in one view, credited at 1 yuan = 100 points",
-          "Phone Me page: the main card shows balance only; tap it for points balance and check-in, with a note that the two are different ledgers",
-          "Phone session list: a finished task stays right under the running one, sorted by latest activity within the same status colour",
-          "Top-up tiers now match the official credit table: each tier (50/100/200/500/1000 yuan) has its own bonus rate"
-        ],
-        "bugs": [
-          "Fixed: phone top-up points came from a hard-coded local table and did not match real credits (the same money produced different unit prices per tier); they are now calculated as 1 yuan = 100 points plus the tier bonus, identical to what actually arrives",
-          "Fixed: the old Me page showed \"points\" and \"about X yuan\" side by side, e.g. 700 points next to 0.00 yuan, which looked like a calculation error; points are for generation features and yuan is for chat billing - two separate ledgers",
-          "Fixed: the session list only sorted by status colour and kept the old order inside the same colour, so a just-finished session jumped back to its old slot and sank; now sorted by latest activity within each colour"
-        ],
-        "lessons": [
-          "Never put two numbers in different units side by side as a conversion - either split them onto separate pages or label each one's purpose clearly (learned from our internal experience base)",
-          "Anything that only stays true if you remember it must be turned into a mechanism: first ask who catches it when you forget, and if nobody does, do not write the rule as a verbal promise (learned from our internal experience base)",
-          "Finishing work is judged by evidence, not by feeling: if you cannot say what changed and what the result was, it is not done (learned from our internal experience base)"
-        ]
-      }
+      "summary": "[What changed] One fix only: confirmation text was being cut off. (1) The text after \"awaiting your confirmation\" used to be truncated to the first 60 characters with a trailing \"…\", so a four-question list showed two questions and a two-step action showed half a step — impossible to answer. The full text is now shown, keeping numbering and line breaks. (2) Multi-line confirmation lists no longer get squeezed into a small pill; they render as a left-barred list, one item per line.",
+      "skills": [
+        "The \"awaiting your confirmation\" badge now shows every item in full, with numbering and line breaks intact (it used to cut at 60 characters)",
+        "When there are several items, the badge becomes a list block (a vertical bar on the left), one item per line",
+        "What to confirm is stated in full — no more half-sentences like \"2.…\"",
+        "Only a genuinely huge list (over 1400 characters) gets trimmed, and it trims on whole lines, never mid-word, with a note that the rest is in the message above"
+      ],
+      "bugs": [
+        "The yellow badge stopped at \"…switch node, install…\" and hid the rest of the instruction and the password request — fixed",
+        "The four-question list showed only question 1 and \"2.…\", the last two vanished — fixed",
+        "The extraction regex had its own 160-character cap that also cut long lists — removed",
+        "The A/B option fallback kept only the first 3 options joined by slashes on one line — now up to 8, one per line"
+      ],
+      "lessons": [
+        "If one line of the confirmation list is missing, the owner cannot answer — better long than broken",
+        "Every \"show only the first N characters\" limit needs to ask: is the cut landing exactly on what needs answering?",
+        "Server and page must extract the same text by the same rule, otherwise they disagree"
+      ]
     },
     "ja": {
-      "summary": "今日はスマホ側で誤解を招きやすい点をまとめて整理しました。①チャージ画面が正式に使えるようになり、料金プラン・ボーナスポイント・実際の反映額の3つが一致し、1元＝100ポイントで反映されます。②「マイページ」ではポイントと残高を並べて表示しなくなりました。以前は「700ポイント ≈ 0.00元」と、別々の台帳を一行に混ぜていたため計算ミスに見えていました。現在はメインカードは残高のみ、タップするとポイント残高とチェックインが開きます。③セッション一覧では、終わったばかりのタスクが「作業中」のすぐ下に並び、元の位置に沈みません。",
-      "sections": {
-        "skills": [
-          "チャージ画面を追加：各プランのボーナスと実際の反映額が一画面で分かり、1元＝100ポイントで反映",
-          "スマホの「マイページ」：メインカードは残高のみ。タップでポイント残高とチェックインを表示し、双方の用途が違うことを明記",
-          "スマホのセッション一覧：終わったタスクは「作業中」のすぐ下に表示、同じステータス色の中では最近の活動順",
-          "チャージプランの表示を公式の反映表と一致：50/100/200/500/1000元の各プランでボーナス率が異なるため個別計算"
-        ],
-        "bugs": [
-          "修正：スマホのチャージ画面のポイントはローカルの固定値で、実際の反映額と一致していませんでした（同じ金額でもプランごとに単価が違う状態）。「1元＝100ポイント＋プランボーナス」に変更し、実際の入金と完全に一致",
-          "修正：旧版は「ポイント」と「約○元」を並べて表示し、700ポイントの隣に0.00元と出ていたため計算ミスに見えていました。ポイントは生成機能用、元はチャット課金用という別々の台帳です",
-          "修正：一覧はステータス色だけで並べていたため、同じ色の中では古い順のままで、終わったばかりのセッションが元の位置に戻って沈んでいました。同じ色の中では最近の活動順に変更"
-        ],
-        "lessons": [
-          "単位の違う数字を並べて換算表示しない。ページを分けるか、それぞれの用途を明記する（社内の経験ベースから学ぶ）",
-          "覚えていないと守れないことは仕組みにする。忘れたとき誰が拾うかを先に決め、拾う人がいないなら口約束のルールにしない（社内の経験ベースから学ぶ）",
-          "作業の完了は感覚ではなく証拠で判断する。「何を変えて結果どうなったか」を言えないなら未完了（社内の経験ベースから学ぶ）"
-        ]
-      }
+      "summary": "【変更点】今回の修正は1点：確認文が途中で切れていた件です。(1)「オーナーの確認待ち」の後ろの説明・選択肢は、以前は最初の60文字で切られ末尾に「…」が付いていました。四問の確認が二問しか出ず、二段階の操作が半分で終わるため答えようがありませんでした。現在は全文を表示し、番号と改行もそのまま残します。(2) 複数行の確認リストは小さな丸いバッジに押し込めず、左に縦線のあるリストブロックで一行ずつ表示します。",
+      "skills": [
+        "「オーナーの確認待ち」バッジは全項目を表示。番号・改行もそのまま（以前は60文字で切断）",
+        "項目が複数あるときは左に縦線のあるリスト表示、一行に一件",
+        "確認事項は最後まで表示。「2.…」のような途中で切れた文は出ません",
+        "本当に長い場合（1400文字超）のみ省略しますが、行単位で切り、語の途中では切りません。残りは上のメッセージにありますと明記"
+      ],
+      "bugs": [
+        "黄色バッジが「…ノードを切り替え、導入…」で途切れ、続きとパスワード依頼が見えなかった — 修正",
+        "四問の確認が第1問と「2.…」だけになり、後ろ二問が消えていた — 修正",
+        "抽出正規表現に160文字の上限があり長いリストが削られていた — 撤去",
+        "A/B選択肢のフォールバックが先頭3件をスラッシュで1行に連結していた — 最大8件・一行一件に変更"
+      ],
+      "lessons": [
+        "確認リストが一行欠けるとオーナーは答えられない — 長くても欠けるより良い",
+        "「先頭N文字だけ表示」という上限は、切れる位置がまさに答え必要な部分でないか必ず問う",
+        "サーバーとページは同じ抽出規則でなければ食い違う"
+      ]
     },
     "ko": {
-      "summary": "오늘은 휴대폰에서 오해하기 쉬운 부분을 한 번에 정리했습니다. ①충전 페이지가 정식으로 사용 가능해졌고, 요금제·보너스 포인트·실제 적립액 세 가지가 일치하며 1위안 = 100포인트로 적립됩니다. ②'내 정보' 페이지에서 포인트와 잔액을 나란히 보여주지 않습니다. 예전에는 '700포인트 ≈ 0.00위안'처럼 서로 다른 장부를 한 줄에 섞어 계산 오류처럼 보였습니다. 이제 메인 카드는 잔액만 보여주고, 누르면 포인트 잔액과 출석 체크를 볼 수 있습니다. ③세션 목록에서 방금 끝난 작업이 '작업 중' 바로 아래에 붙고, 원래 자리로 돌아가 아래로 가라앉지 않습니다.",
-      "sections": {
-        "skills": [
-          "충전 페이지 추가: 요금제별 보너스 포인트와 실제 적립액을 한 화면에서 확인, 1위안 = 100포인트 적립",
-          "휴대폰 '내 정보': 메인 카드는 잔액만 표시, 누르면 포인트 잔액과 출석 체크를 보여주고 두 장부의 용도가 다름을 안내",
-          "휴대폰 세션 목록: 방금 끝난 작업은 '작업 중' 바로 아래에 표시, 같은 상태 색 안에서는 최근 활동 순",
-          "충전 요금제 표시를 공식 적립표와 일치: 50/100/200/500/1000위안 각 요금제의 보너스 비율이 달라 개별 계산"
-        ],
-        "bugs": [
-          "수정: 휴대폰 충전 페이지의 포인트가 로컬 하드코딩 값이라 실제 적립액과 맞지 않았습니다(같은 금액인데 요금제마다 단가가 달랐음). '1위안 = 100포인트 + 요금제 보너스'로 바꿔 실제 입금과 완전히 일치",
-          "수정: 예전 '내 정보'는 '포인트'와 '약 ○위안'을 나란히 보여줘 700포인트 옆에 0.00위안이 붙어 계산 오류처럼 보였습니다. 포인트는 생성 기능용, 위안은 채팅 과금용으로 서로 다른 장부입니다",
-          "수정: 목록이 상태 색으로만 정렬되고 같은 색 안에서는 예전 순서를 유지해, 방금 끝난 세션이 원래 자리로 돌아가 가라앉았습니다. 이제 같은 색 안에서 최근 활동 순으로 정렬"
-        ],
-        "lessons": [
-          "단위가 다른 두 숫자를 나란히 두고 환산하지 말 것. 페이지를 나누거나 각각의 용도를 분명히 표시한다 (사내 경험 저장소에서 배움)",
-          "기억해야만 지켜지는 일은 반드시 구조로 만든다. 잊었을 때 누가 받아주는지 먼저 정하고, 받아줄 사람이 없으면 구두 약속으로 규칙을 만들지 않는다 (사내 경험 저장소에서 배움)",
-          "마무리는 느낌이 아니라 증거로 판단한다. '무엇을 바꿨고 결과가 어땠는지' 말할 수 없으면 끝난 것이 아니다 (사내 경험 저장소에서 배움)"
-        ]
-      }
+      "summary": "[변경 사항] 이번엔 한 가지만 고쳤습니다: 확인 문구가 잘리던 문제. (1) \"확인 대기\" 뒤의 설명·선택지는 이전에 앞 60자만 남기고 \"…\"를 붙였습니다. 네 개 질문이 두 개만 보이고 두 단계 작업이 반만 보여 답할 수 없었습니다. 이제 전체를 표시하고 번호와 줄바꿈도 그대로 유지합니다. (2) 여러 줄 확인 목록은 작은 알약 모양에 밀어 넣지 않고 왼쪽 세로줄이 있는 목록 블록으로 한 줄에 하나씩 표시합니다.",
+      "skills": [
+        "\"확인 대기\" 배지는 모든 항목을 전부 표시(번호·줄바꿈 유지, 이전엔 60자에서 잘림)",
+        "항목이 여러 개면 왼쪽 세로줄 목록으로 한 줄에 하나",
+        "확인할 내용은 끝까지 표시 — \"2.…\" 같은 반토막 문장 없음",
+        "정말 긴 경우(1400자 초과)만 줄 단위로 자르고 단어 중간은 자르지 않으며, 나머지는 위 메시지에 있다고 명시"
+      ],
+      "bugs": [
+        "노란 배지가 \"…노드 교체, 설치…\"에서 끊겨 나머지 지시와 비밀번호 요청이 안 보임 — 수정",
+        "네 개 질문 목록이 1번과 \"2.…\"만 보이고 뒤 두 개가 사라짐 — 수정",
+        "추출 정규식에 160자 상한이 있어 긴 목록이 잘림 — 제거",
+        "A/B 선택지 대체 로직이 앞 3개만 슬래시로 한 줄에 붙임 — 최대 8개, 한 줄에 하나로 변경"
+      ],
+      "lessons": [
+        "확인 목록에서 한 줄이 빠지면 답할 수 없다 — 길어도 잘리는 것보다 낫다",
+        "\"앞 N자만 표시\"하는 모든 상한은 잘리는 지점이 바로 답해야 할 부분인지 물어야 한다",
+        "서버와 페이지는 같은 규칙으로 추출해야 어긋나지 않는다"
+      ]
     },
     "es": {
-      "summary": "Hoy ordenamos varias cosas del móvil que se prestaban a confusión. (1) La página de recarga ya está disponible: planes, puntos de regalo y saldo real por fin coinciden, con 1 yuan = 100 puntos. (2) La página «Mi cuenta» ya no muestra puntos y saldo uno al lado del otro: antes ponía «700 puntos ≈ 0,00 yuan», mezclando dos libros contables distintos en una línea y parecía un error de cálculo. Ahora la tarjeta principal solo muestra el saldo; al tocarla ves los puntos y el registro diario. (3) En la lista de sesiones, la tarea recién terminada queda justo debajo de la que está en marcha, sin volver a hundirse en su posición anterior.",
-      "sections": {
-        "skills": [
-          "Nueva página de recarga: planes, puntos de regalo y saldo real en una sola vista, con 1 yuan = 100 puntos",
-          "Página «Mi cuenta» del móvil: la tarjeta principal solo muestra el saldo; al tocarla se ven los puntos y el registro diario, aclarando que son cuentas distintas",
-          "Lista de sesiones del móvil: la tarea terminada queda justo debajo de la que está en marcha, ordenada por actividad reciente dentro del mismo color",
-          "Los planes de recarga coinciden con la tabla oficial de abono: cada plan (50/100/200/500/1000 yuan) tiene su propio porcentaje de regalo"
-        ],
-        "bugs": [
-          "Corregido: los puntos de la página de recarga del móvil venían de una tabla fija local y no coincidían con el abono real (el mismo dinero daba precios distintos según el plan); ahora se calculan como 1 yuan = 100 puntos más el regalo del plan, igual que lo que llega de verdad",
-          "Corregido: la versión anterior mostraba «puntos» y «≈ yuan» juntos, por ejemplo 700 puntos junto a 0,00 yuan, y parecía un error de cálculo; los puntos son para funciones de generación y el yuan para el cobro del chat: son dos cuentas separadas",
-          "Corregido: la lista solo se ordenaba por color de estado y mantenía el orden antiguo dentro del mismo color, así que la sesión recién terminada volvía a su hueco y se hundía; ahora se ordena por actividad reciente dentro de cada color"
-        ],
-        "lessons": [
-          "No pongas dos cifras en unidades distintas una al lado de la otra como si fueran convertibles: sepáralas en páginas distintas o indica claramente para qué sirve cada una (aprendido de nuestra base de experiencia interna)",
-          "Todo lo que solo se cumple si uno se acuerda debe convertirse en un mecanismo: primero pregunta quién lo cubre si se olvida y, si nadie lo cubre, no lo dejes como promesa verbal (aprendido de nuestra base de experiencia interna)",
-          "El trabajo se cierra con pruebas, no con sensaciones: si no puedes decir qué cambiaste y qué resultado dio, no está hecho (aprendido de nuestra base de experiencia interna)"
-        ]
-      }
+      "summary": "[Novedades] Un solo arreglo: el texto de confirmación se cortaba. (1) El texto tras \"esperando tu confirmación\" se recortaba a los primeros 60 caracteres con \"…\", así que una lista de cuatro preguntas mostraba dos y una acción de dos pasos mostraba medio paso: imposible responder. Ahora se muestra completo, conservando numeración y saltos de línea. (2) Las listas de confirmación de varias líneas ya no se meten en una píldora pequeña; se muestran como bloque con barra a la izquierda, un elemento por línea.",
+      "skills": [
+        "El aviso \"esperando tu confirmación\" muestra todos los elementos completos, con numeración y saltos de línea (antes cortaba a 60 caracteres)",
+        "Cuando hay varios elementos pasa a ser una lista con barra a la izquierda, uno por línea",
+        "Lo que hay que confirmar se dice entero: se acabaron los \"2.…\"",
+        "Solo una lista realmente enorme (más de 1400 caracteres) se recorta, y se recorta por líneas completas, nunca a mitad de palabra, avisando de que el resto está en el mensaje de arriba"
+      ],
+      "bugs": [
+        "El aviso amarillo se cortaba en \"…cambiar nodo, instalar…\" y ocultaba el resto de la instrucción y la petición de contraseña — corregido",
+        "La lista de cuatro preguntas mostraba solo la 1 y \"2.…\", las dos últimas desaparecían — corregido",
+        "La expresión de extracción tenía su propio límite de 160 caracteres que también recortaba listas largas — eliminado",
+        "El respaldo de opciones A/B se quedaba con las 3 primeras unidas por barras en una línea — ahora hasta 8, una por línea"
+      ],
+      "lessons": [
+        "Si falta una línea de la lista de confirmación, el dueño no puede responder: mejor largo que roto",
+        "Todo límite de \"mostrar solo los primeros N caracteres\" debe preguntarse si el corte cae justo en lo que hay que responder",
+        "Servidor y página deben extraer con la misma regla, si no se contradicen"
+      ]
     },
     "fr": {
-      "summary": "Aujourd'hui, nous avons remis d'aplomb plusieurs choses sur mobile qui prêtaient à confusion. (1) La page de rechargement est en service : palier, points offerts et crédit réel concordent enfin, avec 1 yuan = 100 points. (2) La page « Mon compte » n'affiche plus les points et le solde côte à côte : avant, on lisait « 700 points ≈ 0,00 yuan », deux comptabilités différentes sur une seule ligne, ce qui donnait l'impression d'une erreur. La carte principale n'affiche plus que le solde ; un appui ouvre les points et le pointage. (3) Dans la liste des sessions, la tâche qui vient de finir reste juste sous celle en cours au lieu de retomber à sa place.",
-      "sections": {
-        "skills": [
-          "Nouvelle page de rechargement : paliers, points offerts et crédit réel sur un seul écran, avec 1 yuan = 100 points",
-          "Page « Mon compte » mobile : la carte principale n'affiche que le solde ; un appui ouvre les points et le pointage, en précisant que ce sont deux comptes distincts",
-          "Liste des sessions mobile : la tâche terminée reste juste sous celle en cours, triée par activité récente à l'intérieur d'une même couleur d'état",
-          "Les paliers de rechargement suivent la table officielle de crédit : chaque palier (50/100/200/500/1000 yuan) a son propre taux de bonus"
-        ],
-        "bugs": [
-          "Corrigé : les points de la page de rechargement mobile venaient d'une table figée en local et ne correspondaient pas au crédit réel (la même somme donnait des prix unitaires différents selon le palier) ; le calcul est désormais 1 yuan = 100 points plus le bonus du palier, identique à ce qui est réellement crédité",
-          "Corrigé : l'ancienne page affichait « points » et « ≈ yuan » côte à côte, par exemple 700 points à côté de 0,00 yuan, ce qui ressemblait à une erreur de calcul ; les points servent aux fonctions de génération et le yuan à la facturation du chat : deux comptabilités séparées",
-          "Corrigé : la liste ne triait que par couleur d'état et gardait l'ancien ordre à l'intérieur d'une même couleur, si bien qu'une session tout juste terminée revenait à sa place et retombait ; le tri se fait maintenant par activité récente dans chaque couleur"
-        ],
-        "lessons": [
-          "Ne placez jamais deux nombres d'unités différentes côte à côte comme s'ils étaient convertibles : séparez-les sur deux pages ou indiquez clairement l'usage de chacun (appris de notre base d'expérience interne)",
-          "Tout ce qui ne tient que par la mémoire doit devenir un mécanisme : demandez d'abord qui rattrape l'oubli, et si personne ne le fait, n'en faites pas une promesse verbale (appris de notre base d'expérience interne)",
-          "On clôture sur des preuves, pas sur une impression : si vous ne pouvez pas dire ce qui a changé et quel en est le résultat, ce n'est pas terminé (appris de notre base d'expérience interne)"
-        ]
-      }
+      "summary": "[Nouveautés] Un seul correctif : le texte de confirmation était tronqué. (1) Le texte après « en attente de votre confirmation » était coupé aux 60 premiers caractères avec « … » : une liste de quatre questions n'en affichait que deux et une action en deux étapes la moitié. Il s'affiche maintenant en entier, numérotation et retours à la ligne conservés. (2) Les listes de confirmation sur plusieurs lignes ne sont plus compressées dans une petite pastille : elles s'affichent en bloc avec une barre à gauche, un élément par ligne.",
+      "skills": [
+        "Le badge « en attente de votre confirmation » affiche tous les éléments en entier, numérotation et retours à la ligne compris (avant : coupé à 60 caractères)",
+        "Plusieurs éléments : le badge devient une liste avec barre à gauche, un par ligne",
+        "Ce qu'il faut confirmer est dit en entier — fini les « 2.… »",
+        "Seule une liste vraiment énorme (plus de 1400 caractères) est tronquée, et par lignes entières, jamais au milieu d'un mot, avec la mention que la suite est dans le message ci-dessus"
+      ],
+      "bugs": [
+        "Le badge jaune s'arrêtait à « …changer de nœud, installer… » et cachait la suite et la demande de mot de passe — corrigé",
+        "La liste des quatre questions n'affichait que la 1 et « 2.… », les deux dernières disparaissaient — corrigé",
+        "L'expression d'extraction avait sa propre limite de 160 caractères qui tronquait aussi les longues listes — supprimée",
+        "Le repli des options A/B ne gardait que les 3 premières jointes par des barres sur une ligne — désormais jusqu'à 8, une par ligne"
+      ],
+      "lessons": [
+        "S'il manque une ligne de la liste, le propriétaire ne peut pas répondre — mieux vaut long que cassé",
+        "Toute limite « n'afficher que les N premiers caractères » doit se demander si la coupure tombe sur ce qu'il faut répondre",
+        "Serveur et page doivent extraire selon la même règle, sinon ils se contredisent"
+      ]
     },
     "de": {
-      "summary": "Heute haben wir ein paar leicht missverständliche Dinge in der Handy-Ansicht aufgeräumt. (1) Die Aufladeseite ist jetzt nutzbar: Stufen, Bonuspunkte und tatsächliche Gutschrift stimmen überein, gerechnet mit 1 Yuan = 100 Punkte. (2) Die Seite „Mein Konto“ zeigt Punkte und Guthaben nicht mehr nebeneinander: Vorher stand dort „700 Punkte ≈ 0,00 Yuan“, zwei getrennte Konten in einer Zeile, was wie ein Rechenfehler aussah. Die Hauptkarte zeigt jetzt nur das Guthaben; ein Tippen öffnet Punkte und Check-in. (3) In der Sitzungsliste steht eine gerade beendete Aufgabe direkt unter der laufenden, statt an ihren alten Platz zurückzurutschen.",
-      "sections": {
-        "skills": [
-          "Neue Aufladeseite: Stufen, Bonuspunkte und tatsächliche Gutschrift auf einen Blick, gerechnet mit 1 Yuan = 100 Punkte",
-          "Handy-Seite „Mein Konto“: Die Hauptkarte zeigt nur das Guthaben; ein Tippen öffnet Punktestand und Check-in, mit Hinweis, dass beides getrennte Konten sind",
-          "Handy-Sitzungsliste: Eine beendete Aufgabe bleibt direkt unter der laufenden, innerhalb derselben Statusfarbe nach letzter Aktivität sortiert",
-          "Aufladestufen entsprechen der offiziellen Gutschrifttabelle: Jede Stufe (50/100/200/500/1000 Yuan) hat einen eigenen Bonusanteil"
-        ],
-        "bugs": [
-          "Behoben: Die Punkte auf der Handy-Aufladeseite kamen aus einer fest verdrahteten lokalen Tabelle und passten nicht zur echten Gutschrift (dasselbe Geld ergab je Stufe unterschiedliche Stückpreise); jetzt gilt 1 Yuan = 100 Punkte plus Stufenbonus, genau wie tatsächlich gutgeschrieben wird",
-          "Behoben: Die alte Ansicht zeigte „Punkte“ und „≈ Yuan“ nebeneinander, etwa 700 Punkte neben 0,00 Yuan, und wirkte wie ein Rechenfehler; Punkte gelten für Generator-Funktionen, Yuan für die Chat-Abrechnung – zwei getrennte Konten",
-          "Behoben: Die Liste sortierte nur nach Statusfarbe und behielt innerhalb einer Farbe die alte Reihenfolge, sodass eine gerade beendete Sitzung an ihren alten Platz zurücksprang und nach unten rutschte; jetzt wird innerhalb jeder Farbe nach letzter Aktivität sortiert"
-        ],
-        "lessons": [
-          "Zwei Zahlen in verschiedenen Einheiten nie nebeneinander als Umrechnung zeigen – entweder auf getrennte Seiten legen oder den Zweck jeder Zahl klar benennen (gelernt aus unserer internen Erfahrungsbasis)",
-          "Alles, was nur durch Erinnern gilt, muss ein Mechanismus werden: Erst fragen, wer es auffängt, wenn man es vergisst – fängt es niemand auf, keine mündliche Regel daraus machen (gelernt aus unserer internen Erfahrungsbasis)",
-          "Arbeit wird mit Belegen abgeschlossen, nicht mit Gefühl: Wer nicht sagen kann, was geändert wurde und was dabei herauskam, ist nicht fertig (gelernt aus unserer internen Erfahrungsbasis)"
-        ]
-      }
+      "summary": "[Was ist neu] Nur eine Korrektur: Bestätigungstexte wurden abgeschnitten. (1) Der Text nach „wartet auf deine Bestätigung\" wurde auf die ersten 60 Zeichen gekürzt, mit „…\". Eine Liste mit vier Fragen zeigte zwei, eine Zwei-Schritt-Anweisung den halben Schritt — unbeantwortbar. Jetzt wird alles angezeigt, Nummerierung und Zeilenumbrüche bleiben. (2) Mehrzeilige Bestätigungslisten werden nicht mehr in eine kleine Pille gequetscht, sondern als Block mit Balken links dargestellt, ein Eintrag pro Zeile.",
+      "skills": [
+        "Das Abzeichen „wartet auf deine Bestätigung\" zeigt alle Punkte vollständig, mit Nummerierung und Zeilenumbrüchen (vorher bei 60 Zeichen abgeschnitten)",
+        "Bei mehreren Punkten wird daraus eine Liste mit Balken links, ein Punkt pro Zeile",
+        "Was zu bestätigen ist, steht vollständig da — keine halben Sätze wie „2.…\" mehr",
+        "Nur eine wirklich riesige Liste (über 1400 Zeichen) wird gekürzt, und zwar an ganzen Zeilen, nie mitten im Wort, mit Hinweis, dass der Rest in der Nachricht oben steht"
+      ],
+      "bugs": [
+        "Das gelbe Abzeichen endete bei „…Knoten wechseln, installieren…\" und verdeckte den Rest und die Passwortanfrage — behoben",
+        "Die Vier-Fragen-Liste zeigte nur Frage 1 und „2.…\", die letzten beiden verschwanden — behoben",
+        "Der Extraktions-Ausdruck hatte eine eigene 160-Zeichen-Grenze, die lange Listen ebenfalls kürzte — entfernt",
+        "Der A/B-Fallback behielt nur die ersten 3 Optionen, mit Schrägstrichen in einer Zeile — jetzt bis zu 8, eine pro Zeile"
+      ],
+      "lessons": [
+        "Fehlt eine Zeile der Bestätigungsliste, kann der Besitzer nicht antworten — lieber lang als kaputt",
+        "Jede Grenze „zeige nur die ersten N Zeichen\" muss fragen, ob der Schnitt genau das trifft, was beantwortet werden muss",
+        "Server und Seite müssen nach derselben Regel extrahieren, sonst widersprechen sie sich"
+      ]
     },
     "ru": {
-      "summary": "Сегодня мы привели в порядок несколько мест в мобильной версии, которые легко было понять неправильно. (1) Страница пополнения теперь работает: тарифы, бонусные баллы и реальное зачисление наконец совпадают, расчёт 1 юань = 100 баллов. (2) На странице «Мой профиль» баллы и баланс больше не показываются рядом: раньше там было «700 баллов ≈ 0,00 юаня», два разных учёта в одной строке, и это выглядело как ошибка расчёта. Теперь основная карточка показывает только баланс, а по нажатию открываются баллы и отметка. (3) В списке сессий только что завершённая задача стоит сразу под текущей, а не уезжает обратно на старое место.",
-      "sections": {
-        "skills": [
-          "Новая страница пополнения: тарифы, бонусные баллы и реальное зачисление на одном экране, расчёт 1 юань = 100 баллов",
-          "Мобильная страница «Мой профиль»: основная карточка показывает только баланс, по нажатию открываются баллы и отметка с пояснением, что это разные счета",
-          "Мобильный список сессий: завершённая задача остаётся сразу под текущей, внутри одного цвета статуса сортировка по последней активности",
-          "Тарифы пополнения совпадают с официальной таблицей зачисления: у каждого тарифа (50/100/200/500/1000 юаней) свой процент бонуса"
-        ],
-        "bugs": [
-          "Исправлено: баллы на мобильной странице пополнения брались из жёстко заданной локальной таблицы и не совпадали с реальным зачислением (одни и те же деньги давали разную цену балла в разных тарифах); теперь считается как 1 юань = 100 баллов плюс бонус тарифа, ровно как приходит на счёт",
-          "Исправлено: раньше «баллы» и «≈ юани» стояли рядом, например 700 баллов и 0,00 юаня, и это выглядело ошибкой расчёта; баллы нужны для функций генерации, а юани — для оплаты чата, это два разных счёта",
-          "Исправлено: список сортировался только по цвету статуса и внутри одного цвета сохранял старый порядок, поэтому только что завершённая сессия возвращалась на прежнее место и уходила вниз; теперь внутри каждого цвета сортировка по последней активности"
-        ],
-        "lessons": [
-          "Никогда не ставьте два числа в разных единицах рядом как пересчёт: либо разнесите их по разным страницам, либо ясно подпишите назначение каждого (из нашей внутренней базы опыта)",
-          "Всё, что держится только на памяти, должно стать механизмом: сначала решите, кто подстрахует при забывании, а если некому — не превращайте правило в устное обещание (из нашей внутренней базы опыта)",
-          "Работа закрывается по доказательствам, а не по ощущению: если не можете сказать, что изменено и какой результат, значит не сделано (из нашей внутренней базы опыта)"
-        ]
-      }
+      "summary": "[Что нового] Одно исправление: текст подтверждения обрезался. (1) Текст после «ожидает вашего подтверждения» обрезался до первых 60 символов с «…»: список из четырёх вопросов показывал два, а действие из двух шагов — половину шага, ответить было невозможно. Теперь показывается полностью, с сохранением нумерации и переносов строк. (2) Многострочные списки подтверждений больше не сжимаются в маленькую плашку, а выводятся блоком с полосой слева, один пункт на строку.",
+      "skills": [
+        "Значок «ожидает вашего подтверждения» показывает все пункты полностью, с нумерацией и переносами (раньше обрезалось на 60 символах)",
+        "Если пунктов несколько, значок превращается в список с полосой слева, по пункту на строку",
+        "Что подтвердить — сказано целиком, без обрывов вида «2.…»",
+        "Обрезается только действительно огромный список (свыше 1400 символов), причём по целым строкам, никогда посреди слова, с пометкой, что остальное в сообщении выше"
+      ],
+      "bugs": [
+        "Жёлтый значок обрывался на «…сменить узел, установить…» и скрывал остаток инструкции и просьбу о пароле — исправлено",
+        "Список из четырёх вопросов показывал только 1-й и «2.…», два последних исчезали — исправлено",
+        "У регулярного выражения извлечения был свой предел в 160 символов, который тоже резал длинные списки — убран",
+        "Запасной вариант A/B оставлял первые 3 варианта, склеенные через слэш в одну строку — теперь до 8, по одному на строку"
+      ],
+      "lessons": [
+        "Если в списке подтверждений не хватает строки, владелец не сможет ответить — лучше длинно, чем бито",
+        "Любой предел «показывать только первые N символов» должен проверять: не приходится ли обрезка ровно на то, что нужно ответить",
+        "Сервер и страница должны извлекать текст по одному правилу, иначе они расходятся"
+      ]
     },
     "pt": {
-      "summary": "Hoje arrumamos várias coisas no celular que davam margem a confusão. (1) A página de recarga está no ar: planos, pontos de bônus e crédito real agora batem, com 1 yuan = 100 pontos. (2) A página «Minha conta» não mostra mais pontos e saldo lado a lado: antes aparecia «700 pontos ≈ 0,00 yuan», misturando duas contas diferentes na mesma linha e parecendo erro de cálculo. Agora o cartão principal mostra só o saldo; ao tocar, você vê os pontos e o check-in. (3) Na lista de sessões, a tarefa recém-concluída fica logo abaixo da que está em execução, em vez de voltar e afundar no lugar antigo.",
-      "sections": {
-        "skills": [
-          "Nova página de recarga: planos, pontos de bônus e crédito real em uma só tela, com 1 yuan = 100 pontos",
-          "Página «Minha conta» no celular: o cartão principal mostra só o saldo; ao tocar, abre pontos e check-in, explicando que são duas contas diferentes",
-          "Lista de sessões no celular: a tarefa concluída fica logo abaixo da que está em execução, ordenada pela atividade mais recente dentro da mesma cor de status",
-          "Os planos de recarga seguem a tabela oficial de crédito: cada plano (50/100/200/500/1000 yuan) tem seu próprio percentual de bônus"
-        ],
-        "bugs": [
-          "Corrigido: os pontos da página de recarga vinham de uma tabela fixa local e não batiam com o crédito real (o mesmo dinheiro dava preços por ponto diferentes em cada plano); agora o cálculo é 1 yuan = 100 pontos mais o bônus do plano, igual ao que realmente entra na conta",
-          "Corrigido: a versão antiga mostrava «pontos» e «≈ yuan» lado a lado, por exemplo 700 pontos ao lado de 0,00 yuan, e parecia erro de cálculo; pontos servem para funções de geração e yuan para a cobrança do chat: são duas contas separadas",
-          "Corrigido: a lista ordenava só pela cor de status e mantinha a ordem antiga dentro da mesma cor, então a sessão recém-concluída voltava ao lugar de antes e afundava; agora a ordem dentro de cada cor é por atividade mais recente"
-        ],
-        "lessons": [
-          "Nunca coloque dois números de unidades diferentes lado a lado como se fossem conversão: separe em páginas distintas ou diga claramente para que serve cada um (aprendido com nossa base de experiência interna)",
-          "Tudo o que só se mantém pela memória precisa virar mecanismo: primeiro pergunte quem cobre a falha se alguém esquecer e, se ninguém cobre, não transforme a regra em promessa verbal (aprendido com nossa base de experiência interna)",
-          "O trabalho se encerra com evidência, não com sensação: se você não consegue dizer o que mudou e qual foi o resultado, não está pronto (aprendido com nossa base de experiência interna)"
-        ]
-      }
+      "summary": "[O que mudou] Uma correção só: o texto de confirmação estava sendo cortado. (1) O texto após \"aguardando sua confirmação\" era cortado nos primeiros 60 caracteres com \"…\", então uma lista de quatro perguntas mostrava duas e uma ação de duas etapas mostrava meia etapa — impossível responder. Agora aparece inteiro, mantendo numeração e quebras de linha. (2) Listas de confirmação com várias linhas não são mais espremidas numa pílula pequena; viram um bloco com barra à esquerda, um item por linha.",
+      "skills": [
+        "O selo \"aguardando sua confirmação\" mostra todos os itens inteiros, com numeração e quebras de linha (antes cortava aos 60 caracteres)",
+        "Com vários itens, vira uma lista com barra à esquerda, um por linha",
+        "O que confirmar é dito por inteiro — sem mais \"2.…\" pela metade",
+        "Só uma lista realmente enorme (mais de 1400 caracteres) é cortada, e o corte é por linhas inteiras, nunca no meio da palavra, avisando que o resto está na mensagem acima"
+      ],
+      "bugs": [
+        "O selo amarelo parava em \"…trocar nó, instalar…\" e escondia o resto da instrução e o pedido de senha — corrigido",
+        "A lista de quatro perguntas mostrava só a 1 e \"2.…\", as duas últimas desapareciam — corrigido",
+        "A expressão de extração tinha seu próprio limite de 160 caracteres, que também cortava listas longas — removido",
+        "O fallback das opções A/B mantinha só as 3 primeiras unidas por barras em uma linha — agora até 8, uma por linha"
+      ],
+      "lessons": [
+        "Se falta uma linha da lista de confirmação, o dono não consegue responder — melhor longo do que quebrado",
+        "Todo limite de \"mostrar só os primeiros N caracteres\" precisa perguntar se o corte cai justamente no que deve ser respondido",
+        "Servidor e página precisam extrair pela mesma regra, senão se contradizem"
+      ]
     },
     "ar": {
-      "summary": "اليوم رتّبنا عدة أمور في نسخة الهاتف كانت تُفهم خطأً. (1) صفحة الشحن أصبحت جاهزة: الفئات ونقاط الهدايا والرصيد الفعلي أصبحت متوافقة، باحتساب 1 يوان = 100 نقطة. (2) صفحة «حسابي» لم تعد تعرض النقاط والرصيد جنبًا إلى جنب: سابقًا كانت تكتب «700 نقطة ≈ 0.00 يوان»، أي دفترين مستقلين في سطر واحد، فبدا الأمر كخطأ حسابي. الآن تعرض البطاقة الرئيسية الرصيد فقط، وعند الضغط عليها تظهر النقاط وتسجيل الحضور. (3) في قائمة الجلسات، المهمة التي انتهت للتو تبقى أسفل المهمة الجارية مباشرة بدل أن تعود إلى مكانها القديم وتغوص.",
-      "sections": {
-        "skills": [
-          "صفحة شحن جديدة: الفئات ونقاط الهدايا والرصيد الفعلي في شاشة واحدة، باحتساب 1 يوان = 100 نقطة",
-          "صفحة «حسابي» في الهاتف: البطاقة الرئيسية تعرض الرصيد فقط، والضغط عليها يفتح رصيد النقاط وتسجيل الحضور مع توضيح أن لكل منهما استخدامًا مختلفًا",
-          "قائمة الجلسات في الهاتف: المهمة المنتهية تبقى أسفل الجارية مباشرة، ومرتبة حسب آخر نشاط داخل اللون نفسه",
-          "عرض فئات الشحن يطابق جدول الإيداع الرسمي: لكل فئة (50/100/200/500/1000 يوان) نسبة هدية مختلفة وتُحسب على حدة"
-        ],
-        "bugs": [
-          "إصلاح: نقاط صفحة الشحن في الهاتف كانت تأتي من جدول ثابت محلي ولا تطابق الرصيد الفعلي (المبلغ نفسه يعطي سعرًا مختلفًا للنقطة حسب الفئة)؛ أصبح الحساب 1 يوان = 100 نقطة بالإضافة إلى هدية الفئة، مطابقًا تمامًا لما يُودع فعلًا",
-          "إصلاح: النسخة القديمة كانت تعرض «النقاط» و«≈ يوان» جنبًا إلى جنب، مثل 700 نقطة بجانب 0.00 يوان، فبدا كخطأ حسابي؛ النقاط تُستخدم لميزات التوليد واليوان لخصم المحادثة، وهما دفتران منفصلان",
-          "إصلاح: القائمة كانت تُرتّب حسب لون الحالة فقط وتحتفظ بالترتيب القديم داخل اللون نفسه، فتعود الجلسة المنتهية للتو إلى مكانها القديم وتغوص؛ الآن الترتيب داخل كل لون حسب آخر نشاط"
-        ],
-        "lessons": [
-          "لا تضع رقمين بوحدتين مختلفتين جنبًا إلى جنب كأنهما تحويل؛ إما افصلهما في صفحات مختلفة أو وضّح استخدام كل منهما بوضوح (تعلّمناها من قاعدة الخبرة الداخلية)",
-          "كل ما لا يستمر إلا بالتذكّر يجب أن يتحول إلى آلية: اسأل أولًا من يغطيه إذا نُسي، وإن لم يغطّه أحد فلا تكتب القاعدة كوعد شفهي (تعلّمناها من قاعدة الخبرة الداخلية)",
-          "إنهاء العمل يُقاس بالدليل لا بالإحساس: إذا لم تستطع قول ماذا تغيّر وما النتيجة، فهو غير منجز (تعلّمناها من قاعدة الخبرة الداخلية)"
-        ]
-      }
+      "summary": "[ما الجديد] إصلاح واحد فقط: نص التأكيد كان يُقطع. (1) كان النص بعد «بانتظار تأكيدك» يُقتطع عند أول 60 حرفًا مع «…»، فقائمة من أربعة أسئلة تُظهر سؤالين وخطوتان تُظهر نصف خطوة — لا يمكن الرد. الآن يُعرض كاملًا مع الحفاظ على الترقيم وفواصل الأسطر. (2) قوائم التأكيد متعددة الأسطر لم تعد تُحشر في شارة صغيرة، بل تُعرض ككتلة بشريط على اليسار، بندًا في كل سطر.",
+      "skills": [
+        "شارة «بانتظار تأكيدك» تعرض كل البنود كاملة مع الترقيم وفواصل الأسطر (سابقًا كانت تُقطع عند 60 حرفًا)",
+        "عند وجود عدة بنود تتحول إلى قائمة بشريط على اليسار، بند في كل سطر",
+        "ما يجب تأكيده يُقال كاملًا — لا مزيد من «2.…» المقطوعة",
+        "تُختصر فقط القوائم الضخمة فعلًا (أكثر من 1400 حرف)، والاختصار على أسطر كاملة لا في منتصف كلمة، مع الإشارة إلى أن البقية في الرسالة أعلاه"
+      ],
+      "bugs": [
+        "الشارة الصفراء توقفت عند «…تغيير العقدة، تثبيت…» وأخفت بقية التعليمات وطلب كلمة المرور — تم الإصلاح",
+        "قائمة الأسئلة الأربعة أظهرت السؤال الأول و«2.…» فقط، واختفى الآخران — تم الإصلاح",
+        "كانت لصيغة الاستخراج حدّ خاص بـ160 حرفًا يقتطع القوائم الطويلة أيضًا — أُزيل",
+        "خيار A/B الاحتياطي كان يُبقي أول 3 خيارات مدمجة بشرطات مائلة في سطر واحد — الآن حتى 8، بند في كل سطر"
+      ],
+      "lessons": [
+        "إذا نقص سطر من قائمة التأكيد فلن يستطيع المالك الرد — الأطول أفضل من المبتور",
+        "كل حدّ «اظهر أول N حرفًا فقط» يجب أن يسأل: هل يقع القطع على ما يجب الإجابة عنه؟",
+        "يجب أن يستخرج الخادم والصفحة النص بالقاعدة نفسها، وإلا تعارضا"
+      ]
     }
   }
 }
