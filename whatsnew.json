@@ -1,206 +1,384 @@
 {
-  "ver": "1.5.46",
-  "date": "2026-11-06",
-  "summary": "【改了什么】这次只治一件事：要您确认的话被腰斩。①「等待主人确认」后面那段说明/选项清单，以前只留前 60 个字，后面全切掉加个\"…\"，四问只剩两问、两步操作只剩半步，主人根本没法答。现在整段给全，编号和换行原样保留。②多行的确认清单不再塞进一颗小圆胶囊里挤成一行，改成左侧竖条的清单块，一行一条。",
+  "ver": "1.5.51",
+  "date": "2026-11-07",
+  "summary": "【改了什么】①电脑和手机的状态对齐：电脑上已经结束的任务，手机不再一直显示「需要确认」；结案判断排在最前，首页「待确认」数字也用同一套规则。②「等待确认」标记只留给真正需要您拍板的事：结尾如果是助手自己的下一步（先去核对、测完再报），改显示「仍在办·出结果自动报您」，不再让人空等。③同一个「正在跑」不再重复出现三遍，全屏只留一条。④叫停就真停：说了「先不做/等结果」，后台不再自动接着跑。⑤长任务不再被误判成「没在跑」而被强制打断，页面显示「线断了」的老毛病一并修好。⑥家用上网设备优化工具升级到 V7.1：瘦身更彻底、内存三级看护、选节点改成实测取最快；后台图标字体不再显示成方块，页面资源缓存也改合理了。",
   "sections": {
     "skills": [
-      "「等待主人确认」章：要您做的事一条不落全显示，编号、换行都保留（以前超过 60 字就切）",
-      "好几条要确认时，章会变成一块清单（左边一道竖条），一行一条，不再挤成一行",
-      "确认什么就写什么：不会再把\"2.…\"这种半截话端给您",
-      "真超长（1400 字以上）才收口，而且是按整行收，绝不切在半个词上，末尾明写\"后面还有，全文见上面这条回话\""
+      "手机端状态灯判定顺序改为：先看是否已结案 → 再看是否真在跑 → 最后看是否在等您回话",
+      "已结案且没在跑显示「完成」，不再挂「需要确认」；真在等确认的仍然黄灯；首页「待确认」计数用同一套判定",
+      "「等待确认」只在有结果报告且真需要您拍板时出现；助手自己的下一步动作一律记「仍在办·出结果自动报您」",
+      "干活时全屏只留一条状态行，顶栏、气泡、清单里的同文重复行一并去掉",
+      "「先不做/等结果/先搁置」＝停球等外部结果，后台不追跑；叫停后的冷却期内任何自动继续都被拦住",
+      "继续干活前先报结果（改了什么/实测数据/还剩什么）再问一句，禁止没报结果就请示",
+      "同步账本改成「真拿到手才记账」，失败下一轮重试；强制交接前必须确认车道、流、排队全空",
+      "家用上网设备优化工具升级 V7.1：精简冗余服务、界面内存超阈值自动重启界面进程、内存三级看护（只清缓存/重启界面/重启代理，绝不整机重启）",
+      "选节点改用 3MB 实测三采样取最快；已优化过的设备先跑一遍轻量调优；批量收工自动列偏慢清单；优化模板版本自动跟随，放新配置文件即全链路生效",
+      "页面资源缓存从一年改为 7 天、入口页面与脚本改为不缓存；后台图标字体补上正确规则不再变方块，首屏加了加载动画"
     ],
     "bugs": [
-      "黄章只显示「…换节点、装…」就断了，后面\"调 TCP 缓冲区并实测报数\"和\"把管理密码发我\"全看不见——已修",
-      "四问拍板只显示第 1 问和「2.…」，后两问直接消失，主人没法选——已修",
-      "「要您做的」抽取正则里还有个 160 字的字数上限，长清单照样被削——已去掉",
-      "A/B 选项兜底只取前 3 条且用斜杠拼成一行——已改成最多 8 条、按行列"
+      "电脑上点了任务结束，手机刷新多次仍显示「需要确认」，黄标一直不消",
+      "首页顶部写「待确认 1」，点进去发现那件早就办完了",
+      "会话断在半路（「先核对一下」）却盖了「等待确认」，其实是活没干完的在跑态",
+      "「确认：等我测完报结果」被盖成「等待确认」，球在自己手里，章盖反了",
+      "被告知「先不做、等我结果」后后台仍连追三轮空轮，停止钮也拦不住自动续干",
+      "同一条「正在跑」状态行同时出现在顶栏、气泡尾、清单三处，数出来三个在跑",
+      "长任务正常跑到十几分钟，被自家交接判成「没有进程」强制掐断，页面显示「线断了」",
+      "手机到电脑的同步账本一进循环就把进度记成已消费，拉取失败或超过 8 条就永久丢条目",
+      "后台图标字体全部 404、图标显示成方块；静态资源缓存一年，前端改完用户刷新也看不到"
     ],
     "lessons": [
-      "给主人看的确认清单少一行，主人就没法答——宁可长，不许残",
-      "任何\"只显示前 N 个字\"的展示上限，都要问一句：截断的会不会正好是要回答的东西",
-      "服务端和页面抽同一段话必须同一套口径，各切各的就会两脸打架"
+      "状态要从「人拍板的结论」往下推：结案是人为决定，优先级高于任何由活气推断出来的状态",
+      "「等确认」和「还在办」要分清球在谁手里：尾巴是自己的下一步＝在跑，问句或给对方选项＝等确认",
+      "说「等」就是等：等候令不是没干完，自动追跑必须认得出停球，否则只会空烧还什么都不产出",
+      "延迟低不等于速度快：吞吐结论取三轮中位、固定测点，单轮噪声能差出十倍",
+      "记账要「真拿到才算数」，读失败不许当空值写回：要么退出，要么回落备份，静默覆盖等于删数据",
+      "（学自内部经验库）设备反复变慢、修好几次又犯，先怀疑有恶意程序长期驻留，别急着换线路、加临时工具——那只是治标",
+      "（学自内部经验库）恶意程序会改名，所以清理要认「它从哪个文件跑起来」，不能只按名字杀；它的自启往往有好几层，清一层必复活",
+      "（学自内部经验库）清理完别急着报成功：等半分钟再看一次、看它会不会自己回来，才算真的清干净"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "[What changed] One fix only: confirmation text was being cut off. (1) The text after \"awaiting your confirmation\" used to be truncated to the first 60 characters with a trailing \"…\", so a four-question list showed two questions and a two-step action showed half a step — impossible to answer. The full text is now shown, keeping numbering and line breaks. (2) Multi-line confirmation lists no longer get squeezed into a small pill; they render as a left-barred list, one item per line.",
-      "skills": [
-        "The \"awaiting your confirmation\" badge now shows every item in full, with numbering and line breaks intact (it used to cut at 60 characters)",
-        "When there are several items, the badge becomes a list block (a vertical bar on the left), one item per line",
-        "What to confirm is stated in full — no more half-sentences like \"2.…\"",
-        "Only a genuinely huge list (over 1400 characters) gets trimmed, and it trims on whole lines, never mid-word, with a note that the rest is in the message above"
-      ],
-      "bugs": [
-        "The yellow badge stopped at \"…switch node, install…\" and hid the rest of the instruction and the password request — fixed",
-        "The four-question list showed only question 1 and \"2.…\", the last two vanished — fixed",
-        "The extraction regex had its own 160-character cap that also cut long lists — removed",
-        "The A/B option fallback kept only the first 3 options joined by slashes on one line — now up to 8, one per line"
-      ],
-      "lessons": [
-        "If one line of the confirmation list is missing, the owner cannot answer — better long than broken",
-        "Every \"show only the first N characters\" limit needs to ask: is the cut landing exactly on what needs answering?",
-        "Server and page must extract the same text by the same rule, otherwise they disagree"
-      ]
+      "summary": "[What changed] (1) Desktop and mobile now agree: a task ended on the desktop no longer keeps showing \"needs confirmation\" on the phone; the closed check runs first, and the home counter uses the same rule. (2) The \"waiting for confirmation\" stamp is now only for things that really need your decision - if the reply ends with the assistant's own next step (go check X, report after testing) it shows \"still working - results auto-reported\" instead of leaving you waiting. (3) One running task no longer shows three \"running\" lines; only one status line stays on screen. (4) Stop means stop: after \"hold off / waiting for results\", background work no longer keeps running on its own. (5) Long tasks are no longer mistaken for \"not running\" and cut off - the old \"connection dropped\" symptom is fixed too. (6) The home network device tuning tool is now V7.1: deeper cleanup, three-tier memory watch, and node picking by real measured speed. Admin icon fonts no longer render as boxes, and page caching behaves sensibly.",
+      "sections": {
+        "skills": [
+          "Mobile status light order is now: closed first, then actually running, then waiting for your reply",
+          "A closed, idle session shows \"done\" and drops the \"needs confirmation\" badge; genuine waits still show yellow, and the home pending count follows the same rule",
+          "\"Waiting for confirmation\" appears only with a result report plus a real decision request; the assistant's own next step is logged as \"still working - results auto-reported\"",
+          "While working, only one status line stays on screen; duplicate lines in the top bar, bubble footer and step list are removed",
+          "\"Not now / waiting for results / hold it\" means the ball is parked: no background chasing, and any auto-continue is blocked during the stop cooldown",
+          "Before continuing, report results first (what changed, measured numbers, what is left) and then ask one question - no asking without results",
+          "The sync ledger records progress only once data is actually in hand, and retries next round on failure; forced handoff now requires lanes, streams and queues all empty",
+          "Home network device tuning tool V7.1: trims redundant services, restarts the UI process when its memory passes a threshold, and watches memory in three tiers (drop cache / restart UI / restart proxy - never reboot the whole device)",
+          "Node picking now uses three 3MB samples and takes the fastest; already-tuned devices get a light tune-up first; batch runs end with a list of slow devices; template versions auto-follow, so dropping in a new config file updates the whole chain",
+          "Page assets cache for 7 days instead of a year, entry pages and scripts are no-cache, admin icon fonts have correct rules and no longer render as boxes, and the first screen shows a loading animation"
+        ],
+        "bugs": [
+          "After ending a task on the desktop, the phone kept showing \"needs confirmation\" across refreshes",
+          "The home header said \"pending 1\" for work that had finished long ago",
+          "A session stopped mid-work (\"let me check that first\") was stamped \"waiting for confirmation\", though it was still in progress",
+          "\"Confirmed: I'll report after testing\" was stamped as waiting, even though the ball was on the assistant's side",
+          "After being told \"hold off, wait for my results\", three idle chasing rounds still ran and the stop button could not block auto-continue",
+          "The same \"running\" line appeared in three places at once, so it looked like three tasks were running",
+          "A long task running normally for a dozen minutes was judged \"no process\" by an internal handoff and cut off, showing \"connection dropped\"",
+          "The sync ledger marked progress as consumed on entry, so failed pulls or anything beyond 8 items were lost for good",
+          "All admin icon fonts returned 404 and rendered as boxes; assets cached for a year meant users could not see frontend changes after a refresh"
+        ],
+        "lessons": [
+          "Derive state from what a human decided: closing is an explicit decision and outranks any state inferred from liveness",
+          "\"Waiting for confirmation\" vs \"still working\" is about who holds the ball: a self next-step means running; a question or options means waiting",
+          "When someone says wait, it means wait: a hold is not unfinished work, and the auto-chase must recognise a parked ball instead of burning cycles with nothing to show",
+          "Low latency is not high speed: take the median of three runs at a fixed vantage point, since a single run can be off by ten times",
+          "Only count what you actually hold: never write back an empty value after a failed read - either exit or fall back to the backup, because silent overwrite deletes data",
+          "(from the internal lessons library) When a device keeps slowing down and comes back after several fixes, suspect a lingering malicious program first - swapping the route or adding temporary tools only treats the symptom",
+          "(from the internal lessons library) Malicious programs rename themselves, so cleanup must trace the file each process started from instead of killing by name; their auto-start usually has several layers and clearing one layer brings them back",
+          "(from the internal lessons library) Do not declare success right after cleanup: wait half a minute and check whether it returns - only then is it really clean"
+        ]
+      }
     },
     "ja": {
-      "summary": "【変更点】今回の修正は1点：確認文が途中で切れていた件です。(1)「オーナーの確認待ち」の後ろの説明・選択肢は、以前は最初の60文字で切られ末尾に「…」が付いていました。四問の確認が二問しか出ず、二段階の操作が半分で終わるため答えようがありませんでした。現在は全文を表示し、番号と改行もそのまま残します。(2) 複数行の確認リストは小さな丸いバッジに押し込めず、左に縦線のあるリストブロックで一行ずつ表示します。",
-      "skills": [
-        "「オーナーの確認待ち」バッジは全項目を表示。番号・改行もそのまま（以前は60文字で切断）",
-        "項目が複数あるときは左に縦線のあるリスト表示、一行に一件",
-        "確認事項は最後まで表示。「2.…」のような途中で切れた文は出ません",
-        "本当に長い場合（1400文字超）のみ省略しますが、行単位で切り、語の途中では切りません。残りは上のメッセージにありますと明記"
-      ],
-      "bugs": [
-        "黄色バッジが「…ノードを切り替え、導入…」で途切れ、続きとパスワード依頼が見えなかった — 修正",
-        "四問の確認が第1問と「2.…」だけになり、後ろ二問が消えていた — 修正",
-        "抽出正規表現に160文字の上限があり長いリストが削られていた — 撤去",
-        "A/B選択肢のフォールバックが先頭3件をスラッシュで1行に連結していた — 最大8件・一行一件に変更"
-      ],
-      "lessons": [
-        "確認リストが一行欠けるとオーナーは答えられない — 長くても欠けるより良い",
-        "「先頭N文字だけ表示」という上限は、切れる位置がまさに答え必要な部分でないか必ず問う",
-        "サーバーとページは同じ抽出規則でなければ食い違う"
-      ]
+      "summary": "【変更点】①パソコンとスマホの状態が一致しました。パソコンで終了したタスクがスマホで「確認待ち」のまま残らなくなります。終了判定を最優先にし、ホームの「確認待ち」件数も同じ基準です。②「確認待ち」スタンプは本当にご判断が必要なものだけに。末尾がアシスタント自身の次の動作（先に確認する／測定後に報告する）の場合は「作業中・結果は自動報告」と表示し、空待ちをなくしました。③「実行中」の表示が3箇所に重複して出ることがなくなり、画面には1本だけ残ります。④止めると本当に止まります。「今はしない／結果待ち」と言った後、裏で勝手に続きを走らせません。⑤長いタスクが「動いていない」と誤判定されて強制中断される問題と、画面に「接続が切れました」と出る不具合も直しました。⑥家庭用ネット機器の最適化ツールを V7.1 に更新：不要サービスの削減、メモリの三段階監視、実測で最速のノード選択。管理画面のアイコンフォントが四角にならず、ページのキャッシュ設定も適正になりました。",
+      "sections": {
+        "skills": [
+          "スマホの状態ランプの判定順を「終了済みか → 実際に実行中か → 返答待ちか」に変更",
+          "終了済みで実行中でないセッションは「完了」と表示し、「確認待ち」バッジを付けない。本当に返答待ちのものは従来どおり黄色で、ホームの件数も同じ判定",
+          "「確認待ち」は結果報告＋本当にご判断が必要なときだけ。アシスタント自身の次の動作は「作業中・結果は自動報告」と記録",
+          "作業中は画面に状態行を1本だけ表示。上部バー・吹き出し・一覧内の同文の重複行は削除",
+          "「今はしない／結果待ち／保留」はボールを止めた状態。裏での追いかけは行わず、停止後のクールダウン中は自動継続をすべて禁止",
+          "続行前にまず結果を報告（変更点／実測値／残り）し、その後に確認を1つ。結果なしの確認は禁止",
+          "同期台帳は実際に受け取ってから記録し、失敗時は次回再試行。強制引き継ぎの前にはレーン・ストリーム・待ち行列がすべて空であることを確認",
+          "家庭用ネット機器の最適化ツール V7.1：不要サービスを削減、画面プロセスのメモリが閾値を超えたら再起動、メモリは三段階監視（キャッシュ削除／画面再起動／プロキシ再起動のみ、本体の再起動はしない）",
+          "ノード選択は 3MB を3回実測して最速を採用。最適化済みの機器はまず軽い調整を実行。バッチ終了時に遅い機器の一覧を出力。テンプレート版は自動追従で、新しい設定ファイルを置くだけで全体に反映",
+          "ページ資産のキャッシュを1年から7日に、入口ページとスクリプトはキャッシュなしに。管理画面のアイコンフォントは正しい設定で四角にならず、初回表示に読み込みアニメーションを追加"
+        ],
+        "bugs": [
+          "パソコンでタスクを終了したのに、スマホを何度更新しても「確認待ち」が消えなかった",
+          "ホーム上部の「確認待ち 1」が、実はとっくに完了した案件だった",
+          "作業途中（「先に確認します」）なのに「確認待ち」スタンプが付き、実際は進行中だった",
+          "「確認：測定後に報告します」が「確認待ち」と誤判定。ボールは自分の側だった",
+          "「今はしない、結果を待って」と言われた後も空の追いかけが3回走り、停止ボタンでも止まらなかった",
+          "同じ「実行中」の行が上部バー・吹き出し・一覧の3箇所に同時に出て、3つ動いているように見えた",
+          "十数分正常に動いていた長いタスクが、内部の引き継ぎで「プロセスなし」と判定され強制中断。画面は「接続が切れました」",
+          "スマホ→パソコンの同期台帳がループ開始時に進捗を消費済みにし、取得失敗や8件超が永久に失われた",
+          "管理画面のアイコンフォントが全滅（404）して四角表示に。資産キャッシュ1年のため、フロントを直しても更新後に見えなかった"
+        ],
+        "lessons": [
+          "状態は「人が決めた結論」から逆算する。終了は人の明示的な判断であり、稼働状況から推測した状態より優先する",
+          "「確認待ち」と「作業中」はボールが誰にあるかで分ける。末尾が自分の次の動作なら実行中、質問や選択肢なら確認待ち",
+          "「待て」と言われたら待つ。待機令は未完了ではなく、自動追いかけは停球を認識しないと空回りするだけ",
+          "遅延が低い＝速いではない。スループットは固定測点で3回測った中央値を使う。1回の測定は10倍ぶれる",
+          "記録は実際に手にした分だけ。読み取り失敗を空値で書き戻してはいけない。終了するかバックアップに戻す。黙って上書きはデータ削除と同じ",
+          "（社内の経験ライブラリより）機器が何度直してもまた遅くなるなら、まず不正プログラムの常駐を疑う。回線を替える・一時的な道具を足すのは対症療法にすぎない",
+          "（社内の経験ライブラリより）不正プログラムは名前を変えるので、名前で殺すのではなく「どのファイルから起動したか」で特定する。自動起動は何層にもなっており、一層消しただけでは復活する",
+          "（社内の経験ライブラリより）掃除した直後に成功と報告しない。30秒ほど待って再発しないか確認して初めて完了と言える"
+        ]
+      }
     },
     "ko": {
-      "summary": "[변경 사항] 이번엔 한 가지만 고쳤습니다: 확인 문구가 잘리던 문제. (1) \"확인 대기\" 뒤의 설명·선택지는 이전에 앞 60자만 남기고 \"…\"를 붙였습니다. 네 개 질문이 두 개만 보이고 두 단계 작업이 반만 보여 답할 수 없었습니다. 이제 전체를 표시하고 번호와 줄바꿈도 그대로 유지합니다. (2) 여러 줄 확인 목록은 작은 알약 모양에 밀어 넣지 않고 왼쪽 세로줄이 있는 목록 블록으로 한 줄에 하나씩 표시합니다.",
-      "skills": [
-        "\"확인 대기\" 배지는 모든 항목을 전부 표시(번호·줄바꿈 유지, 이전엔 60자에서 잘림)",
-        "항목이 여러 개면 왼쪽 세로줄 목록으로 한 줄에 하나",
-        "확인할 내용은 끝까지 표시 — \"2.…\" 같은 반토막 문장 없음",
-        "정말 긴 경우(1400자 초과)만 줄 단위로 자르고 단어 중간은 자르지 않으며, 나머지는 위 메시지에 있다고 명시"
-      ],
-      "bugs": [
-        "노란 배지가 \"…노드 교체, 설치…\"에서 끊겨 나머지 지시와 비밀번호 요청이 안 보임 — 수정",
-        "네 개 질문 목록이 1번과 \"2.…\"만 보이고 뒤 두 개가 사라짐 — 수정",
-        "추출 정규식에 160자 상한이 있어 긴 목록이 잘림 — 제거",
-        "A/B 선택지 대체 로직이 앞 3개만 슬래시로 한 줄에 붙임 — 최대 8개, 한 줄에 하나로 변경"
-      ],
-      "lessons": [
-        "확인 목록에서 한 줄이 빠지면 답할 수 없다 — 길어도 잘리는 것보다 낫다",
-        "\"앞 N자만 표시\"하는 모든 상한은 잘리는 지점이 바로 답해야 할 부분인지 물어야 한다",
-        "서버와 페이지는 같은 규칙으로 추출해야 어긋나지 않는다"
-      ]
+      "summary": "【변경 사항】①PC와 휴대폰 상태가 일치합니다. PC에서 끝낸 작업이 휴대폰에서 계속 \"확인 필요\"로 남지 않습니다. 종료 판정을 가장 먼저 보고, 홈의 \"확인 대기\" 숫자도 같은 기준을 씁니다. ②\"확인 대기\" 표시는 정말로 판단이 필요할 때만 붙습니다. 끝부분이 도우미 자신의 다음 행동(먼저 확인하기, 테스트 후 보고)이면 \"작업 중·결과는 자동 보고\"로 바뀌어 헛기다림이 없어졌습니다. ③\"실행 중\"이 세 번 겹쳐 보이지 않고 화면에 한 줄만 남습니다. ④멈추면 정말 멈춥니다. \"지금은 하지 마/결과 기다려\"라고 하면 백그라운드에서 자동으로 이어서 돌지 않습니다. ⑤긴 작업이 \"돌지 않는 것\"으로 잘못 판정되어 강제로 끊기던 문제와 화면에 \"연결이 끊겼습니다\"가 뜨던 문제도 고쳤습니다. ⑥가정용 네트워크 장비 최적화 도구를 V7.1로 올렸습니다: 불필요한 서비스 정리, 메모리 3단계 감시, 실측으로 가장 빠른 노드 선택. 관리자 아이콘 글꼴이 네모로 깨지지 않고 페이지 캐시 설정도 정상화했습니다.",
+      "sections": {
+        "skills": [
+          "휴대폰 상태 표시 판정 순서를 \"종료 여부 → 실제 실행 중 여부 → 응답 대기 여부\"로 변경",
+          "종료되었고 실행 중이 아닌 세션은 \"완료\"로 표시하고 \"확인 필요\" 배지를 달지 않음. 실제 응답 대기는 그대로 노란색, 홈의 대기 숫자도 같은 판정",
+          "\"확인 대기\"는 결과 보고와 실제 판단 요청이 있을 때만. 도우미 자신의 다음 행동은 \"작업 중·결과 자동 보고\"로 기록",
+          "작업 중에는 화면에 상태 줄을 하나만 표시. 상단 바·말풍선·목록의 같은 문구 중복 줄은 제거",
+          "\"지금은 안 함/결과 대기/보류\"는 공을 멈춘 상태. 백그라운드 추격 없음, 정지 후 쿨다운 동안 모든 자동 이어하기 차단",
+          "이어서 하기 전에 먼저 결과를 보고(무엇을 고쳤는지/실측 수치/남은 것)하고 질문은 한 번만. 결과 없는 질문 금지",
+          "동기화 장부는 실제로 받은 뒤에 기록하고 실패하면 다음 회차에 재시도. 강제 인계 전에는 레인·스트림·대기열이 모두 비었는지 확인",
+          "가정용 네트워크 장비 최적화 도구 V7.1: 불필요 서비스 정리, 화면 프로세스 메모리가 기준을 넘으면 재시작, 메모리 3단계 감시(캐시 비우기/화면 재시작/프록시 재시작만, 기기 전체 재부팅은 안 함)",
+          "노드 선택은 3MB를 세 번 실측해 가장 빠른 것을 선택. 이미 최적화된 장비는 가벼운 조정을 먼저 실행. 배치 종료 시 느린 장비 목록 출력. 템플릿 버전 자동 추종으로 새 설정 파일만 넣으면 전체에 적용",
+          "페이지 자원 캐시를 1년에서 7일로, 진입 페이지와 스크립트는 캐시 없음으로. 관리자 아이콘 글꼴이 올바른 규칙으로 네모가 아니게 되고 첫 화면에 로딩 애니메이션 추가"
+        ],
+        "bugs": [
+          "PC에서 작업을 끝냈는데 휴대폰을 여러 번 새로고침해도 \"확인 필요\"가 사라지지 않음",
+          "홈 상단의 \"확인 대기 1\"이 사실 오래전에 끝난 건이었음",
+          "작업 도중(\"먼저 확인해 볼게요\")인데 \"확인 대기\"가 붙어 실제로는 진행 중이었음",
+          "\"확인: 테스트 후 보고할게요\"가 \"확인 대기\"로 잘못 판정. 공은 자기 쪽에 있었음",
+          "\"지금은 하지 마, 결과 기다려\"라고 했는데도 빈 추격이 세 번 돌았고 정지 버튼도 막지 못함",
+          "같은 \"실행 중\" 줄이 상단 바·말풍선·목록 세 곳에 동시에 나타나 세 개가 도는 것처럼 보임",
+          "십여 분 정상 실행되던 긴 작업이 내부 인계에서 \"프로세스 없음\"으로 판정되어 강제 중단. 화면은 \"연결이 끊겼습니다\"",
+          "휴대폰→PC 동기화 장부가 루프 진입 시 진행을 이미 소비로 기록해, 실패하거나 8건을 넘으면 영구 손실",
+          "관리자 아이콘 글꼴이 전부 404로 네모 표시. 자원 캐시 1년이라 프런트를 고쳐도 새로고침으로 보이지 않음"
+        ],
+        "lessons": [
+          "상태는 \"사람이 내린 결론\"에서 거꾸로 계산한다. 종료는 명시적 판단이며 활동으로 추정한 상태보다 우선한다",
+          "\"확인 대기\"와 \"작업 중\"은 공이 누구에게 있느냐로 나눈다. 끝이 자기 다음 행동이면 실행 중, 질문이나 선택지면 확인 대기",
+          "\"기다려\"라고 하면 기다린다. 대기 지시는 미완료가 아니며, 자동 추격은 멈춘 공을 알아야 헛돌지 않는다",
+          "지연이 낮다고 빠른 것이 아니다. 처리량은 고정 측점에서 세 번 측정한 중앙값을 쓴다. 한 번 측정은 열 배까지 흔들린다",
+          "기록은 실제로 손에 넣은 것만. 읽기 실패를 빈 값으로 되쓰지 말고 종료하거나 백업으로 되돌린다. 조용한 덮어쓰기는 데이터 삭제와 같다",
+          "(사내 경험 라이브러리에서) 기기가 여러 번 고쳐도 다시 느려지면 먼저 악성 프로그램의 상주를 의심한다. 회선을 바꾸거나 임시 도구를 더하는 것은 증상만 다스린다",
+          "(사내 경험 라이브러리에서) 악성 프로그램은 이름을 바꾸므로 이름으로 죽이지 말고 '어느 파일에서 실행되었는지'로 찾는다. 자동 시작은 여러 겹이라 한 겹만 지우면 되살아난다",
+          "(사내 경험 라이브러리에서) 정리 직후에 성공이라고 보고하지 않는다. 30초쯤 기다려 다시 나타나는지 확인해야 진짜 끝이다"
+        ]
+      }
     },
     "es": {
-      "summary": "[Novedades] Un solo arreglo: el texto de confirmación se cortaba. (1) El texto tras \"esperando tu confirmación\" se recortaba a los primeros 60 caracteres con \"…\", así que una lista de cuatro preguntas mostraba dos y una acción de dos pasos mostraba medio paso: imposible responder. Ahora se muestra completo, conservando numeración y saltos de línea. (2) Las listas de confirmación de varias líneas ya no se meten en una píldora pequeña; se muestran como bloque con barra a la izquierda, un elemento por línea.",
-      "skills": [
-        "El aviso \"esperando tu confirmación\" muestra todos los elementos completos, con numeración y saltos de línea (antes cortaba a 60 caracteres)",
-        "Cuando hay varios elementos pasa a ser una lista con barra a la izquierda, uno por línea",
-        "Lo que hay que confirmar se dice entero: se acabaron los \"2.…\"",
-        "Solo una lista realmente enorme (más de 1400 caracteres) se recorta, y se recorta por líneas completas, nunca a mitad de palabra, avisando de que el resto está en el mensaje de arriba"
-      ],
-      "bugs": [
-        "El aviso amarillo se cortaba en \"…cambiar nodo, instalar…\" y ocultaba el resto de la instrucción y la petición de contraseña — corregido",
-        "La lista de cuatro preguntas mostraba solo la 1 y \"2.…\", las dos últimas desaparecían — corregido",
-        "La expresión de extracción tenía su propio límite de 160 caracteres que también recortaba listas largas — eliminado",
-        "El respaldo de opciones A/B se quedaba con las 3 primeras unidas por barras en una línea — ahora hasta 8, una por línea"
-      ],
-      "lessons": [
-        "Si falta una línea de la lista de confirmación, el dueño no puede responder: mejor largo que roto",
-        "Todo límite de \"mostrar solo los primeros N caracteres\" debe preguntarse si el corte cae justo en lo que hay que responder",
-        "Servidor y página deben extraer con la misma regla, si no se contradicen"
-      ]
+      "summary": "[Qué cambió] (1) El escritorio y el móvil ahora coinciden: una tarea terminada en el escritorio ya no sigue mostrando \"necesita confirmación\" en el móvil; el cierre se comprueba primero y el contador de la portada usa la misma regla. (2) La etiqueta \"esperando confirmación\" queda solo para lo que de verdad requiere tu decisión: si la respuesta termina con el siguiente paso del asistente (voy a revisar X, te aviso tras probarlo) se muestra \"sigo trabajando · te aviso al terminar\", sin dejarte esperando. (3) Una tarea en marcha ya no muestra tres líneas de \"en ejecución\"; en pantalla queda solo una. (4) Parar es parar: tras un \"déjalo / espera resultados\", el trabajo en segundo plano no sigue solo. (5) Las tareas largas ya no se confunden con \"no está corriendo\" y se cortan; también se corrigió el antiguo \"se cortó la conexión\". (6) La herramienta de optimización de equipos de red domésticos pasa a V7.1: limpieza más profunda, vigilancia de memoria en tres niveles y elección de nodo por velocidad realmente medida. Los iconos del panel ya no salen como cuadros y la caché se comporta de forma razonable.",
+      "sections": {
+        "skills": [
+          "El orden del indicador en el móvil ahora es: cerrada primero, luego realmente en ejecución, luego esperando tu respuesta",
+          "Una sesión cerrada y sin ejecución muestra \"completada\" y pierde la etiqueta \"necesita confirmación\"; las esperas reales siguen en amarillo y el contador usa la misma regla",
+          "\"Esperando confirmación\" solo aparece con un informe de resultados y una petición real de decisión; el siguiente paso del asistente se registra como \"sigo trabajando · te aviso al terminar\"",
+          "Mientras trabaja queda una sola línea de estado; se eliminan las líneas duplicadas de la barra superior, el pie del mensaje y la lista",
+          "\"Ahora no / espera resultados / en pausa\" significa balón parado: no hay persecución en segundo plano y cualquier continuación automática se bloquea durante el enfriamiento tras la parada",
+          "Antes de continuar, informa primero (qué cambió, datos medidos, qué queda) y luego haz una pregunta; prohibido preguntar sin resultados",
+          "El registro de sincronización apunta solo lo que ya se recibió y reintenta en la siguiente vuelta si falla; el traspaso forzado exige canales, flujos y colas vacíos",
+          "Herramienta de optimización de equipos de red domésticos V7.1: recorta servicios redundantes, reinicia el proceso de interfaz cuando su memoria pasa un umbral y vigila la memoria en tres niveles (vaciar caché / reiniciar interfaz / reiniciar proxy, nunca reiniciar el equipo entero)",
+          "La elección de nodo usa tres muestras de 3MB y toma la más rápida; los equipos ya optimizados reciben antes un ajuste ligero; al acabar un lote se lista los equipos lentos; las versiones de plantilla se actualizan solas: basta dejar un archivo de configuración nuevo",
+          "La caché de recursos pasa de un año a 7 días, las páginas de entrada y los scripts van sin caché; las fuentes de iconos del panel tienen reglas correctas y ya no salen como cuadros, y la primera pantalla muestra una animación de carga"
+        ],
+        "bugs": [
+          "Tras terminar una tarea en el escritorio, el móvil seguía mostrando \"necesita confirmación\" aunque se refrescara",
+          "La portada decía \"pendiente 1\" para algo terminado hace tiempo",
+          "Una sesión cortada a medias (\"voy a comprobarlo primero\") llevaba la etiqueta \"esperando confirmación\" aunque seguía en curso",
+          "\"Confirmado: te aviso tras probarlo\" se marcó como espera, cuando el balón estaba en el lado del asistente",
+          "Tras un \"no lo hagas aún, espera mis resultados\" se lanzaron tres rondas vacías y el botón de parar no bloqueó la continuación automática",
+          "La misma línea de \"en ejecución\" aparecía en tres sitios a la vez, así que parecían tres tareas corriendo",
+          "Una tarea larga que corría con normalidad fue juzgada \"sin proceso\" por un traspaso interno y se cortó, mostrando \"se cortó la conexión\"",
+          "El registro de sincronización marcaba el avance como consumido al entrar, así que los fallos de lectura o lo que pasaba de 8 elementos se perdía para siempre",
+          "Todas las fuentes de iconos del panel daban 404 y salían como cuadros; con caché de un año, los usuarios no veían los cambios tras refrescar"
+        ],
+        "lessons": [
+          "El estado se deduce desde lo que decidió una persona: el cierre es una decisión explícita y manda sobre cualquier estado inferido de la actividad",
+          "\"Esperando confirmación\" frente a \"sigo trabajando\" depende de quién tiene el balón: un paso propio significa en marcha; una pregunta u opciones significa espera",
+          "Cuando alguien dice espera, es espera: una pausa no es trabajo sin terminar, y la persecución automática debe reconocer el balón parado en vez de girar en vacío",
+          "Latencia baja no es velocidad alta: toma la mediana de tres mediciones desde un punto fijo, porque una sola puede desviarse diez veces",
+          "Solo cuenta lo que tienes en la mano: nunca reescribas un valor vacío tras una lectura fallida; o sales, o vuelves a la copia de seguridad, porque sobrescribir en silencio borra datos",
+          "(de la biblioteca interna de lecciones) Si un equipo vuelve a ir lento tras varias reparaciones, sospecha primero de un programa malicioso residente: cambiar la ruta o añadir herramientas temporales solo trata el síntoma",
+          "(de la biblioteca interna de lecciones) Los programas maliciosos se renombran, así que la limpieza debe rastrear desde qué archivo arrancó cada proceso, no matar por nombre; su autoarranque suele tener varias capas y quitar una lo revive",
+          "(de la biblioteca interna de lecciones) No declares el éxito justo después de limpiar: espera medio minuto y comprueba si vuelve; solo entonces está limpio de verdad"
+        ]
+      }
     },
     "fr": {
-      "summary": "[Nouveautés] Un seul correctif : le texte de confirmation était tronqué. (1) Le texte après « en attente de votre confirmation » était coupé aux 60 premiers caractères avec « … » : une liste de quatre questions n'en affichait que deux et une action en deux étapes la moitié. Il s'affiche maintenant en entier, numérotation et retours à la ligne conservés. (2) Les listes de confirmation sur plusieurs lignes ne sont plus compressées dans une petite pastille : elles s'affichent en bloc avec une barre à gauche, un élément par ligne.",
-      "skills": [
-        "Le badge « en attente de votre confirmation » affiche tous les éléments en entier, numérotation et retours à la ligne compris (avant : coupé à 60 caractères)",
-        "Plusieurs éléments : le badge devient une liste avec barre à gauche, un par ligne",
-        "Ce qu'il faut confirmer est dit en entier — fini les « 2.… »",
-        "Seule une liste vraiment énorme (plus de 1400 caractères) est tronquée, et par lignes entières, jamais au milieu d'un mot, avec la mention que la suite est dans le message ci-dessus"
-      ],
-      "bugs": [
-        "Le badge jaune s'arrêtait à « …changer de nœud, installer… » et cachait la suite et la demande de mot de passe — corrigé",
-        "La liste des quatre questions n'affichait que la 1 et « 2.… », les deux dernières disparaissaient — corrigé",
-        "L'expression d'extraction avait sa propre limite de 160 caractères qui tronquait aussi les longues listes — supprimée",
-        "Le repli des options A/B ne gardait que les 3 premières jointes par des barres sur une ligne — désormais jusqu'à 8, une par ligne"
-      ],
-      "lessons": [
-        "S'il manque une ligne de la liste, le propriétaire ne peut pas répondre — mieux vaut long que cassé",
-        "Toute limite « n'afficher que les N premiers caractères » doit se demander si la coupure tombe sur ce qu'il faut répondre",
-        "Serveur et page doivent extraire selon la même règle, sinon ils se contredisent"
-      ]
+      "summary": "[Ce qui change] (1) Bureau et mobile sont désormais alignés : une tâche terminée sur le bureau n'affiche plus \"confirmation requise\" sur le mobile ; le statut « terminé » est vérifié en premier et le compteur d'accueil suit la même règle. (2) L'étiquette \"en attente de confirmation\" ne sert plus qu'aux vraies décisions : si la réponse se termine par la prochaine action de l'assistant (je vérifie X, je te tiens au courant après le test), elle devient \"travail en cours · résultats envoyés automatiquement\". (3) Une tâche en cours n'affiche plus trois lignes \"en cours d'exécution\" ; il n'en reste qu'une à l'écran. (4) Dire stop, c'est stop : après un \"laisse tomber / attends les résultats\", l'arrière-plan ne continue plus tout seul. (5) Les tâches longues ne sont plus prises pour \"rien ne tourne\" et coupées ; l'ancien \"connexion interrompue\" est corrigé aussi. (6) L'outil d'optimisation des équipements réseau domestiques passe en V7.1 : nettoyage plus poussé, surveillance mémoire à trois niveaux, choix du nœud selon la vitesse réellement mesurée. Les icônes du panneau ne s'affichent plus en carrés et le cache des pages est enfin raisonnable.",
+      "sections": {
+        "skills": [
+          "L'ordre du voyant sur mobile devient : terminé d'abord, puis réellement en cours, puis en attente de votre réponse",
+          "Une session terminée et inactive affiche \"terminé\" et perd le badge \"confirmation requise\" ; les vraies attentes restent en jaune et le compteur d'accueil suit la même règle",
+          "\"En attente de confirmation\" n'apparaît qu'avec un rapport de résultat et une vraie demande de décision ; la prochaine action de l'assistant est notée \"travail en cours · résultats envoyés automatiquement\"",
+          "Pendant le travail, une seule ligne d'état reste à l'écran ; les doublons de la barre supérieure, du pied de bulle et de la liste sont supprimés",
+          "\"Pas maintenant / j'attends les résultats / en pause\" signifie balle au sol : pas de relance en arrière-plan, et toute reprise automatique est bloquée pendant le délai après l'arrêt",
+          "Avant de reprendre, donner le résultat (ce qui a changé, mesures, ce qui reste) puis poser une seule question ; interdit de demander sans résultat",
+          "Le journal de synchronisation n'enregistre que ce qui est réellement reçu et réessaie au tour suivant en cas d'échec ; le transfert forcé exige voies, flux et files vides",
+          "Outil d'optimisation des équipements réseau domestiques V7.1 : supprime les services redondants, redémarre le processus d'interface quand sa mémoire dépasse un seuil, surveille la mémoire sur trois niveaux (vider le cache / redémarrer l'interface / redémarrer le proxy, jamais redémarrer l'appareil)",
+          "Le choix du nœud utilise trois échantillons de 3 Mo et retient le plus rapide ; les appareils déjà optimisés passent d'abord par un réglage léger ; un lot se termine par la liste des appareils lents ; les versions de modèle suivent automatiquement, il suffit de déposer un nouveau fichier de configuration",
+          "Le cache des ressources passe d'un an à 7 jours, les pages d'entrée et les scripts ne sont plus mis en cache ; les polices d'icônes du panneau ont des règles correctes et ne s'affichent plus en carrés, et le premier écran affiche une animation de chargement"
+        ],
+        "bugs": [
+          "Après avoir terminé une tâche sur le bureau, le mobile affichait toujours \"confirmation requise\" même après plusieurs rafraîchissements",
+          "L'accueil annonçait \"en attente 1\" pour un travail terminé depuis longtemps",
+          "Une session coupée en plein travail (\"je vérifie d'abord\") portait l'étiquette \"en attente de confirmation\" alors qu'elle était en cours",
+          "\"Confirmé : je te tiens au courant après le test\" a été marqué en attente, alors que la balle était du côté de l'assistant",
+          "Après un \"ne fais pas ça, attends mes résultats\", trois tours à vide ont été lancés et le bouton stop n'a pas bloqué la reprise automatique",
+          "La même ligne \"en cours\" s'affichait à trois endroits, donnant l'impression de trois tâches actives",
+          "Une tâche longue qui tournait normalement a été jugée \"sans processus\" par un transfert interne et coupée, avec \"connexion interrompue\" à l'écran",
+          "Le journal de synchronisation marquait l'avancement comme consommé dès l'entrée, donc les échecs de lecture ou au-delà de 8 éléments étaient perdus définitivement",
+          "Toutes les polices d'icônes du panneau renvoyaient 404 et s'affichaient en carrés ; avec un cache d'un an, les utilisateurs ne voyaient pas les changements après rafraîchissement"
+        ],
+        "lessons": [
+          "L'état se déduit de ce qu'une personne a décidé : la clôture est une décision explicite et prime sur tout état déduit de l'activité",
+          "\"En attente de confirmation\" ou \"travail en cours\" dépend de qui tient la balle : une prochaine action propre = en cours ; une question ou des options = en attente",
+          "Quand quelqu'un dit d'attendre, on attend : une mise en attente n'est pas un travail inachevé, et la relance automatique doit reconnaître la balle au sol au lieu de tourner à vide",
+          "Une latence basse n'est pas un débit élevé : prendre la médiane de trois mesures depuis un point fixe, une seule mesure peut varier d'un facteur dix",
+          "Ne compte que ce que tu tiens vraiment : ne réécris jamais une valeur vide après une lecture ratée ; soit tu sors, soit tu reviens à la sauvegarde, car écraser en silence revient à supprimer des données",
+          "(d'après la bibliothèque interne de leçons) Si un appareil ralentit encore après plusieurs réparations, soupçonnez d'abord un programme malveillant résident : changer de route ou ajouter des outils temporaires ne traite que le symptôme",
+          "(d'après la bibliothèque interne de leçons) Les programmes malveillants changent de nom : le nettoyage doit retrouver le fichier depuis lequel chaque processus a démarré, pas tuer par nom ; leur démarrage automatique a souvent plusieurs couches et en retirer une le fait revenir",
+          "(d'après la bibliothèque interne de leçons) Ne déclarez pas le succès juste après le nettoyage : attendez une trentaine de secondes et vérifiez s'il revient, c'est seulement là que c'est vraiment propre"
+        ]
+      }
     },
     "de": {
-      "summary": "[Was ist neu] Nur eine Korrektur: Bestätigungstexte wurden abgeschnitten. (1) Der Text nach „wartet auf deine Bestätigung\" wurde auf die ersten 60 Zeichen gekürzt, mit „…\". Eine Liste mit vier Fragen zeigte zwei, eine Zwei-Schritt-Anweisung den halben Schritt — unbeantwortbar. Jetzt wird alles angezeigt, Nummerierung und Zeilenumbrüche bleiben. (2) Mehrzeilige Bestätigungslisten werden nicht mehr in eine kleine Pille gequetscht, sondern als Block mit Balken links dargestellt, ein Eintrag pro Zeile.",
-      "skills": [
-        "Das Abzeichen „wartet auf deine Bestätigung\" zeigt alle Punkte vollständig, mit Nummerierung und Zeilenumbrüchen (vorher bei 60 Zeichen abgeschnitten)",
-        "Bei mehreren Punkten wird daraus eine Liste mit Balken links, ein Punkt pro Zeile",
-        "Was zu bestätigen ist, steht vollständig da — keine halben Sätze wie „2.…\" mehr",
-        "Nur eine wirklich riesige Liste (über 1400 Zeichen) wird gekürzt, und zwar an ganzen Zeilen, nie mitten im Wort, mit Hinweis, dass der Rest in der Nachricht oben steht"
-      ],
-      "bugs": [
-        "Das gelbe Abzeichen endete bei „…Knoten wechseln, installieren…\" und verdeckte den Rest und die Passwortanfrage — behoben",
-        "Die Vier-Fragen-Liste zeigte nur Frage 1 und „2.…\", die letzten beiden verschwanden — behoben",
-        "Der Extraktions-Ausdruck hatte eine eigene 160-Zeichen-Grenze, die lange Listen ebenfalls kürzte — entfernt",
-        "Der A/B-Fallback behielt nur die ersten 3 Optionen, mit Schrägstrichen in einer Zeile — jetzt bis zu 8, eine pro Zeile"
-      ],
-      "lessons": [
-        "Fehlt eine Zeile der Bestätigungsliste, kann der Besitzer nicht antworten — lieber lang als kaputt",
-        "Jede Grenze „zeige nur die ersten N Zeichen\" muss fragen, ob der Schnitt genau das trifft, was beantwortet werden muss",
-        "Server und Seite müssen nach derselben Regel extrahieren, sonst widersprechen sie sich"
-      ]
+      "summary": "[Was sich ändert] (1) Desktop und Handy sind jetzt synchron: Eine am Desktop beendete Aufgabe zeigt am Handy nicht mehr dauerhaft \"Bestätigung nötig\"; der Abschluss wird zuerst geprüft und der Zähler auf der Startseite nutzt dieselbe Regel. (2) Das Kennzeichen \"wartet auf Bestätigung\" gibt es nur noch für echte Entscheidungen: Endet die Antwort mit dem nächsten Schritt des Assistenten (ich prüfe erst X, melde mich nach dem Test), steht dort \"läuft weiter · Ergebnis kommt automatisch\". (3) Eine laufende Aufgabe zeigt nicht mehr drei Statuszeilen; auf dem Bildschirm bleibt nur eine. (4) Stopp heißt Stopp: Nach \"erst mal nicht / auf Ergebnisse warten\" läuft im Hintergrund nichts von selbst weiter. (5) Lange Aufgaben werden nicht mehr fälschlich als \"läuft nicht\" eingestuft und abgebrochen; auch das alte \"Verbindung getrennt\" ist behoben. (6) Das Optimierungswerkzeug für Heimnetzgeräte ist jetzt V7.1: gründlicheres Aufräumen, dreistufige Speicherüberwachung und Knotenwahl nach tatsächlich gemessener Geschwindigkeit. Admin-Symbolschriften erscheinen nicht mehr als Kästchen, und das Seiten-Caching verhält sich vernünftig.",
+      "sections": {
+        "skills": [
+          "Die Reihenfolge der Statusanzeige am Handy ist jetzt: abgeschlossen zuerst, dann wirklich laufend, dann auf Ihre Antwort wartend",
+          "Eine abgeschlossene, nicht laufende Sitzung zeigt \"fertig\" und verliert das Kennzeichen \"Bestätigung nötig\"; echte Wartezustände bleiben gelb, der Zähler auf der Startseite folgt derselben Regel",
+          "\"Wartet auf Bestätigung\" erscheint nur mit Ergebnisbericht und echter Entscheidungsfrage; der nächste Schritt des Assistenten wird als \"läuft weiter · Ergebnis kommt automatisch\" vermerkt",
+          "Während der Arbeit bleibt nur eine Statuszeile sichtbar; doppelte Zeilen in Titelleiste, Sprechblase und Liste werden entfernt",
+          "\"Jetzt nicht / auf Ergebnisse warten / pausiert\" heißt Ball ruht: kein Nachlaufen im Hintergrund, und während der Abklingzeit nach dem Stopp ist jede automatische Fortsetzung gesperrt",
+          "Vor dem Weitermachen erst das Ergebnis melden (was geändert wurde, Messwerte, was offen ist) und dann eine Frage stellen; Fragen ohne Ergebnis sind tabu",
+          "Das Synchronisationsjournal verbucht Fortschritt erst, wenn die Daten wirklich vorliegen, und wiederholt bei Fehlern in der nächsten Runde; eine erzwungene Übergabe verlangt leere Spuren, Streams und Warteschlangen",
+          "Optimierungswerkzeug für Heimnetzgeräte V7.1: entfernt überflüssige Dienste, startet den Oberflächenprozess bei zu viel Speicher neu und überwacht den Speicher dreistufig (Cache leeren / Oberfläche neu starten / Proxy neu starten – nie das ganze Gerät neu starten)",
+          "Die Knotenwahl nutzt drei 3-MB-Messungen und nimmt den schnellsten Wert; bereits optimierte Geräte bekommen zuerst eine leichte Nachjustierung; ein Lauf endet mit einer Liste langsamer Geräte; Vorlagenversionen folgen automatisch, eine neue Konfigurationsdatei genügt",
+          "Seitenressourcen werden 7 Tage statt ein Jahr zwischengespeichert, Einstiegsseiten und Skripte gar nicht; Admin-Symbolschriften haben korrekte Regeln und erscheinen nicht mehr als Kästchen, der erste Bildschirm zeigt eine Ladeanimation"
+        ],
+        "bugs": [
+          "Nach dem Beenden einer Aufgabe am Desktop zeigte das Handy auch nach mehreren Aktualisierungen \"Bestätigung nötig\"",
+          "Auf der Startseite stand \"1 offen\" für etwas, das längst erledigt war",
+          "Eine mitten in der Arbeit abgebrochene Sitzung (\"ich prüfe das erst\") trug \"wartet auf Bestätigung\", obwohl sie noch lief",
+          "\"Bestätigt: ich melde mich nach dem Test\" wurde als Warten markiert, obwohl der Ball beim Assistenten lag",
+          "Nach \"erst mal nicht, warte auf meine Ergebnisse\" liefen drei leere Runden weiter und der Stopp-Knopf blockierte die automatische Fortsetzung nicht",
+          "Dieselbe \"läuft\"-Zeile erschien an drei Stellen gleichzeitig, sodass es nach drei laufenden Aufgaben aussah",
+          "Eine lange, normal laufende Aufgabe wurde von einer internen Übergabe als \"kein Prozess\" gewertet und abgebrochen, Anzeige \"Verbindung getrennt\"",
+          "Das Synchronisationsjournal verbuchte Fortschritt schon beim Eintritt als verbraucht, daher gingen Fehlschläge und alles über 8 Einträge dauerhaft verloren",
+          "Alle Admin-Symbolschriften lieferten 404 und erschienen als Kästchen; bei einem Jahr Cache sahen Nutzer Änderungen auch nach dem Aktualisieren nicht"
+        ],
+        "lessons": [
+          "Status leitet sich aus einer menschlichen Entscheidung ab: Der Abschluss ist eine ausdrückliche Entscheidung und steht über jedem aus Aktivität abgeleiteten Zustand",
+          "\"Wartet auf Bestätigung\" gegen \"läuft weiter\" entscheidet, wer den Ball hat: eigener nächster Schritt = läuft; Frage oder Optionen = wartet",
+          "Wenn jemand \"warte\" sagt, wird gewartet: Eine Pause ist keine unfertige Arbeit, und das automatische Nachlaufen muss den ruhenden Ball erkennen, statt leer zu drehen",
+          "Niedrige Latenz ist keine hohe Geschwindigkeit: Nimm den Median aus drei Messungen an einem festen Punkt, eine einzelne kann um den Faktor zehn danebenliegen",
+          "Zähle nur, was du wirklich hast: Nach einem fehlgeschlagenen Lesen nie einen leeren Wert zurückschreiben – entweder abbrechen oder auf die Sicherung zurückfallen, denn stilles Überschreiben löscht Daten",
+          "(aus der internen Erfahrungsbibliothek) Wird ein Gerät nach mehreren Reparaturen wieder langsam, zuerst auf dauerhaft laufende Schadprogramme prüfen - Route wechseln oder temporäre Tools hinzufügen behandelt nur das Symptom",
+          "(aus der internen Erfahrungsbibliothek) Schadprogramme benennen sich um, daher muss die Bereinigung nachvollziehen, aus welcher Datei ein Prozess gestartet wurde, statt nach Namen zu beenden; der Autostart hat meist mehrere Ebenen, eine Ebene zu entfernen lässt es zurückkehren",
+          "(aus der internen Erfahrungsbibliothek) Nicht direkt nach der Bereinigung Erfolg melden: eine halbe Minute warten und prüfen, ob es zurückkommt - erst dann ist es wirklich sauber"
+        ]
+      }
     },
     "ru": {
-      "summary": "[Что нового] Одно исправление: текст подтверждения обрезался. (1) Текст после «ожидает вашего подтверждения» обрезался до первых 60 символов с «…»: список из четырёх вопросов показывал два, а действие из двух шагов — половину шага, ответить было невозможно. Теперь показывается полностью, с сохранением нумерации и переносов строк. (2) Многострочные списки подтверждений больше не сжимаются в маленькую плашку, а выводятся блоком с полосой слева, один пункт на строку.",
-      "skills": [
-        "Значок «ожидает вашего подтверждения» показывает все пункты полностью, с нумерацией и переносами (раньше обрезалось на 60 символах)",
-        "Если пунктов несколько, значок превращается в список с полосой слева, по пункту на строку",
-        "Что подтвердить — сказано целиком, без обрывов вида «2.…»",
-        "Обрезается только действительно огромный список (свыше 1400 символов), причём по целым строкам, никогда посреди слова, с пометкой, что остальное в сообщении выше"
-      ],
-      "bugs": [
-        "Жёлтый значок обрывался на «…сменить узел, установить…» и скрывал остаток инструкции и просьбу о пароле — исправлено",
-        "Список из четырёх вопросов показывал только 1-й и «2.…», два последних исчезали — исправлено",
-        "У регулярного выражения извлечения был свой предел в 160 символов, который тоже резал длинные списки — убран",
-        "Запасной вариант A/B оставлял первые 3 варианта, склеенные через слэш в одну строку — теперь до 8, по одному на строку"
-      ],
-      "lessons": [
-        "Если в списке подтверждений не хватает строки, владелец не сможет ответить — лучше длинно, чем бито",
-        "Любой предел «показывать только первые N символов» должен проверять: не приходится ли обрезка ровно на то, что нужно ответить",
-        "Сервер и страница должны извлекать текст по одному правилу, иначе они расходятся"
-      ]
+      "summary": "[Что изменилось] (1) Компьютер и телефон теперь согласованы: задача, завершённая на компьютере, больше не висит на телефоне как «требуется подтверждение»; сначала проверяется закрытие, и счётчик на главной использует то же правило. (2) Пометка «ожидает подтверждения» остаётся только для настоящих решений: если ответ заканчивается следующим шагом помощника (сначала проверю X, сообщу после теста), показывается «работаю · результат придёт автоматически». (3) Одна работающая задача больше не показывает три строки «выполняется» — на экране остаётся одна. (4) Остановка значит остановку: после «пока не делай / жду результатов» фон сам не продолжает. (5) Долгие задачи больше не принимаются за «ничего не работает» и не обрываются; старый симптом «соединение оборвалось» тоже исправлен. (6) Инструмент оптимизации домашних сетевых устройств обновлён до V7.1: глубже чистка, трёхуровневый контроль памяти, выбор узла по реально измеренной скорости. Значки в панели больше не квадратики, кеширование страниц настроено разумно.",
+      "sections": {
+        "skills": [
+          "Порядок индикатора на телефоне теперь такой: сначала закрыта ли, затем действительно ли выполняется, затем ждёт ли вашего ответа",
+          "Закрытая и не выполняющаяся сессия показывает «готово» и теряет метку «требуется подтверждение»; настоящие ожидания по-прежнему жёлтые, счётчик на главной подчиняется тому же правилу",
+          "«Ожидает подтверждения» появляется только при отчёте о результате и реальном запросе решения; собственный следующий шаг помощника записывается как «работаю · результат автоматически»",
+          "Во время работы на экране остаётся одна строка состояния; дубли в верхней панели, под пузырём и в списке удаляются",
+          "«Сейчас не надо / жду результатов / на паузе» означает мяч остановлен: фоновой догонки нет, а любое автопродолжение блокируется на время после остановки",
+          "Перед продолжением сначала отчитаться (что изменено, измеренные числа, что осталось), затем задать один вопрос; спрашивать без результата нельзя",
+          "Журнал синхронизации записывает прогресс только после фактического получения данных и повторяет попытку при сбое; принудительная передача требует пустых линий, потоков и очередей",
+          "Инструмент оптимизации домашних сетевых устройств V7.1: убирает лишние службы, перезапускает процесс интерфейса при превышении порога памяти и следит за памятью на трёх уровнях (сбросить кеш / перезапустить интерфейс / перезапустить прокси — без перезагрузки всего устройства)",
+          "Выбор узла — три замера по 3 МБ и берётся самый быстрый; уже оптимизированные устройства сначала проходят лёгкую подстройку; пакетный прогон завершается списком медленных устройств; версии шаблонов подхватываются автоматически — достаточно положить новый файл конфигурации",
+          "Кеш ресурсов страниц — 7 дней вместо года, входные страницы и скрипты не кешируются; значки панели получили правильные правила и больше не квадратики, на первом экране появилась анимация загрузки"
+        ],
+        "bugs": [
+          "После завершения задачи на компьютере телефон после нескольких обновлений всё равно показывал «требуется подтверждение»",
+          "На главной было «ожидает 1» для того, что давно сделано",
+          "Сессия, оборванная на середине работы («сначала проверю»), получила метку «ожидает подтверждения», хотя работа шла",
+          "«Подтверждаю: сообщу после теста» пометили как ожидание, хотя мяч был на стороне помощника",
+          "После слов «пока не делай, жди моих результатов» прошли три пустых круга, и кнопка остановки не заблокировала автопродолжение",
+          "Одна и та же строка «выполняется» появлялась в трёх местах, будто работают три задачи",
+          "Долгая задача, нормально шедшая десяток минут, была признана внутренней передачей «без процесса» и оборвана, на экране «соединение оборвалось»",
+          "Журнал синхронизации отмечал прогресс как использованный на входе, поэтому сбои и всё сверх 8 записей терялись навсегда",
+          "Все шрифты значков панели отдавали 404 и отображались квадратиками; из-за годового кеша пользователи не видели изменений даже после обновления"
+        ],
+        "lessons": [
+          "Состояние выводится из решения человека: закрытие — это явное решение, и оно важнее любого состояния, выведенного из активности",
+          "«Ожидает подтверждения» и «работаю» различаются по тому, у кого мяч: свой следующий шаг — работа, вопрос или варианты — ожидание",
+          "Если сказали «жди», значит жди: пауза не является незаконченной работой, и автодогонка должна распознавать остановленный мяч, а не крутиться впустую",
+          "Низкая задержка — не высокая скорость: берите медиану трёх замеров из фиксированной точки, один замер может ошибаться в десять раз",
+          "Считайте только то, что действительно получено: после неудачного чтения не записывайте пустое значение — либо выход, либо откат к резервной копии, молчаливая перезапись стирает данные",
+          "(из внутренней библиотеки опыта) Если устройство снова тормозит после нескольких ремонтов, сначала подозревайте постоянно работающую вредоносную программу: смена маршрута или временные утилиты лечат только симптом",
+          "(из внутренней библиотеки опыта) Вредоносные программы меняют имена, поэтому чистка должна искать, из какого файла запущен процесс, а не убивать по имени; автозапуск обычно многослойный, снятие одного слоя возвращает программу",
+          "(из внутренней библиотеки опыта) Не докладывайте об успехе сразу после чистки: подождите полминуты и проверьте, не вернулось ли, только тогда действительно чисто"
+        ]
+      }
     },
     "pt": {
-      "summary": "[O que mudou] Uma correção só: o texto de confirmação estava sendo cortado. (1) O texto após \"aguardando sua confirmação\" era cortado nos primeiros 60 caracteres com \"…\", então uma lista de quatro perguntas mostrava duas e uma ação de duas etapas mostrava meia etapa — impossível responder. Agora aparece inteiro, mantendo numeração e quebras de linha. (2) Listas de confirmação com várias linhas não são mais espremidas numa pílula pequena; viram um bloco com barra à esquerda, um item por linha.",
-      "skills": [
-        "O selo \"aguardando sua confirmação\" mostra todos os itens inteiros, com numeração e quebras de linha (antes cortava aos 60 caracteres)",
-        "Com vários itens, vira uma lista com barra à esquerda, um por linha",
-        "O que confirmar é dito por inteiro — sem mais \"2.…\" pela metade",
-        "Só uma lista realmente enorme (mais de 1400 caracteres) é cortada, e o corte é por linhas inteiras, nunca no meio da palavra, avisando que o resto está na mensagem acima"
-      ],
-      "bugs": [
-        "O selo amarelo parava em \"…trocar nó, instalar…\" e escondia o resto da instrução e o pedido de senha — corrigido",
-        "A lista de quatro perguntas mostrava só a 1 e \"2.…\", as duas últimas desapareciam — corrigido",
-        "A expressão de extração tinha seu próprio limite de 160 caracteres, que também cortava listas longas — removido",
-        "O fallback das opções A/B mantinha só as 3 primeiras unidas por barras em uma linha — agora até 8, uma por linha"
-      ],
-      "lessons": [
-        "Se falta uma linha da lista de confirmação, o dono não consegue responder — melhor longo do que quebrado",
-        "Todo limite de \"mostrar só os primeiros N caracteres\" precisa perguntar se o corte cai justamente no que deve ser respondido",
-        "Servidor e página precisam extrair pela mesma regra, senão se contradizem"
-      ]
+      "summary": "[O que mudou] (1) Computador e celular agora concordam: uma tarefa encerrada no computador não fica mais mostrando \"precisa de confirmação\" no celular; o encerramento é verificado primeiro e o contador da tela inicial usa a mesma regra. (2) A marca \"aguardando confirmação\" fica só para decisões reais: se a resposta termina com o próximo passo do assistente (vou verificar X, aviso depois do teste), aparece \"segue em andamento · resultado enviado automaticamente\". (3) Uma tarefa em execução não mostra mais três linhas de \"executando\"; fica só uma na tela. (4) Parar é parar: depois de \"deixa pra lá / aguarde os resultados\", o fundo não continua sozinho. (5) Tarefas longas não são mais confundidas com \"não está rodando\" e cortadas; o antigo \"conexão caiu\" também foi corrigido. (6) A ferramenta de otimização de equipamentos de rede domésticos vai para a V7.1: limpeza mais profunda, monitoramento de memória em três níveis e escolha de nó pela velocidade realmente medida. Os ícones do painel não viram mais quadrados e o cache das páginas ficou sensato.",
+      "sections": {
+        "skills": [
+          "A ordem do indicador no celular agora é: encerrada primeiro, depois realmente em execução, depois aguardando sua resposta",
+          "Sessão encerrada e parada mostra \"concluída\" e perde a etiqueta \"precisa de confirmação\"; esperas reais continuam em amarelo e o contador segue a mesma regra",
+          "\"Aguardando confirmação\" só aparece com relatório de resultado e um pedido real de decisão; o próximo passo do assistente é registrado como \"segue em andamento · resultado automático\"",
+          "Durante o trabalho fica uma única linha de status na tela; duplicatas na barra superior, no rodapé do balão e na lista são removidas",
+          "\"Agora não / aguarde os resultados / em espera\" significa bola parada: sem perseguição em segundo plano, e qualquer continuação automática é bloqueada durante o resfriamento após a parada",
+          "Antes de continuar, informe o resultado (o que mudou, números medidos, o que falta) e depois faça uma pergunta; proibido perguntar sem resultado",
+          "O registro de sincronização só anota o que realmente chegou e tenta de novo na rodada seguinte em caso de falha; a passagem forçada exige faixas, fluxos e filas vazios",
+          "Ferramenta de otimização de equipamentos de rede domésticos V7.1: corta serviços redundantes, reinicia o processo da interface quando a memória passa do limite e monitora a memória em três níveis (limpar cache / reiniciar interface / reiniciar proxy, nunca reiniciar o aparelho inteiro)",
+          "A escolha de nó usa três amostras de 3MB e pega a mais rápida; equipamentos já otimizados passam antes por um ajuste leve; o lote termina com a lista de equipamentos lentos; as versões de modelo acompanham sozinhas — basta colocar um novo arquivo de configuração",
+          "O cache de recursos cai de um ano para 7 dias, páginas de entrada e scripts ficam sem cache; as fontes de ícones do painel têm regras corretas e não viram quadrados, e a primeira tela ganhou animação de carregamento"
+        ],
+        "bugs": [
+          "Depois de encerrar uma tarefa no computador, o celular continuava mostrando \"precisa de confirmação\" mesmo após várias atualizações",
+          "A tela inicial dizia \"pendente 1\" para algo concluído há muito tempo",
+          "Uma sessão interrompida no meio (\"vou verificar primeiro\") levava a etiqueta \"aguardando confirmação\", embora estivesse em andamento",
+          "\"Confirmado: aviso depois do teste\" foi marcado como espera, com a bola do lado do assistente",
+          "Depois de \"não faça agora, aguarde meus resultados\", três rodadas vazias rodaram e o botão de parar não bloqueou a continuação automática",
+          "A mesma linha de \"executando\" aparecia em três lugares, parecendo três tarefas rodando",
+          "Uma tarefa longa que rodava normalmente foi julgada \"sem processo\" por uma passagem interna e cortada, exibindo \"conexão caiu\"",
+          "O registro de sincronização marcava o progresso como consumido na entrada, então falhas de leitura e tudo acima de 8 itens se perdia para sempre",
+          "Todas as fontes de ícones do painel davam 404 e viravam quadrados; com cache de um ano, usuários não viam as mudanças nem após atualizar"
+        ],
+        "lessons": [
+          "O estado vem da decisão de uma pessoa: o encerramento é decisão explícita e vale mais que qualquer estado inferido da atividade",
+          "\"Aguardando confirmação\" contra \"segue em andamento\" depende de quem tem a bola: próximo passo próprio = em execução; pergunta ou opções = espera",
+          "Quando alguém diz espera, é espera: uma pausa não é trabalho inacabado, e a perseguição automática precisa reconhecer a bola parada em vez de girar em vazio",
+          "Latência baixa não é velocidade alta: use a mediana de três medições num ponto fixo, uma única pode errar por dez vezes",
+          "Conte só o que você realmente tem: nunca grave um valor vazio após leitura falha — ou sai, ou volta ao backup, porque sobrescrever em silêncio apaga dados",
+          "(da biblioteca interna de lições) Se um equipamento volta a ficar lento após várias correções, suspeite primeiro de um programa malicioso residente: trocar a rota ou adicionar ferramentas temporárias só trata o sintoma",
+          "(da biblioteca interna de lições) Programas maliciosos trocam de nome, então a limpeza deve rastrear de qual arquivo cada processo iniciou, não matar pelo nome; a inicialização automática costuma ter várias camadas e remover uma faz voltar",
+          "(da biblioteca interna de lições) Não declare sucesso logo após a limpeza: espere meio minuto e verifique se voltou; só então está realmente limpo"
+        ]
+      }
     },
     "ar": {
-      "summary": "[ما الجديد] إصلاح واحد فقط: نص التأكيد كان يُقطع. (1) كان النص بعد «بانتظار تأكيدك» يُقتطع عند أول 60 حرفًا مع «…»، فقائمة من أربعة أسئلة تُظهر سؤالين وخطوتان تُظهر نصف خطوة — لا يمكن الرد. الآن يُعرض كاملًا مع الحفاظ على الترقيم وفواصل الأسطر. (2) قوائم التأكيد متعددة الأسطر لم تعد تُحشر في شارة صغيرة، بل تُعرض ككتلة بشريط على اليسار، بندًا في كل سطر.",
-      "skills": [
-        "شارة «بانتظار تأكيدك» تعرض كل البنود كاملة مع الترقيم وفواصل الأسطر (سابقًا كانت تُقطع عند 60 حرفًا)",
-        "عند وجود عدة بنود تتحول إلى قائمة بشريط على اليسار، بند في كل سطر",
-        "ما يجب تأكيده يُقال كاملًا — لا مزيد من «2.…» المقطوعة",
-        "تُختصر فقط القوائم الضخمة فعلًا (أكثر من 1400 حرف)، والاختصار على أسطر كاملة لا في منتصف كلمة، مع الإشارة إلى أن البقية في الرسالة أعلاه"
-      ],
-      "bugs": [
-        "الشارة الصفراء توقفت عند «…تغيير العقدة، تثبيت…» وأخفت بقية التعليمات وطلب كلمة المرور — تم الإصلاح",
-        "قائمة الأسئلة الأربعة أظهرت السؤال الأول و«2.…» فقط، واختفى الآخران — تم الإصلاح",
-        "كانت لصيغة الاستخراج حدّ خاص بـ160 حرفًا يقتطع القوائم الطويلة أيضًا — أُزيل",
-        "خيار A/B الاحتياطي كان يُبقي أول 3 خيارات مدمجة بشرطات مائلة في سطر واحد — الآن حتى 8، بند في كل سطر"
-      ],
-      "lessons": [
-        "إذا نقص سطر من قائمة التأكيد فلن يستطيع المالك الرد — الأطول أفضل من المبتور",
-        "كل حدّ «اظهر أول N حرفًا فقط» يجب أن يسأل: هل يقع القطع على ما يجب الإجابة عنه؟",
-        "يجب أن يستخرج الخادم والصفحة النص بالقاعدة نفسها، وإلا تعارضا"
-      ]
+      "summary": "[ما الذي تغيّر] (1) أصبح الحاسوب والهاتف متوافقين: المهمة المنتهية على الحاسوب لم تعد تظهر على الهاتف بعبارة \"يحتاج إلى تأكيد\"؛ يُفحص الإغلاق أولًا وعدّاد الشاشة الرئيسية يستخدم القاعدة نفسها. (2) وسم \"بانتظار التأكيد\" بقي للحالات التي تحتاج قرارك فعلًا: إذا انتهى الرد بخطوة المساعد التالية (سأتحقق من كذا، سأبلغك بعد الاختبار) يظهر \"قيد العمل · النتيجة تُرسل تلقائيًا\" بدلًا من الانتظار الفارغ. (3) المهمة الجارية لم تعد تظهر بثلاثة أسطر \"قيد التنفيذ\"؛ يبقى سطر واحد على الشاشة. (4) الإيقاف إيقاف حقيقي: بعد \"لا تنفّذ الآن / انتظر النتائج\" لا تستمر الخلفية من تلقاء نفسها. (5) المهام الطويلة لم تعد تُحسب \"لا شيء يعمل\" فتُقطع؛ وعُولج أيضًا عرض \"انقطع الاتصال\" القديم. (6) أداة تحسين أجهزة الشبكة المنزلية ترقّت إلى V7.1: تنظيف أعمق، ومراقبة الذاكرة على ثلاث درجات، واختيار العقدة حسب السرعة المقيسة فعليًا. أيقونات لوحة الإدارة لم تعد تظهر مربعات، وتخزين الصفحات المؤقت أصبح معقولًا.",
+      "sections": {
+        "skills": [
+          "ترتيب مؤشر الحالة على الهاتف أصبح: مُغلقة أولًا، ثم جارية فعلًا، ثم بانتظار ردّك",
+          "الجلسة المغلقة غير الجارية تُعرض \"مكتملة\" ويزول وسم \"يحتاج إلى تأكيد\"؛ الانتظار الحقيقي يبقى أصفر، وعدّاد الشاشة الرئيسية يتبع القاعدة نفسها",
+          "\"بانتظار التأكيد\" يظهر فقط مع تقرير نتيجة وطلب قرار حقيقي؛ خطوة المساعد التالية تُسجّل \"قيد العمل · النتيجة تلقائيًا\"",
+          "أثناء العمل يبقى سطر حالة واحد على الشاشة؛ وتُحذف الأسطر المكررة في الشريط العلوي وذيل الفقاعة والقائمة",
+          "\"ليس الآن / انتظر النتائج / معلّق\" تعني توقف الكرة: لا ملاحقة في الخلفية، وأي متابعة تلقائية تُمنع خلال فترة التهدئة بعد الإيقاف",
+          "قبل المتابعة أبلغ بالنتيجة أولًا (ما تغيّر، الأرقام المقيسة، ما تبقّى) ثم اسأل سؤالًا واحدًا؛ لا سؤال بلا نتيجة",
+          "سجل المزامنة لا يثبت التقدّم إلا بعد وصول البيانات فعلًا ويعيد المحاولة في الجولة التالية عند الفشل؛ والتسليم القسري يتطلب مسارات وتدفقات وطوابير فارغة",
+          "أداة تحسين أجهزة الشبكة المنزلية V7.1: تحذف الخدمات الزائدة، وتعید تشغيل عملية الواجهة عند تجاوز الذاكرة حدًّا معينًا، وتراقب الذاكرة على ثلاث درجات (تفريغ الذاكرة المؤقتة / إعادة تشغيل الواجهة / إعادة تشغيل الوسيط، دون إعادة تشغيل الجهاز كله)",
+          "اختيار العقدة بثلاث قياسات بحجم 3 ميغابايت وأخذ الأسرع؛ الأجهزة المحسّنة مسبقًا تخضع أولًا لضبط خفيف؛ وتنتهي الدفعة بقائمة الأجهزة البطيئة؛ وإصدارات القوالب تتبع تلقائيًا بمجرد وضع ملف إعداد جديد",
+          "تخزين موارد الصفحات صار 7 أيام بدل سنة، وصفحات الدخول والسكربتات بلا تخزين مؤقت؛ وخطوط أيقونات لوحة الإدارة لها قواعد صحيحة ولم تعد مربعات، وأُضيفت حركة تحميل للشاشة الأولى"
+        ],
+        "bugs": [
+          "بعد إنهاء مهمة على الحاسوب ظل الهاتف يعرض \"يحتاج إلى تأكيد\" رغم تحديثه عدة مرات",
+          "الشاشة الرئيسية قالت \"بانتظار 1\" لعمل انتهى منذ زمن",
+          "جلسة انقطعت في منتصف العمل (\"سأتحقق أولًا\") حملت وسم \"بانتظار التأكيد\" مع أنها كانت جارية",
+          "\"تأكيد: سأبلغك بعد الاختبار\" وُسم بانتظار التأكيد مع أن الكرة كانت في جانب المساعد",
+          "بعد \"لا تنفّذ الآن، انتظر نتائجي\" جرت ثلاث جولات فارغة ولم يوقف زر الإيقاف المتابعة التلقائية",
+          "السطر نفسه \"قيد التنفيذ\" ظهر في ثلاثة مواضع فبدت ثلاث مهام جارية",
+          "مهمة طويلة كانت تعمل بشكل طبيعي حُكم عليها \"لا عملية\" من تسليم داخلي فقطعت، وظهر \"انقطع الاتصال\"",
+          "سجل المزامنة كان يعدّ التقدّم مستهلكًا عند الدخول، فضاعت فروق القراءة وما يزيد على 8 عناصر نهائيًا",
+          "كل خطوط أيقونات لوحة الإدارة أعادت 404 وظهرت مربعات؛ ومع تخزين سنة لم يرَ المستخدمون التغييرات بعد التحديث"
+        ],
+        "lessons": [
+          "تُشتق الحالة من قرار بشري: الإغلاق قرار صريح وأولويته أعلى من أي حالة مستنتجة من النشاط",
+          "\"بانتظار التأكيد\" و\"قيد العمل\" يفرقهما من يملك الكرة: خطوة تالية خاصة = جارية، سؤال أو خيارات = انتظار",
+          "عندما يقال \"انتظر\" فالانتظار واجب: التعليق ليس عملًا ناقصًا، والملاحقة التلقائية يجب أن تدرك توقف الكرة بدل الدوران بلا نتيجة",
+          "زمن استجابة منخفض لا يعني سرعة عالية: خذ وسيط ثلاث قياسات من نقطة ثابتة، فالقياس الواحد قد يخطئ عشرة أضعاف",
+          "لا تحسب إلا ما بيدك فعلًا: لا تُعد كتابة قيمة فارغة بعد فشل القراءة؛ إما الخروج أو الرجوع إلى النسخة الاحتياطية، فالكتابة الصامتة تمحو البيانات",
+          "(من مكتبة الدروس الداخلية) إذا عاد الجهاز إلى البطء بعد عدة إصلاحات فاشتبه أولًا ببرنامج خبيث مقيم: تغيير المسار أو إضافة أدوات مؤقتة يعالج العَرَض فقط",
+          "(من مكتبة الدروس الداخلية) البرامج الخبيثة تغيّر أسماءها، لذا يجب أن يتتبّع التنظيف الملف الذي انطلقت منه العملية بدل القتل بالاسم؛ والتشغيل التلقائي عادة طبقات متعددة وإزالة طبقة تعيده",
+          "(من مكتبة الدروس الداخلية) لا تعلن النجاح فور التنظيف: انتظر نصف دقيقة وتحقق من عدم عودته، عندها فقط يكون نظيفًا فعلًا"
+        ]
+      }
     }
   }
 }
