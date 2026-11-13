@@ -1,242 +1,222 @@
 {
   "ver": "1.5.80",
-  "date": "2026-11-12",
-  "summary": "【修了什么】①修好一类\"名额被幽灵占位\"的老毛病：过去的清理逻辑只把记录删掉了，却没有真正断开那条会话，被清掉的角色仍留在内存里继续占着名额，用户看到的稀奇现象就是\"名额明明没用满，却一直提示满\"。现在清理一律要求真的断开连接，删记录不再当清理用。②查出\"同一出口网络多设备共用\"会被误判成同一个人：手机网络的出口地址常常在很多人之间共享，按地址数名额就会把别人的用量算到你头上；已把计数口径调回更宽松的历史基线值。 另：修掉会话记录被空白消息灌大：异常收场时存进了空文本，同步又照单全收，攒到几十条就把真消息挤出可见范围。现在同步前先滤掉空条目，异常也一定写一句人话；修掉「回话补长了但屏幕还停在旧内容」：原先只在条数变多时才认更新，同一位置内容被补长时条数没变就不刷新，现在按内容指纹判断。 【优化/新增了什么】①把相关配置与历史版本逐字节对照，确认与早期正常时段完全一致，不再靠\"看着差不多\"。②排查流程固定加一步：先拿历史备份当基线比对差异，再看现行代码。 另：判断远端有没有新内容，别只数条数：条数不变不等于内容没变，按尾部内容指纹比对才靠谱。 【自我学习到了什么】三条（学自内部经验库）：①删掉记录不等于断掉连接，清理类动作必须真的断开，否则留下看不见的占位；②判断\"以前一直没问题\"要拿历史配置做基线，比读现行代码更快找到差异；③嫌疑不等于根因，第一版结论证据链不完整就该如实标\"未证实\"并继续查，不许拿最像的答案结案。 另：脏数据会挤掉真数据：显示窗口是有限的，几条空白条目攒多了，真消息就看不见了；「没变化」和「变了但条数没变」是两回事；判定条件写窄了，就会出现「明明更新了却看不到」。",
+  "date": "2026-11-13",
+  "summary": "今天修了四件用户能直接感觉到的：余额合计的口径、分类点击、说明文字可读性、网页播放卡顿；另加了三条工作方法。",
   "sections": {
     "skills": [
-      "排查流程固定加一步：先用历史备份当基线做逐字节比对，再看现行代码。差异点常常就在\"以前好的时候是什么样\"里，比通读代码快得多。",
-      "配置类修复一律做字节级对照验收：与历史正常版本逐字节一致才算回滚到位，不接受\"看着差不多\"。",
-      "判断远端有没有新内容，别只数条数：条数不变不等于内容没变，按尾部内容指纹比对才靠谱。"
+      "换算类功能不写死汇率：把「平台折算汇率与市场汇率的差」做成可调参数，汇率一动就跟着走，不用再改代码。",
+      "大批量文件上传改整包传输：原来逐个文件传，20 分钟只落十几个。改成打一个包一次传、服务端解包，321 个文件一分多钟。",
+      "改线上页面先记大小和修改时间，改完再核一次有没有被别的程序覆盖；报「改好了」必须从线上取样实测。"
     ],
     "bugs": [
-      "修好一类\"名额被幽灵占位\"的老毛病：清理逻辑只删记录、没真正断开会话，被清掉的角色仍留在内存里占名额，表现就是\"名额没用满却一直提示满\"。现在清理必须真的断开连接，删记录不再当清理用。",
-      "修掉\"同一出口网络多设备共用\"被误判成同一个人的问题：手机网络的出口地址常在多人之间共享，按地址数名额会把别人的用量算到你头上。计数口径已调回更宽松的历史基线值。",
-      "修掉\"清理了但没生效\"的静默失败：清理动作与真实断开是两条路径，只跑前一条时界面显示成功、实际占位还在。现在两条路径绑在一起，没断开就不算清理完成。",
-      "修掉会话记录被空白消息灌大：异常收场时存进了空文本，同步又照单全收，攒到几十条就把真消息挤出可见范围。现在同步前先滤掉空条目，异常也一定写一句人话。",
-      "修掉「回话补长了但屏幕还停在旧内容」：原先只在条数变多时才认更新，同一位置内容被补长时条数没变就不刷新，现在按内容指纹判断。"
+      "修好「余额显示和官方页面差一笔」：原来只统计主币种，账户里另一种货币的余额没算进去，两边自然对不上。现在按全部币种折算合计，差额归零。",
+      "修好「点分类没反应」：导航上的分类全指向首页里根本不存在的锚点，点了什么都不发生。现在每个分类都是真实页面，手机上也能直接点进。",
+      "修好「说明文字看不清」：地图页的说明块用了深红底配灰字，几乎糊成一片。改成白底深字加红色提示行，一眼能读。",
+      "修好「网页播放声音正常但画面卡」：网页版靠软解，1080p 在小盒子上跑不动。现在播放交给系统硬解，硬解失败自动回落网页模式，不会黑屏。"
     ],
     "lessons": [
-      "删掉记录不等于断掉连接：清理类动作必须真的断开，否则留下看不见的占位，越清越满。",
-      "判断\"以前一直没问题\"，要拿历史配置当基线做比对，而不是通读现行代码找感觉。",
-      "嫌疑不等于根因：第一版结论证据链不完整，就如实标\"未证实\"并继续查，不许拿最像的答案结案。",
-      "脏数据会挤掉真数据：显示窗口是有限的，几条空白条目攒多了，真消息就看不见了。",
-      "「没变化」和「变了但条数没变」是两回事；判定条件写窄了，就会出现「明明更新了却看不到」。"
+      "数字对不上，先找「口径差」：漏了一个币种、漏了一类费用，往往比「数据错了」更常见。",
+      "「点了没反应」先看链接指向的目标在不在：指向不存在的锚点不会报错，只会安静地什么都不做。",
+      "别拿体积判断好坏：别人的安装包大几百兆，是因为里面塞了完整的播放内核；我们的小，只是因为缺了它。",
+      "「我改完了」和「线上真的是这样」是两件事：报告之前必须从线上取样，看一眼真实的计算结果。"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "[What we fixed] (1) Fixed a class of \"slots held by ghosts\" problem: the old cleanup logic only deleted the record but never actually closed that session, so the role that had been cleaned up stayed in memory and kept occupying a slot. What users saw was the odd \"the slots clearly are not full, but it keeps saying full\". Cleanup now always requires a real disconnect; deleting a record is no longer treated as cleanup. (2) Found that \"several devices sharing one outbound network\" was being misjudged as the same person: mobile network outbound addresses are often shared by many people, so counting slots by address charged other people's usage to you. The counting rule has been set back to the more generous historical baseline. Also: Fixed chat history being bloated by blank messages: an error path saved an empty string and sync accepted those entries as-is, so after dozens piled up, real messages were pushed out of the visible window. Sync now filters blank entries first, and the error path always writes a readable line; Fixed \"the reply got longer but the screen still shows the old text\": the pull only treated a bigger message count as an update, so content that grew at the same position never refreshed. It now compares a content fingerprint. [What we improved / added] (1) Byte-for-byte comparison of the related configuration against historical versions, confirming it matches the early healthy period exactly instead of relying on \"looks about right\". (2) The troubleshooting routine now always starts with a step: compare against a historical backup as the baseline first, then read the current code. Also: To tell whether there is new content on the remote side, do not count messages only: an unchanged count does not mean unchanged content - compare a fingerprint of the tail. [What we learned] Three lessons from our internal playbook: (a) deleting a record is not the same as closing a connection - cleanup must really disconnect, otherwise an invisible placeholder stays behind; (b) to judge \"it never had this problem before\", use historical configuration as the baseline - it finds the difference faster than reading current code; (c) a suspect is not a root cause: if the first conclusion's evidence chain is incomplete, label it \"unconfirmed\" honestly and keep digging, never close the case on the most plausible answer. Also: Dirty data crowds out real data: the visible window is limited, and enough blank entries make real messages disappear; \"Nothing changed\" and \"changed but the count did not\" are two different things; a condition written too narrowly produces \"it did update but I cannot see it\".",
+      "summary": "Today we fixed four things users can feel directly: how the balance total is calculated, category links that did nothing, unreadable caption text, and stuttering web playback. Plus three working habits.",
       "sections": {
-        "skills": [
-          "The troubleshooting routine now always starts with one step: compare byte-for-byte against a historical backup as the baseline, then read the current code. The difference usually hides in \"what it looked like when it worked\", which is far faster than reading everything.",
-          "Configuration fixes are accepted only with byte-level verification: byte-identical to the historical healthy version, not \"looks about right\".",
-          "To tell whether there is new content on the remote side, do not count messages only: an unchanged count does not mean unchanged content - compare a fingerprint of the tail."
-        ],
         "bugs": [
-          "Fixed a class of \"slots held by ghosts\" problem: cleanup deleted the record but never closed the session, so the cleaned-up role stayed in memory occupying a slot - showing as \"the slots are not full but it keeps saying full\". Cleanup must now really disconnect, and deleting a record no longer counts as cleanup.",
-          "Fixed \"several devices on one outbound network\" being misjudged as a single person: mobile outbound addresses are widely shared, so counting by address charged other people's usage to you. The counting rule is back to the more generous historical baseline.",
-          "Fixed a silent failure where \"cleanup ran but nothing changed\": cleanup and the real disconnect were two separate paths, so running only the first showed success in the UI while the placeholder remained. The two paths are now tied together - no disconnect, no completed cleanup.",
-          "Fixed chat history being bloated by blank messages: an error path saved an empty string and sync accepted those entries as-is, so after dozens piled up, real messages were pushed out of the visible window. Sync now filters blank entries first, and the error path always writes a readable line.",
-          "Fixed \"the reply got longer but the screen still shows the old text\": the pull only treated a bigger message count as an update, so content that grew at the same position never refreshed. It now compares a content fingerprint."
+          "Fixed \"the balance we show is off from the official page\": we only counted the main currency and ignored a balance held in another currency, so the two sides never matched. Every currency is now converted and summed, and the gap is zero.",
+          "Fixed \"tapping a category does nothing\": the category links all pointed at anchors that do not exist on the home page. Every category is now a real page and opens fine on mobile.",
+          "Fixed \"caption text is unreadable\": the note box on the map page used grey text on a dark red background and blended into a blur. It is now dark text on white with a red callout line.",
+          "Fixed \"sound is fine but video stutters in the browser\": the web player decodes in software, which a small TV box cannot handle at 1080p. Playback now goes to the system hardware decoder and falls back to the web player if that fails, so no black screen."
+        ],
+        "skills": [
+          "Never hard-code exchange rates in a conversion feature: the gap between the platform conversion rate and the market rate is now a tunable parameter, so it follows the rate instead of needing a code change.",
+          "Bulk uploads go as one archive: uploading file by file landed a dozen files in 20 minutes. Packing once and unpacking on the server moves 321 files in a bit over a minute.",
+          "Before editing a live page, record its size and modified time; after editing, check again that no other process overwrote it. Never report \"fixed\" without sampling the real result from the live site."
         ],
         "lessons": [
-          "Deleting a record is not closing a connection: cleanup must really disconnect, otherwise an invisible placeholder remains and it gets fuller the more you clean.",
-          "To judge \"it never had this problem before\", compare against historical configuration as the baseline instead of reading current code and guessing.",
-          "A suspect is not a root cause: when the first conclusion's evidence is incomplete, label it \"unconfirmed\" and keep digging - never close the case on the most plausible answer.",
-          "Dirty data crowds out real data: the visible window is limited, and enough blank entries make real messages disappear.",
-          "\"Nothing changed\" and \"changed but the count did not\" are two different things; a condition written too narrowly produces \"it did update but I cannot see it\"."
+          "When numbers do not match, look for a difference in scope first: a missing currency or a missing fee is far more common than corrupt data.",
+          "\"Tapping does nothing\" starts with checking whether the link target exists: pointing at a missing anchor throws no error, it just silently does nothing.",
+          "Do not judge by package size: someone else's installer is hundreds of megabytes because it bundles a full playback engine. Ours is small only because it lacked one.",
+          "\"I changed it\" and \"this is how it behaves live\" are two different claims: sample the live site and check the real computed result before reporting."
         ]
       }
     },
     "ja": {
-      "summary": "【修正したこと】①「枠が幽霊に占有される」類の古い不具合を修正しました。以前のクリーンアップ処理は記録を削除するだけで、そのセッションを実際には切断していませんでした。そのため消したはずのキャラクターがメモリに残って枠を取り続け、「枠は埋まっていないのに満杯と言われる」という不思議な現象が起きていました。今後はクリーンアップに必ず実際の切断を伴わせ、記録の削除をクリーンアップとして扱いません。②「同じ出口ネットワークを複数端末で共有」が同一人物と誤判定される問題を特定しました。モバイル回線の出口アドレスは大勢で共有されることが多く、アドレス単位で枠を数えると他人の利用分が自分に計上されます。計数の基準は余裕のある過去の値に戻しました。 ほかにも：会話履歴が空メッセージで膨らむ問題を修正：エラー終了時に空文字列が保存され、同期もそのまま取り込んでいたため、数十件たまると本物のメッセージが見える範囲から押し出されていました。同期前に空項目を除外し、エラー時も必ず読める一文を残します；「返答が伸びたのに画面が古いまま」を修正：以前は件数が増えたときだけ更新とみなし、同じ位置の中身が伸びても再描画していませんでした。内容の指紋で比較する方式に変更しました。 【改善・追加したこと】①関連設定を過去バージョンとバイト単位で照合し、正常だった時期と完全に一致することを確認しました。「だいたい同じ」では済ませません。②調査手順に一工程を固定で追加しました。まず過去のバックアップを基準に差分を取り、その後に現行コードを読みます。 ほかにも：遠隔に新しい内容があるかは件数だけで判断しない：件数が同じでも中身は変わっていることがある。尾部の内容指紋で比べるのが確実。 【学んだこと】三つ（社内の経験データベースより）：①記録の削除は接続の切断ではない。クリーンアップは本当に切断しなければ見えない占有が残る。②「以前は問題なかった」の判断は過去の設定を基準に比べるべきで、現行コードを読むより差分が速く見つかる。③疑わしいものは根本原因ではない。最初の結論の証拠が不完全なら「未確認」と正直に記し、調査を続ける。もっともらしい答えで打ち切ってはいけない。 ほかにも：汚いデータは本物のデータを押し出す：表示範囲は有限で、空の項目がたまると本物のメッセージが見えなくなる；「変化なし」と「変化したが件数は同じ」は別物。条件を狭く書くと「更新されたのに見えない」が起きる。",
+      "summary": "今日は利用者が直接体感できる4件を直しました：残高合計の計算方法、カテゴリを押しても反応しない問題、説明文の読みにくさ、Web再生のカクつき。あわせて作業手順を3つ追加。",
       "sections": {
-        "skills": [
-          "調査手順に一工程を固定で追加しました。まず過去のバックアップを基準にバイト単位で差分を取り、その後に現行コードを読みます。差分は「正常だった頃の姿」に隠れていることが多く、通読より速いです。",
-          "設定の修正はバイトレベルの照合で受け入れます。過去の正常版と完全一致して初めて元に戻ったと認め、「だいたい同じ」は不可とします。",
-          "遠隔に新しい内容があるかは件数だけで判断しない：件数が同じでも中身は変わっていることがある。尾部の内容指紋で比べるのが確実。"
-        ],
         "bugs": [
-          "「枠が幽霊に占有される」類の古い不具合を修正しました。クリーンアップが記録だけ削除してセッションを切断せず、消したはずのキャラクターがメモリに残って枠を占有し、「枠が埋まっていないのに満杯と言われる」状態になっていました。今後は必ず実際に切断し、記録削除はクリーンアップと見なしません。",
-          "「同じ出口ネットワークを複数端末で共有」が同一人物と誤判定される問題を修正しました。モバイル回線の出口アドレスは広く共有されるため、アドレス単位の計数では他人の利用分が自分に計上されます。計数基準は余裕のある過去の値に戻しました。",
-          "「クリーンアップしたのに変わらない」という無言の失敗を修正しました。クリーンアップと実際の切断が二本の別経路で、前者だけ走ると画面は成功でも占有は残っていました。今は二本を結び付け、切断できなければクリーンアップ完了としません。",
-          "会話履歴が空メッセージで膨らむ問題を修正：エラー終了時に空文字列が保存され、同期もそのまま取り込んでいたため、数十件たまると本物のメッセージが見える範囲から押し出されていました。同期前に空項目を除外し、エラー時も必ず読める一文を残します。",
-          "「返答が伸びたのに画面が古いまま」を修正：以前は件数が増えたときだけ更新とみなし、同じ位置の中身が伸びても再描画していませんでした。内容の指紋で比較する方式に変更しました。"
+          "「表示残高が公式ページと一致しない」を修正：これまで主要通貨しか集計しておらず、別通貨の残高が漏れていました。現在は全通貨を換算して合計し、差はゼロです。",
+          "「カテゴリを押しても何も起きない」を修正：ナビのカテゴリが存在しないアンカーを指していたため、押しても無反応でした。今は各カテゴリが実ページになり、スマホからも直接開けます。",
+          "「説明文が読めない」を修正：地図ページの注記が濃い赤背景に灰色文字で、ほぼ判別不能でした。白背景に濃い文字＋赤い注意行に変更しました。",
+          "「音は出るが映像がカクつく」を修正：Web版はソフトウェア再生で、小型端末では1080pが処理しきれませんでした。再生を端末のハードウェアデコードに任せ、失敗時はWeb再生に自動で戻すので黒画面になりません。"
+        ],
+        "skills": [
+          "換算機能では為替レートを固定値にしない：プラットフォーム換算レートと市場レートの差を調整可能なパラメータにし、レートが動けば自動で追従します。",
+          "大量ファイルのアップロードは一括アーカイブで：1ファイルずつだと20分で十数個しか送れませんでした。1回にまとめて送り、サーバー側で展開すれば321ファイルが1分強で完了します。",
+          "公開ページを編集する前にサイズと更新時刻を記録し、編集後にも他プロセスに上書きされていないか確認する。さらに「直した」と報告する前に公開サイトから実物を取得して確認する。"
         ],
         "lessons": [
-          "記録の削除は接続の切断ではない。クリーンアップは本当に切断しないと見えない占有が残り、掃除するほど枠が埋まる。",
-          "「以前は問題なかった」の判断は、現行コードを読んで勘で決めず、過去の設定を基準に比較する。",
-          "疑わしいものは根本原因ではない。最初の結論の証拠が不完全なら「未確認」と記して調査を続け、もっともらしい答えで打ち切らない。",
-          "汚いデータは本物のデータを押し出す：表示範囲は有限で、空の項目がたまると本物のメッセージが見えなくなる。",
-          "「変化なし」と「変化したが件数は同じ」は別物。条件を狭く書くと「更新されたのに見えない」が起きる。"
+          "数字が合わないときは、まず「範囲の違い」を探す：通貨の漏れや費用の漏れのほうが、データ破損よりずっとよくあります。",
+          "「押しても反応しない」はリンク先の存在確認から：存在しないアンカーを指してもエラーは出ず、静かに何も起きないだけです。",
+          "サイズで良し悪しを判断しない：他社のインストーラが数百MBなのは、再生エンジンを丸ごと同梱しているから。こちらの小さいのは、それが無いからにすぎません。",
+          "「直した」と「公開サイトで本当にそう動く」は別の話：報告前に公開サイトから実データを取得し、実際の計算結果を見る。"
         ]
       }
     },
     "ko": {
-      "summary": "[수정한 것] (1) \"자리가 유령에게 점유되는\" 유형의 오랜 문제를 고쳤습니다. 예전 정리 로직은 기록만 삭제하고 그 세션을 실제로 끊지 않았습니다. 그래서 정리된 캐릭터가 메모리에 남아 계속 자리를 차지했고, 사용자에게는 \"자리가 남아 있는데도 계속 꽉 찼다고 나온다\"는 이상한 현상으로 보였습니다. 이제 정리는 반드시 실제 연결 끊기를 포함하며, 기록 삭제를 정리로 치지 않습니다. (2) \"같은 출구 네트워크를 여러 기기가 공유\"하는 경우가 같은 사람으로 잘못 판정되던 문제를 찾았습니다. 모바일 회선의 출구 주소는 여러 사람이 함께 쓰는 경우가 많아, 주소 단위로 자리를 세면 남의 사용량이 내 몫으로 잡힙니다. 집계 기준을 더 여유 있는 과거 값으로 되돌렸습니다. 추가: 대화 기록이 빈 메시지로 부풀던 문제 수정: 오류로 끝날 때 빈 문자열이 저장되고 동기화도 그대로 받아들여, 수십 개가 쌓이면 실제 메시지가 보이는 범위 밖으로 밀려났습니다. 이제 동기화 전에 빈 항목을 걸러내고 오류 시에도 읽을 수 있는 한 줄을 남깁니다; '답변이 길어졌는데 화면은 그대로' 문제 수정: 이전에는 개수가 늘어야만 갱신으로 봤기 때문에 같은 위치의 내용이 늘어나도 다시 그리지 않았습니다. 이제 내용 지문으로 비교합니다. [개선·추가한 것] (1) 관련 설정을 과거 버전과 바이트 단위로 대조해 정상이던 시기와 완전히 일치함을 확인했습니다. \"대충 비슷하다\"로 넘기지 않습니다. (2) 점검 절차에 한 단계를 고정으로 넣었습니다. 먼저 과거 백업을 기준으로 차이를 보고, 그다음 현재 코드를 읽습니다. 추가: 원격에 새 내용이 있는지는 개수만으로 판단하지 마세요. 개수가 같아도 내용은 바뀌 수 있으니 끝부분의 내용 지문으로 비교하는 편이 정확합니다. [배운 것] 세 가지(내부 경험 저장소에서): (a) 기록 삭제는 연결 끊기가 아니다. 정리는 정말 끊어야 하며 아니면 보이지 않는 점유가 남는다. (b) \"예전엔 문제없었다\"는 판단은 과거 설정을 기준으로 비교해야 하며 현재 코드를 읽는 것보다 차이를 빨리 찾는다. (c) 의심은 근본 원인이 아니다. 첫 결론의 증거가 불완전하면 \"미확인\"이라고 솔직히 적고 계속 파고들어야 하며, 가장 그럴듯한 답으로 끝내면 안 된다. 추가: 지저분한 데이터는 진짜 데이터를 밀어냅니다. 보이는 범위는 한정되어 있어 빈 항목이 쌓이면 실제 메시지가 보이지 않게 됩니다; '변화 없음'과 '변했지만 개수는 그대로'는 다릅니다. 조건을 좁게 쓰면 '업데이트됐는데 안 보인다'가 생깁니다.",
+      "summary": "오늘은 사용자가 바로 체감할 수 있는 네 가지를 고쳤습니다: 잔액 합계 계산 방식, 눌러도 반응 없는 카테고리, 읽기 힘든 설명 문구, 웹 재생 끊김. 그리고 작업 방법 세 가지를 추가했습니다.",
       "sections": {
-        "skills": [
-          "점검 절차에 한 단계를 고정으로 넣었습니다. 먼저 과거 백업을 기준으로 바이트 단위 차이를 보고, 그다음 현재 코드를 읽습니다. 차이는 \"잘 되던 때의 모습\"에 숨어 있는 경우가 많아 통독보다 훨씬 빠릅니다.",
-          "설정 수정은 바이트 수준 대조로만 인정합니다. 과거 정상 버전과 완전히 같아야 되돌린 것으로 보고 \"대충 비슷함\"은 받지 않습니다.",
-          "원격에 새 내용이 있는지는 개수만으로 판단하지 마세요. 개수가 같아도 내용은 바뀌 수 있으니 끝부분의 내용 지문으로 비교하는 편이 정확합니다."
-        ],
         "bugs": [
-          "\"자리가 유령에게 점유되는\" 유형의 오랜 문제를 고쳤습니다. 정리가 기록만 지우고 세션을 끊지 않아, 지운 캐릭터가 메모리에 남아 자리를 차지했고 \"자리가 남았는데도 꽉 찼다고 나온다\"로 보였습니다. 이제 반드시 실제로 끊고, 기록 삭제는 정리로 치지 않습니다.",
-          "\"같은 출구 네트워크를 여러 기기가 공유\"하는 경우가 같은 사람으로 잘못 판정되던 문제를 고쳤습니다. 모바일 출구 주소는 널리 공유되어 주소 단위 집계에서 남의 사용량이 내 몫이 됩니다. 집계 기준을 더 여유 있는 과거 값으로 되돌렸습니다.",
-          "\"정리했는데 그대로\"인 조용한 실패를 고쳤습니다. 정리와 실제 연결 끊기가 서로 다른 두 경로여서 앞의 것만 돌면 화면은 성공인데 점유는 남아 있었습니다. 이제 두 경로를 묶어, 끊지 않으면 정리 완료로 보지 않습니다.",
-          "대화 기록이 빈 메시지로 부풀던 문제 수정: 오류로 끝날 때 빈 문자열이 저장되고 동기화도 그대로 받아들여, 수십 개가 쌓이면 실제 메시지가 보이는 범위 밖으로 밀려났습니다. 이제 동기화 전에 빈 항목을 걸러내고 오류 시에도 읽을 수 있는 한 줄을 남깁니다.",
-          "'답변이 길어졌는데 화면은 그대로' 문제 수정: 이전에는 개수가 늘어야만 갱신으로 봤기 때문에 같은 위치의 내용이 늘어나도 다시 그리지 않았습니다. 이제 내용 지문으로 비교합니다."
+          "\"표시 잔액이 공식 페이지와 다르다\" 문제를 수정: 그동안 주 통화만 집계해 다른 통화 잔액이 빠져 있었습니다. 이제 모든 통화를 환산해 합산하며 차액은 0입니다.",
+          "\"카테고리를 눌러도 아무 반응이 없다\" 문제를 수정: 내비게이션의 카테고리가 홈에 없는 앵커를 가리키고 있었습니다. 이제 각 카테고리는 실제 페이지이며 모바일에서도 바로 열립니다.",
+          "\"설명 문구가 잘 안 보인다\" 문제를 수정: 지도 페이지 안내 상자가 진한 빨강 배경에 회색 글자라 거의 뭉개져 보였습니다. 흰 배경에 진한 글자, 빨간 안내 줄로 바꿨습니다.",
+          "\"소리는 나는데 화면이 끊긴다\" 문제를 수정: 웹 버전은 소프트웨어 디코딩이라 작은 기기에서 1080p를 감당하지 못했습니다. 이제 재생을 시스템 하드웨어 디코더에 넘기고, 실패하면 웹 재생으로 자동 복귀하므로 검은 화면이 되지 않습니다."
+        ],
+        "skills": [
+          "환산 기능에 환율을 고정하지 않는다: 플랫폼 환산 환율과 시장 환율의 차이를 조정 가능한 값으로 두어 환율이 움직이면 자동으로 따라가게 합니다.",
+          "대량 파일 업로드는 한 번에 묶어서: 파일을 하나씩 올리면 20분에 십여 개만 전송됐습니다. 한 번에 묶어 보내고 서버에서 풀면 321개가 1분 남짓에 끝납니다.",
+          "공개 페이지를 고치기 전에 크기와 수정 시각을 기록하고, 고친 뒤 다른 프로세스가 덮어쓰지 않았는지 다시 확인한다. \"고쳤다\"고 보고하기 전에 실제 사이트에서 결과를 뽑아 확인한다."
         ],
         "lessons": [
-          "기록 삭제는 연결 끊기가 아니다. 정리는 정말 끊어야 하며, 아니면 보이지 않는 점유가 남아 청소할수록 더 찬다.",
-          "\"예전엔 문제없었다\"는 판단은 현재 코드를 읽고 감으로 정하지 말고 과거 설정을 기준으로 비교한다.",
-          "의심은 근본 원인이 아니다. 첫 결론의 증거가 불완전하면 \"미확인\"으로 적고 계속 파고들며, 그럴듯한 답으로 끝내지 않는다.",
-          "지저분한 데이터는 진짜 데이터를 밀어냅니다. 보이는 범위는 한정되어 있어 빈 항목이 쌓이면 실제 메시지가 보이지 않게 됩니다.",
-          "'변화 없음'과 '변했지만 개수는 그대로'는 다릅니다. 조건을 좁게 쓰면 '업데이트됐는데 안 보인다'가 생깁니다."
+          "숫자가 안 맞으면 먼저 \"범위 차이\"를 찾는다: 통화가 빠졌거나 비용 항목이 빠진 경우가 데이터 오류보다 훨씬 흔합니다.",
+          "\"눌러도 반응이 없다\"는 링크 대상이 존재하는지부터 본다: 없는 앵커를 가리키면 오류도 없이 조용히 아무 일도 일어나지 않습니다.",
+          "크기로 좋고 나쁨을 판단하지 않는다: 남의 설치 파일이 수백 MB인 것은 재생 엔진을 통째로 넣었기 때문이고, 우리 것이 작은 것은 그게 없기 때문일 뿐입니다.",
+          "\"고쳤다\"와 \"실제 사이트에서 그렇게 동작한다\"는 다른 말이다: 보고 전에 실제 사이트에서 값을 뽑아 계산 결과를 확인한다."
         ]
       }
     },
     "es": {
-      "summary": "[Lo que arreglamos] (1) Arreglamos una familia de fallos del tipo \"plazas ocupadas por fantasmas\": la lógica de limpieza antigua solo borraba el registro pero nunca cerraba de verdad esa sesión, así que el personaje ya limpiado seguía en memoria ocupando una plaza. Lo que veía el usuario era lo extraño de \"las plazas claramente no están llenas, pero sigue diciendo lleno\". Ahora la limpieza exige siempre una desconexión real; borrar un registro ya no cuenta como limpiar. (2) Detectamos que \"varios dispositivos compartiendo una misma red de salida\" se estaba juzgando como la misma persona: las direcciones de salida de las redes móviles suelen compartirse entre mucha gente, así que contar plazas por dirección te cobraba el uso de otros. El criterio de conteo volvió al valor histórico más permisivo. Además: Corregido el historial que se inflaba con mensajes vacíos: al terminar con error se guardaba una cadena vacía y la sincronización la aceptaba tal cual, así que al acumular decenas los mensajes reales salían de la ventana visible. Ahora se filtran las entradas vacías antes de sincronizar y el error siempre deja una frase legible; Corregido «la respuesta se alargó pero la pantalla sigue mostrando lo viejo»: antes solo contaba como actualización si aumentaba el número de mensajes, así que si el contenido de la misma posición crecía no se redibujaba. Ahora se compara una huella del contenido. [Lo que mejoramos / añadimos] (1) Comparamos la configuración relacionada byte a byte contra versiones históricas y confirmamos que coincide exactamente con la etapa sana anterior, en lugar de fiarnos de \"se ve más o menos igual\". (2) El procedimiento de diagnóstico arranca ahora siempre con un paso: comparar primero contra una copia histórica como referencia y después leer el código actual. Además: Para saber si hay contenido nuevo en el otro lado no cuentes solo los mensajes: el mismo número no significa el mismo contenido; compara una huella del final. [Lo que aprendimos] Tres lecciones de nuestra base de experiencia interna: (a) borrar un registro no es cerrar una conexión: la limpieza debe desconectar de verdad, o queda una ocupación invisible; (b) para juzgar \"antes nunca pasaba\", usa la configuración histórica como referencia, encuentra la diferencia más rápido que leer el código actual; (c) un sospechoso no es una causa raíz: si la cadena de pruebas de la primera conclusión está incompleta, márcala como \"sin confirmar\" con honestidad y sigue investigando; nunca cierres el caso con la respuesta más plausible. Además: Los datos sucios desplazan a los datos reales: la ventana visible es limitada y unas cuantas entradas vacías hacen desaparecer mensajes reales; «No cambió nada» y «cambió pero el número no» son cosas distintas; una condición demasiado estrecha produce «se actualizó pero no lo veo».",
+      "summary": "Hoy arreglamos cuatro cosas que el usuario nota directamente: cómo se calcula el saldo total, las categorías que no hacían nada al pulsarlas, textos de ayuda ilegibles y el vídeo web entrecortado. Además, tres hábitos de trabajo.",
       "sections": {
-        "skills": [
-          "El procedimiento de diagnóstico arranca ahora siempre con un paso: comparar byte a byte contra una copia histórica como referencia y después leer el código actual. La diferencia suele esconderse en \"cómo era cuando funcionaba\", mucho más rápido que leerlo todo.",
-          "Las correcciones de configuración solo se aceptan con verificación a nivel de byte: idéntico byte a byte a la versión sana histórica, no \"se ve más o menos igual\".",
-          "Para saber si hay contenido nuevo en el otro lado no cuentes solo los mensajes: el mismo número no significa el mismo contenido; compara una huella del final."
-        ],
         "bugs": [
-          "Arreglamos una familia de fallos del tipo \"plazas ocupadas por fantasmas\": la limpieza borraba el registro pero no cerraba la sesión, así que el personaje limpiado seguía en memoria ocupando una plaza, mostrándose como \"las plazas no están llenas pero sigue diciendo lleno\". Ahora la limpieza debe desconectar de verdad y borrar un registro ya no cuenta como limpiar.",
-          "Arreglamos que \"varios dispositivos en una misma red de salida\" se juzgara como una sola persona: las direcciones de salida móviles se comparten ampliamente, así que contar por dirección te cobraba el uso de otros. El criterio volvió al valor histórico más permisivo.",
-          "Arreglamos un fallo silencioso donde \"se limpió pero nada cambió\": limpieza y desconexión real eran dos rutas separadas, así que ejecutar solo la primera mostraba éxito en pantalla mientras la ocupación seguía. Ahora las dos rutas van unidas: sin desconexión no hay limpieza completada.",
-          "Corregido el historial que se inflaba con mensajes vacíos: al terminar con error se guardaba una cadena vacía y la sincronización la aceptaba tal cual, así que al acumular decenas los mensajes reales salían de la ventana visible. Ahora se filtran las entradas vacías antes de sincronizar y el error siempre deja una frase legible.",
-          "Corregido «la respuesta se alargó pero la pantalla sigue mostrando lo viejo»: antes solo contaba como actualización si aumentaba el número de mensajes, así que si el contenido de la misma posición crecía no se redibujaba. Ahora se compara una huella del contenido."
+          "Arreglado «el saldo que mostramos no coincide con la página oficial»: solo sumábamos la moneda principal e ignorábamos el saldo en otra moneda. Ahora se convierten y suman todas las monedas y la diferencia es cero.",
+          "Arreglado «pulsar una categoría no hace nada»: los enlaces apuntaban a anclas que no existen en la portada. Ahora cada categoría es una página real y se abre bien en el móvil.",
+          "Arreglado «el texto de ayuda no se lee»: el recuadro del mapa usaba texto gris sobre fondo rojo oscuro y se difuminaba. Ahora es texto oscuro sobre blanco con una línea de aviso en rojo.",
+          "Arreglado «el sonido va bien pero la imagen se corta en el navegador»: el reproductor web decodifica por software y un equipo pequeño no aguanta 1080p. Ahora la reproducción pasa al decodificador por hardware y, si falla, vuelve sola al reproductor web sin dejar la pantalla en negro."
+        ],
+        "skills": [
+          "No fijar el tipo de cambio en una función de conversión: la diferencia entre el tipo de la plataforma y el de mercado es ahora un parámetro ajustable, así sigue al mercado sin tocar código.",
+          "Las subidas masivas van en un solo paquete: subir archivo por archivo dejaba una docena en 20 minutos. Empaquetar una vez y descomprimir en el servidor mueve 321 archivos en poco más de un minuto.",
+          "Antes de editar una página en producción, anotar tamaño y fecha de modificación; después comprobar que ningún otro proceso la sobrescribió. Nunca informar «arreglado» sin tomar una muestra real del sitio."
         ],
         "lessons": [
-          "Borrar un registro no es cerrar una conexión: la limpieza debe desconectar de verdad, o queda una ocupación invisible y cuanto más limpias, más se llena.",
-          "Para juzgar \"antes nunca pasaba\", compara contra la configuración histórica como referencia en lugar de leer el código actual y adivinar.",
-          "Un sospechoso no es una causa raíz: si la evidencia de la primera conclusión está incompleta, márcala como \"sin confirmar\" y sigue investigando; nunca cierres el caso con la respuesta más plausible.",
-          "Los datos sucios desplazan a los datos reales: la ventana visible es limitada y unas cuantas entradas vacías hacen desaparecer mensajes reales.",
-          "«No cambió nada» y «cambió pero el número no» son cosas distintas; una condición demasiado estrecha produce «se actualizó pero no lo veo»."
+          "Cuando los números no cuadran, busca primero una diferencia de alcance: una moneda o una comisión que falta es mucho más común que datos corruptos.",
+          "«Pulsar no hace nada» empieza por comprobar si el destino del enlace existe: apuntar a un ancla inexistente no da error, simplemente no hace nada.",
+          "No juzgues por el tamaño del paquete: el instalador de otro pesa cientos de megas porque incluye un motor de reproducción completo. El nuestro es pequeño solo porque le faltaba.",
+          "«Lo he cambiado» y «así se comporta en producción» son dos afirmaciones distintas: toma una muestra del sitio y comprueba el resultado real antes de informar."
         ]
       }
     },
     "fr": {
-      "summary": "[Ce que nous avons corrigé] (1) Correction d'une famille de bugs du type « places occupées par des fantômes » : l'ancienne logique de nettoyage supprimait l'enregistrement sans jamais fermer réellement la session, si bien que le personnage nettoyé restait en mémoire et continuait d'occuper une place. Ce que l'utilisateur voyait était l'étrangeté « les places ne sont manifestement pas pleines, mais on me dit que c'est plein ». Désormais, le nettoyage exige toujours une déconnexion réelle ; supprimer un enregistrement ne compte plus comme un nettoyage. (2) Nous avons identifié que « plusieurs appareils partageant le même réseau de sortie » était jugé comme une seule personne : les adresses de sortie des réseaux mobiles sont souvent partagées par beaucoup de gens, donc compter les places par adresse vous facturait l'usage des autres. Le critère de comptage est revenu à la valeur historique plus permissive. Aussi : Corrigé l'historique gonflé par des messages vides : en cas d'erreur une chaîne vide était enregistrée et la synchronisation l'acceptait telle quelle ; au bout de dizaines, les vrais messages sortaient de la fenêtre visible. Les entrées vides sont maintenant filtrées avant la synchronisation et l'erreur laisse toujours une phrase lisible; Corrigé « la réponse s'est allongée mais l'écran affiche encore l'ancien contenu » : avant, seule une hausse du nombre de messages comptait comme mise à jour, donc un contenu qui s'allongeait au même endroit n'était pas redessiné. On compare désormais une empreinte du contenu. [Ce que nous avons amélioré / ajouté] (1) Comparaison octet par octet de la configuration concernée avec les versions historiques : elle correspond exactement à la période saine, au lieu de se fier à « ça a l'air à peu près pareil ». (2) La procédure de diagnostic commence maintenant toujours par une étape : comparer d'abord à une sauvegarde historique comme référence, puis lire le code actuel. Aussi : Pour savoir s'il y a du nouveau à distance, ne comptez pas seulement les messages : un nombre identique ne veut pas dire un contenu identique ; comparez une empreinte de la fin. [Ce que nous avons appris] Trois leçons de notre base d'expérience interne : (a) supprimer un enregistrement n'est pas fermer une connexion : le nettoyage doit vraiment déconnecter, sinon une occupation invisible demeure ; (b) pour juger « ça n'arrivait jamais avant », prenez la configuration historique comme référence : la différence se trouve plus vite qu'en lisant le code actuel ; (c) un suspect n'est pas une cause racine : si la chaîne de preuves de la première conclusion est incomplète, marquez-la honnêtement « non confirmé » et continuez à chercher, sans jamais clore avec la réponse la plus plausible. Aussi : Les données sales chassent les vraies : la fenêtre visible est limitée, et quelques entrées vides suffisent à faire disparaître de vrais messages; « Rien n'a changé » et « ça a changé mais pas le nombre » sont deux choses différentes ; une condition trop étroite donne « c'est à jour mais je ne le vois pas ».",
+      "summary": "Aujourd'hui, quatre corrections que l'utilisateur ressent directement : le calcul du solde total, les catégories qui ne réagissaient pas, des textes d'aide illisibles et la lecture web saccadée. Plus trois habitudes de travail.",
       "sections": {
-        "skills": [
-          "La procédure de diagnostic commence maintenant toujours par une étape : comparer octet par octet à une sauvegarde historique comme référence, puis lire le code actuel. La différence se cache souvent dans « à quoi ça ressemblait quand ça marchait », bien plus rapide que tout relire.",
-          "Les corrections de configuration ne sont acceptées qu'avec une vérification au niveau de l'octet : identique octet pour octet à la version saine historique, pas « ça a l'air à peu près pareil ».",
-          "Pour savoir s'il y a du nouveau à distance, ne comptez pas seulement les messages : un nombre identique ne veut pas dire un contenu identique ; comparez une empreinte de la fin."
-        ],
         "bugs": [
-          "Correction d'une famille de bugs du type « places occupées par des fantômes » : le nettoyage supprimait l'enregistrement sans fermer la session, donc le personnage nettoyé restait en mémoire et occupait une place, avec le symptôme « les places ne sont pas pleines mais on me dit que c'est plein ». Désormais le nettoyage doit déconnecter réellement et supprimer un enregistrement ne compte plus comme un nettoyage.",
-          "Correction du jugement erroné « plusieurs appareils sur un même réseau de sortie » = une seule personne : les adresses de sortie mobiles sont largement partagées, donc compter par adresse vous facturait l'usage des autres. Le critère est revenu à la valeur historique plus permissive.",
-          "Correction d'un échec silencieux où « le nettoyage a tourné mais rien n'a changé » : nettoyage et déconnexion réelle étaient deux chemins séparés, donc exécuter seulement le premier affichait un succès à l'écran alors que l'occupation restait. Les deux chemins sont désormais liés : pas de déconnexion, pas de nettoyage terminé.",
-          "Corrigé l'historique gonflé par des messages vides : en cas d'erreur une chaîne vide était enregistrée et la synchronisation l'acceptait telle quelle ; au bout de dizaines, les vrais messages sortaient de la fenêtre visible. Les entrées vides sont maintenant filtrées avant la synchronisation et l'erreur laisse toujours une phrase lisible.",
-          "Corrigé « la réponse s'est allongée mais l'écran affiche encore l'ancien contenu » : avant, seule une hausse du nombre de messages comptait comme mise à jour, donc un contenu qui s'allongeait au même endroit n'était pas redessiné. On compare désormais une empreinte du contenu."
+          "Corrigé « le solde affiché ne correspond pas à la page officielle » : nous ne comptions que la devise principale et ignorions le solde dans une autre devise. Toutes les devises sont désormais converties et additionnées, l'écart est nul.",
+          "Corrigé « cliquer sur une catégorie ne fait rien » : les liens pointaient vers des ancres inexistantes sur la page d'accueil. Chaque catégorie est maintenant une vraie page, utilisable aussi sur mobile.",
+          "Corrigé « le texte explicatif est illisible » : l'encadré de la carte affichait du gris sur fond rouge foncé et se brouillait. C'est maintenant du texte foncé sur fond blanc avec une ligne d'alerte rouge.",
+          "Corrigé « le son est bon mais l'image saccade dans le navigateur » : le lecteur web décode en logiciel, ce qu'un petit boîtier ne supporte pas en 1080p. La lecture passe au décodeur matériel du système et revient automatiquement au lecteur web en cas d'échec, sans écran noir."
+        ],
+        "skills": [
+          "Ne jamais figer le taux de change dans une fonction de conversion : l'écart entre le taux de la plateforme et celui du marché est un paramètre réglable, il suit donc le marché sans modification de code.",
+          "Les envois massifs passent en une seule archive : fichier par fichier, une douzaine en 20 minutes. Empaqueter une fois puis décompresser sur le serveur transfère 321 fichiers en un peu plus d'une minute.",
+          "Avant de modifier une page en production, noter sa taille et sa date de modification ; après, vérifier qu'aucun autre processus ne l'a écrasée. Et ne jamais annoncer « corrigé » sans prélever le résultat réel sur le site."
         ],
         "lessons": [
-          "Supprimer un enregistrement n'est pas fermer une connexion : le nettoyage doit vraiment déconnecter, sinon une occupation invisible demeure et plus on nettoie, plus c'est plein.",
-          "Pour juger « ça n'arrivait jamais avant », comparez à la configuration historique comme référence au lieu de lire le code actuel et deviner.",
-          "Un suspect n'est pas une cause racine : si les preuves de la première conclusion sont incomplètes, marquez-la « non confirmé » et continuez à chercher ; ne closez jamais avec la réponse la plus plausible.",
-          "Les données sales chassent les vraies : la fenêtre visible est limitée, et quelques entrées vides suffisent à faire disparaître de vrais messages.",
-          "« Rien n'a changé » et « ça a changé mais pas le nombre » sont deux choses différentes ; une condition trop étroite donne « c'est à jour mais je ne le vois pas »."
+          "Quand les chiffres ne collent pas, cherchez d'abord un écart de périmètre : une devise ou un frais oublié est bien plus fréquent que des données corrompues.",
+          "« Cliquer ne fait rien » commence par vérifier que la cible du lien existe : pointer vers une ancre absente ne lève aucune erreur, cela ne fait simplement rien.",
+          "Ne jugez pas à la taille du paquet : l'installateur d'un autre pèse des centaines de mégaoctets parce qu'il embarque un moteur de lecture complet. Le nôtre est petit seulement parce qu'il en manquait un.",
+          "« Je l'ai modifié » et « voilà comment ça se comporte en production » sont deux affirmations différentes : prélevez le résultat réel sur le site avant de rendre compte."
         ]
       }
     },
     "de": {
-      "summary": "[Was wir behoben haben] (1) Eine Klasse von Fehlern der Art „Plätze von Geistern belegt\" behoben: Die alte Aufräumlogik löschte nur den Datensatz, beendete aber nie wirklich diese Sitzung, sodass die aufgeräumte Figur im Speicher blieb und weiter einen Platz belegte. Nutzer sahen das seltsame „die Plätze sind offensichtlich nicht voll, aber es heißt ständig voll\". Aufräumen erfordert jetzt immer eine echte Trennung; einen Datensatz zu löschen gilt nicht mehr als Aufräumen. (2) Erkannt, dass „mehrere Geräte teilen sich ein ausgehendes Netz\" als dieselbe Person gewertet wurde: Ausgangsadressen mobiler Netze werden oft von vielen geteilt, sodass die Zählung pro Adresse fremde Nutzung auf dich umlegte. Die Zählregel steht wieder auf dem großzügigeren historischen Wert. Außerdem: Behoben: Der Verlauf wurde durch leere Nachrichten aufgebläht – bei einem Fehlerabschluss wurde eine leere Zeichenkette gespeichert und die Synchronisierung übernahm sie ungeprüft; nach Dutzenden Einträgen fielen echte Nachrichten aus dem sichtbaren Bereich. Leere Einträge werden nun vor dem Abgleich gefiltert, und im Fehlerfall steht immer ein lesbarer Satz; Behoben: „Antwort wurde länger, der Bildschirm zeigt aber weiter den alten Text“ – bisher galt nur eine gestiegene Anzahl als Aktualisierung, daher wurde an gleicher Stelle verlängerter Inhalt nicht neu gezeichnet. Jetzt wird ein Inhalts-Fingerabdruck verglichen. [Was wir verbessert / ergänzt haben] (1) Byteweiser Vergleich der betroffenen Konfiguration mit historischen Versionen: exakte Übereinstimmung mit dem früheren gesunden Zeitraum statt „sieht ungefähr gleich aus\". (2) Die Fehlersuche beginnt jetzt immer mit einem Schritt: zuerst gegen eine historische Sicherung als Referenz vergleichen, dann den aktuellen Code lesen. Außerdem: Ob es remote neuen Inhalt gibt, nicht an der Anzahl festmachen: gleiche Anzahl heißt nicht gleicher Inhalt – ein Fingerabdruck des Endes ist verlässlicher. [Was wir gelernt haben] Drei Lehren aus unserer internen Erfahrungsbasis: (a) Einen Datensatz löschen ist nicht eine Verbindung trennen – Aufräumen muss wirklich trennen, sonst bleibt eine unsichtbare Belegung; (b) um „das gab es früher nie\" zu beurteilen, die historische Konfiguration als Referenz nehmen – das findet den Unterschied schneller, als aktuellen Code zu lesen; (c) ein Verdacht ist keine Ursache: Ist die Beweiskette der ersten Schlussfolgerung unvollständig, ehrlich „unbestätigt\" vermerken und weitersuchen, niemals mit der plausibelsten Antwort abschließen. Außerdem: Schmutzige Daten verdrängen echte Daten: Das sichtbare Fenster ist begrenzt, und ein paar leere Einträge lassen echte Nachrichten verschwinden; „Nichts geändert“ und „geändert, aber die Anzahl nicht“ sind zwei Dinge; eine zu enge Bedingung erzeugt „aktualisiert, aber ich sehe es nicht“.",
+      "summary": "Heute vier Korrekturen, die Nutzer direkt spüren: wie sich der Gesamtsaldo berechnet, Kategorien ohne Reaktion, unlesbare Hinweistexte und ruckelnde Wiedergabe im Browser. Dazu drei Arbeitsgewohnheiten.",
       "sections": {
-        "skills": [
-          "Die Fehlersuche beginnt jetzt immer mit einem Schritt: zuerst byteweise gegen eine historische Sicherung als Referenz vergleichen, dann den aktuellen Code lesen. Der Unterschied versteckt sich oft in „wie es aussah, als es lief\" – viel schneller als alles zu lesen.",
-          "Konfigurationskorrekturen werden nur mit Byte-Prüfung akzeptiert: byteidentisch zur historischen gesunden Version, nicht „sieht ungefähr gleich aus\".",
-          "Ob es remote neuen Inhalt gibt, nicht an der Anzahl festmachen: gleiche Anzahl heißt nicht gleicher Inhalt – ein Fingerabdruck des Endes ist verlässlicher."
-        ],
         "bugs": [
-          "Eine Klasse von Fehlern der Art „Plätze von Geistern belegt\" behoben: Das Aufräumen löschte den Datensatz, beendete die Sitzung aber nicht, sodass die aufgeräumte Figur im Speicher blieb und einen Platz belegte – sichtbar als „die Plätze sind nicht voll, es heißt aber ständig voll\". Jetzt muss Aufräumen wirklich trennen, und Datensatz löschen gilt nicht mehr als Aufräumen.",
-          "Behoben, dass „mehrere Geräte in einem ausgehenden Netz\" als eine Person gewertet wurden: mobile Ausgangsadressen werden breit geteilt, sodass Zählung pro Adresse fremde Nutzung auf dich umlegte. Die Zählregel steht wieder auf dem großzügigeren historischen Wert.",
-          "Einen stillen Fehler behoben, bei dem „aufgeräumt, aber nichts geändert\" galt: Aufräumen und echte Trennung waren zwei getrennte Wege, sodass nur der erste lief und die Oberfläche Erfolg zeigte, während die Belegung blieb. Beide Wege sind jetzt verbunden: keine Trennung, kein abgeschlossenes Aufräumen.",
-          "Behoben: Der Verlauf wurde durch leere Nachrichten aufgebläht – bei einem Fehlerabschluss wurde eine leere Zeichenkette gespeichert und die Synchronisierung übernahm sie ungeprüft; nach Dutzenden Einträgen fielen echte Nachrichten aus dem sichtbaren Bereich. Leere Einträge werden nun vor dem Abgleich gefiltert, und im Fehlerfall steht immer ein lesbarer Satz.",
-          "Behoben: „Antwort wurde länger, der Bildschirm zeigt aber weiter den alten Text“ – bisher galt nur eine gestiegene Anzahl als Aktualisierung, daher wurde an gleicher Stelle verlängerter Inhalt nicht neu gezeichnet. Jetzt wird ein Inhalts-Fingerabdruck verglichen."
+          "Behoben: „Der angezeigte Saldo weicht von der offiziellen Seite ab\" – wir zählten nur die Hauptwährung und ignorierten ein Guthaben in einer anderen Währung. Jetzt werden alle Währungen umgerechnet und summiert, die Differenz ist null.",
+          "Behoben: „Klick auf eine Kategorie bewirkt nichts\" – die Links zeigten auf Anker, die es auf der Startseite nicht gibt. Jede Kategorie ist jetzt eine echte Seite und funktioniert auch mobil.",
+          "Behoben: „Hinweistext ist unlesbar\" – der Kasten auf der Kartenseite hatte graue Schrift auf dunkelrotem Grund. Jetzt dunkle Schrift auf Weiß mit roter Hinweiszeile.",
+          "Behoben: „Ton ist gut, Bild ruckelt im Browser\" – der Web-Player dekodiert per Software, was ein kleiner Kasten bei 1080p nicht schafft. Die Wiedergabe geht jetzt an den Hardware-Decoder des Systems und fällt bei Fehlern automatisch auf den Web-Player zurück, ohne schwarzen Bildschirm."
+        ],
+        "skills": [
+          "Wechselkurse in Umrechnungsfunktionen nie fest verdrahten: die Differenz zwischen Plattform- und Marktkurs ist jetzt ein einstellbarer Parameter und folgt dem Markt ohne Codeänderung.",
+          "Massen-Uploads laufen als ein Archiv: Datei für Datei kamen in 20 Minuten nur ein Dutzend an. Einmal packen und auf dem Server entpacken schafft 321 Dateien in gut einer Minute.",
+          "Vor dem Ändern einer Live-Seite Größe und Änderungszeit notieren; danach prüfen, ob ein anderer Prozess sie überschrieben hat. Und nie „behoben\" melden, ohne das reale Ergebnis von der Live-Seite zu prüfen."
         ],
         "lessons": [
-          "Einen Datensatz löschen ist nicht eine Verbindung trennen: Aufräumen muss wirklich trennen, sonst bleibt eine unsichtbare Belegung und je mehr man aufräumt, desto voller wird es.",
-          "Um „das gab es früher nie\" zu beurteilen, die historische Konfiguration als Referenz vergleichen, statt aktuellen Code zu lesen und zu raten.",
-          "Ein Verdacht ist keine Ursache: Ist die Beweislage der ersten Schlussfolgerung unvollständig, „unbestätigt\" vermerken und weitersuchen; niemals mit der plausibelsten Antwort abschließen.",
-          "Schmutzige Daten verdrängen echte Daten: Das sichtbare Fenster ist begrenzt, und ein paar leere Einträge lassen echte Nachrichten verschwinden.",
-          "„Nichts geändert“ und „geändert, aber die Anzahl nicht“ sind zwei Dinge; eine zu enge Bedingung erzeugt „aktualisiert, aber ich sehe es nicht“."
+          "Wenn Zahlen nicht passen, zuerst nach einem Unterschied im Umfang suchen: eine fehlende Währung oder Gebühr ist viel häufiger als kaputte Daten.",
+          "„Klick bewirkt nichts\" beginnt mit der Prüfung, ob das Linkziel existiert: ein fehlender Anker wirft keinen Fehler, er tut einfach still nichts.",
+          "Nicht nach der Paketgröße urteilen: der Installer anderer ist hunderte Megabyte groß, weil eine komplette Wiedergabe-Engine enthalten ist. Unserer ist nur klein, weil sie fehlte.",
+          "„Ich habe es geändert\" und „so verhält es sich live\" sind zwei verschiedene Aussagen: vor dem Bericht eine echte Probe von der Live-Seite nehmen."
         ]
       }
     },
     "ru": {
-      "summary": "[Что исправлено] (1) Исправлена целая группа ошибок вида «места заняты призраками»: старая логика очистки только удаляла запись, но никогда реально не закрывала сессию, поэтому уже очищенный персонаж оставался в памяти и продолжал занимать место. Пользователь видел странное «места явно не заполнены, но система говорит, что всё занято». Теперь очистка всегда требует реального отключения; удаление записи больше не считается очисткой. (2) Обнаружено, что «несколько устройств в одной исходящей сети» определялись как один человек: исходящие адреса мобильных сетей часто делятся между многими, поэтому подсчёт мест по адресу записывал вам чужой расход. Правило подсчёта возвращено к более мягкому историческому значению. Также: Исправлено раздувание истории пустыми сообщениями: при аварийном завершении сохранялась пустая строка, и синхронизация принимала её как есть; накопившись десятками, такие записи вытесняли настоящие сообщения из видимой области. Теперь пустые записи отфильтровываются до синхронизации, а при ошибке всегда остаётся понятная фраза; Исправлено «ответ стал длиннее, а на экране старый текст»: раньше обновлением считалось только увеличение числа сообщений, поэтому дополненный на том же месте текст не перерисовывался. Теперь сравнивается отпечаток содержимого. [Что улучшено / добавлено] (1) Побайтовое сравнение связанной конфигурации с историческими версиями: полное совпадение с прежним здоровым периодом вместо «выглядит примерно так же». (2) Процедура диагностики теперь всегда начинается с шага: сначала сравнить с исторической копией как эталоном, потом читать текущий код. Также: Чтобы понять, есть ли новое содержимое на той стороне, не считайте только сообщения: одинаковое число не значит одинаковый текст — сравнивайте отпечаток конца. [Чему научились] Три урока из внутренней базы опыта: (a) удалить запись — не значит закрыть соединение: очистка должна реально отключать, иначе остаётся невидимое занятие места; (b) чтобы судить «раньше такого не было», берите историческую конфигурацию как эталон — разница находится быстрее, чем при чтении текущего кода; (c) подозреваемый — не корневая причина: если цепочка доказательств первого вывода неполна, честно помечайте «не подтверждено» и продолжайте искать, никогда не закрывайте дело самым правдоподобным ответом. Также: Грязные данные вытесняют настоящие: видимая область ограничена, и несколько пустых записей заставляют реальные сообщения исчезнуть; «Ничего не изменилось» и «изменилось, но число прежнее» — разные вещи; слишком узкое условие даёт «обновилось, но я этого не вижу».",
+      "summary": "Сегодня исправили четыре вещи, которые пользователь чувствует сразу: расчёт общего баланса, категории без реакции, нечитаемый текст подсказок и рывки при воспроизведении в браузере. Плюс три рабочих привычки.",
       "sections": {
-        "skills": [
-          "Процедура диагностики теперь всегда начинается с шага: сначала побайтовое сравнение с исторической копией как эталоном, затем чтение текущего кода. Разница часто прячется в «как это выглядело, когда работало» — это гораздо быстрее, чем читать всё подряд.",
-          "Исправления конфигурации принимаются только с побайтовой проверкой: полное совпадение с исторической рабочей версией, а не «выглядит примерно так же».",
-          "Чтобы понять, есть ли новое содержимое на той стороне, не считайте только сообщения: одинаковое число не значит одинаковый текст — сравнивайте отпечаток конца."
-        ],
         "bugs": [
-          "Исправлена группа ошибок вида «места заняты призраками»: очистка удаляла запись, но не закрывала сессию, поэтому очищенный персонаж оставался в памяти и занимал место — проявлялось как «места не заполнены, но система говорит, что всё занято». Теперь очистка обязана реально отключать, и удаление записи не считается очисткой.",
-          "Исправлено ошибочное определение «несколько устройств в одной исходящей сети» как одного человека: мобильные исходящие адреса широко разделяются, поэтому подсчёт по адресу записывал вам чужой расход. Правило подсчёта возвращено к более мягкому историческому значению.",
-          "Исправлен тихий сбой «очистка прошла, но ничего не изменилось»: очистка и реальное отключение были двумя разными путями, поэтому при запуске только первого интерфейс показывал успех, а занятое место оставалось. Теперь пути связаны: нет отключения — нет завершённой очистки.",
-          "Исправлено раздувание истории пустыми сообщениями: при аварийном завершении сохранялась пустая строка, и синхронизация принимала её как есть; накопившись десятками, такие записи вытесняли настоящие сообщения из видимой области. Теперь пустые записи отфильтровываются до синхронизации, а при ошибке всегда остаётся понятная фраза.",
-          "Исправлено «ответ стал длиннее, а на экране старый текст»: раньше обновлением считалось только увеличение числа сообщений, поэтому дополненный на том же месте текст не перерисовывался. Теперь сравнивается отпечаток содержимого."
+          "Исправлено «баланс не совпадает с официальной страницей»: мы учитывали только основную валюту и игнорировали остаток в другой. Теперь все валюты пересчитываются и суммируются, расхождение равно нулю.",
+          "Исправлено «нажатие на категорию ничего не делает»: ссылки вели на якоря, которых нет на главной. Теперь каждая категория — настоящая страница, открывается и на телефоне.",
+          "Исправлено «текст пояснения не читается»: блок на странице карты был серым на тёмно-красном и сливался. Теперь тёмный текст на белом с красной строкой-подсказкой.",
+          "Исправлено «звук есть, а картинка дёргается в браузере»: веб-плеер декодирует программно, небольшая приставка не тянет 1080p. Теперь воспроизведение отдаётся аппаратному декодеру системы, а при сбое автоматически возвращается к веб-плееру — без чёрного экрана."
+        ],
+        "skills": [
+          "Не зашивать курс валюты в функцию пересчёта: разница между курсом платформы и рыночным курсом теперь настраиваемый параметр, она следует за рынком без правки кода.",
+          "Массовую загрузку делаем одним архивом: по одному файлу за 20 минут уходил десяток. Упаковать один раз и распаковать на сервере — 321 файл чуть больше минуты.",
+          "Перед правкой рабочей страницы записывать размер и время изменения, после — проверять, не перезаписал ли её другой процесс. И никогда не сообщать «исправлено», не сняв реальный результат с живого сайта."
         ],
         "lessons": [
-          "Удалить запись — не значит закрыть соединение: очистка должна реально отключать, иначе остаётся невидимое занятие места, и чем больше чистишь, тем полнее.",
-          "Чтобы судить «раньше такого не было», сравнивайте с исторической конфигурацией как эталоном, а не читайте текущий код и не гадайте.",
-          "Подозреваемый — не корневая причина: если доказательства первого вывода неполны, помечайте «не подтверждено» и ищите дальше; никогда не закрывайте дело самым правдоподобным ответом.",
-          "Грязные данные вытесняют настоящие: видимая область ограничена, и несколько пустых записей заставляют реальные сообщения исчезнуть.",
-          "«Ничего не изменилось» и «изменилось, но число прежнее» — разные вещи; слишком узкое условие даёт «обновилось, но я этого не вижу»."
+          "Если числа не сходятся, сначала ищите разницу в охвате: забытая валюта или комиссия встречается куда чаще, чем испорченные данные.",
+          "«Нажатие ничего не делает» начинается с проверки, существует ли цель ссылки: отсутствующий якорь не даёт ошибки, он просто молча ничего не делает.",
+          "Не судить по размеру пакета: чужой установщик весит сотни мегабайт, потому что внутри полный движок воспроизведения. Наш мал только потому, что его не было.",
+          "«Я изменил» и «вот как это работает на живом сайте» — разные утверждения: перед отчётом снимите реальный результат с сайта."
         ]
       }
     },
     "pt": {
-      "summary": "[O que corrigimos] (1) Corrigimos uma família de falhas do tipo \"vagas ocupadas por fantasmas\": a lógica antiga de limpeza apenas apagava o registro, mas nunca encerrava de fato aquela sessão, então o personagem já limpo continuava na memória ocupando uma vaga. O que o usuário via era o estranho \"as vagas claramente não estão cheias, mas continua dizendo cheio\". Agora a limpeza sempre exige uma desconexão real; apagar um registro não conta mais como limpeza. (2) Descobrimos que \"vários dispositivos compartilhando a mesma rede de saída\" era julgado como a mesma pessoa: endereços de saída de redes móveis costumam ser compartilhados por muita gente, então contar vagas por endereço cobrava o uso dos outros de você. A regra de contagem voltou ao valor histórico mais permissivo. Também: Corrigido o histórico inflado por mensagens vazias: ao terminar com erro era gravada uma string vazia e a sincronização aceitava isso sem filtro; ao acumular dezenas, as mensagens reais saíam da janela visível. Agora as entradas vazias são filtradas antes de sincronizar e o erro sempre deixa uma frase legível; Corrigido «a resposta ficou maior mas a tela continua mostrando o antigo»: antes só contava como atualização quando o número de mensagens aumentava, então conteúdo que crescia no mesmo lugar não era redesenhado. Agora comparamos uma impressão digital do conteúdo. [O que melhoramos / adicionamos] (1) Comparação byte a byte da configuração relacionada com versões históricas, confirmando correspondência exata com o período saudável anterior, em vez de \"parece mais ou menos igual\". (2) O procedimento de diagnóstico agora sempre começa com um passo: comparar primeiro com um backup histórico como referência e depois ler o código atual. Também: Para saber se há conteúdo novo do outro lado, não conte apenas mensagens: mesmo número não significa mesmo conteúdo — compare uma impressão digital do final. [O que aprendemos] Três lições da nossa base de experiência interna: (a) apagar um registro não é encerrar uma conexão: a limpeza precisa desconectar de verdade, senão fica uma ocupação invisível; (b) para julgar \"antes nunca acontecia\", use a configuração histórica como referência — encontra a diferença mais rápido que ler o código atual; (c) um suspeito não é uma causa raiz: se a cadeia de evidências da primeira conclusão está incompleta, marque honestamente \"não confirmado\" e continue investigando, nunca encerre com a resposta mais plausível. Também: Dados sujos expulsam dados reais: a janela visível é limitada e algumas entradas vazias fazem mensagens reais desaparecerem; «Nada mudou» e «mudou mas o número não» são coisas diferentes; uma condição estreita demais gera «atualizou mas eu não vejo».",
+      "summary": "Hoje corrigimos quatro coisas que o utilizador sente de imediato: o cálculo do saldo total, categorias que não reagiam ao toque, textos de ajuda ilegíveis e vídeo aos soluços no navegador. Mais três hábitos de trabalho.",
       "sections": {
-        "skills": [
-          "O procedimento de diagnóstico agora sempre começa com um passo: comparar byte a byte com um backup histórico como referência e depois ler o código atual. A diferença costuma estar escondida em \"como era quando funcionava\", muito mais rápido que ler tudo.",
-          "Correções de configuração só são aceitas com verificação em nível de byte: idêntico byte a byte à versão saudável histórica, não \"parece mais ou menos igual\".",
-          "Para saber se há conteúdo novo do outro lado, não conte apenas mensagens: mesmo número não significa mesmo conteúdo — compare uma impressão digital do final."
-        ],
         "bugs": [
-          "Corrigimos uma família de falhas do tipo \"vagas ocupadas por fantasmas\": a limpeza apagava o registro mas não encerrava a sessão, então o personagem limpo continuava na memória ocupando uma vaga, aparecendo como \"as vagas não estão cheias mas continua dizendo cheio\". Agora a limpeza precisa desconectar de verdade e apagar registro não conta mais como limpeza.",
-          "Corrigimos \"vários dispositivos na mesma rede de saída\" sendo julgado como uma só pessoa: endereços de saída móveis são amplamente compartilhados, então contar por endereço cobrava o uso dos outros de você. A regra voltou ao valor histórico mais permissivo.",
-          "Corrigimos um silencioso \"limpou mas nada mudou\": limpeza e desconexão real eram dois caminhos separados, então rodar só o primeiro mostrava sucesso na tela enquanto a ocupação continuava. Agora os dois caminhos estão ligados: sem desconexão, não há limpeza concluída.",
-          "Corrigido o histórico inflado por mensagens vazias: ao terminar com erro era gravada uma string vazia e a sincronização aceitava isso sem filtro; ao acumular dezenas, as mensagens reais saíam da janela visível. Agora as entradas vazias são filtradas antes de sincronizar e o erro sempre deixa uma frase legível.",
-          "Corrigido «a resposta ficou maior mas a tela continua mostrando o antigo»: antes só contava como atualização quando o número de mensagens aumentava, então conteúdo que crescia no mesmo lugar não era redesenhado. Agora comparamos uma impressão digital do conteúdo."
+          "Corrigido «o saldo mostrado não bate com a página oficial»: só contávamos a moeda principal e ignorávamos o saldo noutra moeda. Agora todas as moedas são convertidas e somadas, e a diferença é zero.",
+          "Corrigido «tocar numa categoria não faz nada»: os links apontavam para âncoras que não existem na página inicial. Agora cada categoria é uma página real e abre bem no telemóvel.",
+          "Corrigido «o texto explicativo não se lê»: a caixa do mapa tinha texto cinzento sobre fundo vermelho escuro e ficava esbatida. Agora é texto escuro sobre branco com uma linha de aviso vermelha.",
+          "Corrigido «o som está bom mas a imagem engasga no navegador»: o leitor web descodifica por software e uma caixa pequena não aguenta 1080p. Agora a reprodução passa para o descodificador de hardware e volta sozinha ao leitor web se falhar, sem ecrã negro."
+        ],
+        "skills": [
+          "Nunca fixar a taxa de câmbio numa função de conversão: a diferença entre a taxa da plataforma e a do mercado é agora um parâmetro ajustável, acompanha o mercado sem alterar código.",
+          "Envios em massa vão num único pacote: ficheiro a ficheiro chegavam uma dúzia em 20 minutos. Empacotar uma vez e descompactar no servidor move 321 ficheiros em pouco mais de um minuto.",
+          "Antes de editar uma página em produção, registar tamanho e data de modificação; depois confirmar que nenhum outro processo a substituiu. Nunca reportar «corrigido» sem recolher o resultado real do site."
         ],
         "lessons": [
-          "Apagar um registro não é encerrar uma conexão: a limpeza precisa desconectar de verdade, senão fica uma ocupação invisível e quanto mais limpa, mais cheia.",
-          "Para julgar \"antes nunca acontecia\", compare com a configuração histórica como referência em vez de ler o código atual e adivinhar.",
-          "Um suspeito não é uma causa raiz: se as evidências da primeira conclusão estiverem incompletas, marque \"não confirmado\" e continue investigando; nunca encerre com a resposta mais plausível.",
-          "Dados sujos expulsam dados reais: a janela visível é limitada e algumas entradas vazias fazem mensagens reais desaparecerem.",
-          "«Nada mudou» e «mudou mas o número não» são coisas diferentes; uma condição estreita demais gera «atualizou mas eu não vejo»."
+          "Quando os números não batem, procure primeiro uma diferença de âmbito: uma moeda ou uma taxa em falta é bem mais comum do que dados corrompidos.",
+          "«Tocar não faz nada» começa por verificar se o destino do link existe: apontar para uma âncora inexistente não dá erro, simplesmente não faz nada.",
+          "Não julgar pelo tamanho do pacote: o instalador de outro tem centenas de megabytes porque inclui um motor de reprodução completo. O nosso é pequeno só porque faltava.",
+          "«Eu alterei» e «é assim que se comporta em produção» são afirmações diferentes: recolha o resultado real do site antes de reportar."
         ]
       }
     },
     "ar": {
-      "summary": "[ما أصلحناه] (1) أصلحنا مجموعة من الأخطاء من نوع «المقاعد محتلة من أشباح»: منطق التنظيف القديم كان يحذف السجل فقط دون أن يقطع تلك الجلسة فعليًا، فيبقى الشخص الذي جرى تنظيفه في الذاكرة ويحتل مقعدًا. ما كان يراه المستخدم هو «المقاعد غير ممتلئة بوضوح لكنه يقول دائمًا ممتلئ». الآن يستلزم التنظيف قطع الاتصال فعليًا، ولم يعد حذف السجل يُعد تنظيفًا. (2) اكتشفنا أن «عدة أجهزة تتشارك شبكة خروج واحدة» كان يُحكم عليها بأنها الشخص نفسه: عناوين الخروج في شبكات الهاتف تُشارَك بين كثيرين، فعدّ المقاعد حسب العنوان يحسب استخدام الآخرين عليك. أُعيد معيار العد إلى القيمة التاريخية الأكثر تسامحًا. أيضًا: أُصلح تضخم سجل المحادثة برسائل فارغة: عند الانتهاء بخطأ كان يُحفظ نص فارغ وتقبله المزامنة كما هو، وبعد تراكم العشرات تخرج الرسائل الحقيقية من النطاق المرئي. الآن تُستبعد الإدخالات الفارغة قبل المزامنة، وفي حال الخطأ تُكتب دائمًا جملة مفهومة؛ أُصلح «طال الرد لكن الشاشة ما زالت تعرض القديم»: سابقًا كان التحديث يُحتسب فقط عند زيادة عدد الرسائل، فإذا طال المحتوى في الموضع نفسه لم تُعد الشاشة الرسم. الآن نقارن بصمة المحتوى. [ما حسّناه / أضفناه] (1) مقارنة بايت ببايت للإعدادات المعنية مع النسخ التاريخية، فأصبحت مطابقة تمامًا للفترة السليمة السابقة بدلًا من «تبدو متشابهة تقريبًا». (2) إجراء التشخيص يبدأ الآن دائمًا بخطوة: المقارنة أولًا بنسخة احتياطية تاريخية كمرجع ثم قراءة الكود الحالي. أيضًا: لمعرفة وجود محتوى جديد في الطرف الآخر لا تكتف بعدّ الرسائل: تساوي العدد لا يعني تساوي المحتوى، قارن بصمة نهاية المحتوى. [ما تعلمناه] ثلاثة دروس من قاعدة خبرتنا الداخلية: (أ) حذف السجل ليس قطع الاتصال: التنظيف يجب أن يقطع فعلًا وإلا بقي احتلال غير مرئي؛ (ب) للحكم بأن «هذا لم يحدث سابقًا»، اتخذ الإعدادات التاريخية مرجعًا، فذلك يجد الفرق أسرع من قراءة الكود الحالي؛ (ج) المشتبه به ليس السبب الجذري: إن كانت سلسلة الأدلة في الاستنتاج الأول ناقصة فاكتب «غير مؤكد» بصراحة وواصل البحث، ولا تُغلق القضية بأكثر الإجابات معقولية. أيضًا: البيانات الملوّثة تُزيح البيانات الحقيقية: نافذة العرض محدودة، وتراكم إدخالات فارغة يُخفي الرسائل الحقيقية؛ «لم يتغير شيء» و«تغيّر لكن العدد لم يتغيّر» أمران مختلفان؛ الشرط الضيق جدًا يُنتج «تحدّث لكني لا أراه».",
+      "summary": "أصلحنا اليوم أربعة أمور يلاحظها المستخدم مباشرة: طريقة حساب إجمالي الرصيد، وأقسام لا تستجيب للنقر، ونصوص توضيحية غير مقروءة، وتقطّع الفيديو في المتصفح. وأضفنا ثلاث عادات عمل.",
       "sections": {
-        "skills": [
-          "إجراء التشخيص يبدأ الآن دائمًا بخطوة: مقارنة بايت ببايت بنسخة احتياطية تاريخية كمرجع ثم قراءة الكود الحالي. الفرق غالبًا يختبئ في «كيف كان شكله عندما كان يعمل»، وهو أسرع بكثير من قراءة كل شيء.",
-          "تصحيحات الإعدادات لا تُقبل إلا بتحقق على مستوى البايت: مطابقة تامة للنسخة السليمة التاريخية، لا «تبدو متشابهة تقريبًا».",
-          "لمعرفة وجود محتوى جديد في الطرف الآخر لا تكتف بعدّ الرسائل: تساوي العدد لا يعني تساوي المحتوى، قارن بصمة نهاية المحتوى."
-        ],
         "bugs": [
-          "أصلحنا مجموعة أخطاء من نوع «المقاعد محتلة من أشباح»: التنظيف كان يحذف السجل دون قطع الجلسة، فيبقى الشخص المنظَّف في الذاكرة ويحتل مقعدًا، ويظهر كـ«المقاعد غير ممتلئة لكنه يقول ممتلئ». الآن يجب القطع فعليًا، وحذف السجل لم يعد يُعد تنظيفًا.",
-          "أصلحنا الحكم الخاطئ بأن «عدة أجهزة على شبكة خروج واحدة» شخص واحد: عناوين الخروج للهاتف تُشارَك على نطاق واسع، فعدّ المقاعد حسب العنوان يحسب استخدام الآخرين عليك. أُعيد المعيار إلى القيمة التاريخية الأكثر تسامحًا.",
-          "أصلحنا فشلًا صامتًا حيث «جرى التنظيف ولم يتغير شيء»: التنظيف والقطع الفعلي كانا مسارين منفصلين، فتشغيل الأول وحده يُظهر نجاحًا على الشاشة بينما يبقى الاحتلال. الآن المساران مرتبطان: لا قطع فلا تنظيف مكتمل.",
-          "أُصلح تضخم سجل المحادثة برسائل فارغة: عند الانتهاء بخطأ كان يُحفظ نص فارغ وتقبله المزامنة كما هو، وبعد تراكم العشرات تخرج الرسائل الحقيقية من النطاق المرئي. الآن تُستبعد الإدخالات الفارغة قبل المزامنة، وفي حال الخطأ تُكتب دائمًا جملة مفهومة.",
-          "أُصلح «طال الرد لكن الشاشة ما زالت تعرض القديم»: سابقًا كان التحديث يُحتسب فقط عند زيادة عدد الرسائل، فإذا طال المحتوى في الموضع نفسه لم تُعد الشاشة الرسم. الآن نقارن بصمة المحتوى."
+          "أُصلح «الرصيد المعروض لا يطابق الصفحة الرسمية»: كنا نحسب العملة الرئيسية فقط ونتجاهل رصيدًا بعملة أخرى. الآن تُحوَّل جميع العملات وتُجمَع والفرق صفر.",
+          "أُصلح «النقر على قسم لا يفعل شيئًا»: كانت الروابط تشير إلى مراسٍ غير موجودة في الصفحة الرئيسية. الآن كل قسم صفحة حقيقية ويعمل على الهاتف أيضًا.",
+          "أُصلح «النص التوضيحي غير مقروء»: كان صندوق الملاحظات في صفحة الخريطة بنص رمادي على خلفية حمراء داكنة فيتلاشى. أصبح الآن نصًا داكنًا على أبيض مع سطر تنبيه أحمر.",
+          "أُصلح «الصوت سليم لكن الصورة تتقطع في المتصفح»: مشغّل الويب يفك الترميز برمجيًا ولا يتحمل جهاز صغير دقة 1080p. الآن تُسلَّم إعادة التشغيل إلى مفكك الترميز العتادي في النظام، ويعود تلقائيًا إلى مشغّل الويب عند الفشل دون شاشة سوداء."
+        ],
+        "skills": [
+          "لا نُثبّت سعر الصرف داخل أي وظيفة تحويل: الفرق بين سعر المنصة وسعر السوق أصبح معاملًا قابلًا للضبط، فيتبع السوق دون تعديل الشيفرة.",
+          "رفع الملفات بالجملة يتم في حزمة واحدة: رفع ملفًا بملف لم يُنجز سوى عشرات خلال 20 دقيقة. الضغط مرة واحدة وفك الضغط على الخادم ينقل 321 ملفًا في ما يزيد قليلًا على دقيقة.",
+          "قبل تعديل صفحة عاملة نسجّل الحجم ووقت التعديل، وبعده نتأكد أن عملية أخرى لم تستبدلها. ولا نُعلن «تم الإصلاح» دون أخذ عيّنة حقيقية من الموقع."
         ],
         "lessons": [
-          "حذف السجل ليس قطع الاتصال: التنظيف يجب أن يقطع فعلًا، وإلا بقي احتلال غير مرئي وكلما نظفت أكثر امتلأ أكثر.",
-          "للحكم بأن «هذا لم يحدث سابقًا»، قارن بالإعدادات التاريخية كمرجع بدلًا من قراءة الكود الحالي والتخمين.",
-          "المشتبه به ليس السبب الجذري: إن كانت أدلة الاستنتاج الأول ناقصة فاكتب «غير مؤكد» وواصل البحث؛ لا تُغلق القضية بأكثر الإجابات معقولية.",
-          "البيانات الملوّثة تُزيح البيانات الحقيقية: نافذة العرض محدودة، وتراكم إدخالات فارغة يُخفي الرسائل الحقيقية.",
-          "«لم يتغير شيء» و«تغيّر لكن العدد لم يتغيّر» أمران مختلفان؛ الشرط الضيق جدًا يُنتج «تحدّث لكني لا أراه»."
+          "عندما لا تتطابق الأرقام، ابحث أولًا عن اختلاف في النطاق: عملة منسيّة أو رسم منسي أكثر شيوعًا بكثير من بيانات تالفة.",
+          "«النقر لا يفعل شيئًا» يبدأ بالتحقق من وجود هدف الرابط: الإشارة إلى مرساة غير موجودة لا تُنتج خطأ، بل لا تفعل شيئًا بصمت.",
+          "لا تحكم بحجم الحزمة: مثبّت الآخرين بمئات الميغابايت لأنه يضم محرّك تشغيل كاملًا. حزمتنا صغيرة فقط لأنه كان ناقصًا.",
+          "«لقد عدّلته» و«هكذا يعمل فعليًا» ادّعاءان مختلفان: خُذ نتيجة حقيقية من الموقع قبل الإبلاغ."
         ]
       }
     }
