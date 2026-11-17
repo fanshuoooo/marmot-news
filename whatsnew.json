@@ -1,212 +1,222 @@
 {
   "ver": "1.5.94",
-  "date": "2026-11-16",
-  "summary": "【修了什么】修好「一次交两件事，第二件当场报失败」：现在第二件自动排队，前一件跑完自动接上，刷新页面队列也不会丢；正在跑的那一轮也能接着看，刷新后接得回来。顺带修好「跑完就找不到刚才的结果」：最近几次留在弹窗里，点一下就能回看全过程。【优化/新增了什么】新增五套配色随手换——标准白（默认）、樱花粉、薄荷绿、星空紫、黑色护眼，选过就记住，夜里看黑色护眼不刺眼。界面框架也整理了一遍：会话列表改成圆角卡片加选中色条，顶栏底栏收进圆角容器，按钮做成卡片状，看着更清楚；按钮顺序和位置一处没动，老用户不用重新适应。【自我学习到了什么】三条（学自内部经验库）：①判据本身要先被证伪再拿去判事——只看一个标志位加自设阈值就下结论，会把正常数据一起误伤，得先拿同批真实分布做基线；②「改了」不等于「对方认这个版本」——识别方和安装方必须同一个来源，否则会出现「明明修好了还被判没修」，反复重做；③「更新」不等于「当前状态」——一次自动更新会把之前的设置重置回去，修完要顺手防住下一次重置。",
+  "date": "2026-11-17",
+  "summary": "【修了什么】手机端头像与任务卡图标恢复显示；手机首页「进行中」不再偶尔归零，正在跑的任务随时能看到；还在跑的任务不会被提前标成「已完结」，已汇报的固定排在已结束上面；「取消排队」后条目不会再自己冒回来，页面也不再卡在「正在查」这三个字上。【优化/新增了什么】模型调度重排：按时间段和任务轻重自动挑合适的模型，轻活走快模型、重活走强模型、带图单独一档，实测 49 种组合全部落在预期档位；手机端状态改成自动实时刷新，多余的刷新按钮去掉了。【自我学习到了什么】三条（学自内部经验库）：①健康的自愈机制应当是安静的，如果它每个周期都在「修复」，先怀疑检测手段本身，而不是被监控的服务；②报「已自动恢复」必须带凭据——恢复前后是同一个实例、同一条健康记录，一句「已重启」不算修好；③「没有新内容」未必是故障，先对照「它本来就该有什么」再判断。",
   "sections": {
     "skills": [
-      "五套配色随时换：标准白（默认）、樱花粉、薄荷绿、星空紫、黑色护眼，选过就记住；黑色护眼给夜间用，对比度压低不刺眼。",
-      "界面框架整理：会话列表改成圆角卡片加选中色条，顶栏底栏收进圆角容器，按钮做成卡片状，层级更清楚；按钮顺序与位置保持不变。",
-      "一次可以连交几件事：第二件起自动排队，前一件完成自动接上，刷新页面队列还在，不用守着等。",
-      "结果留在弹窗里回看：最近几次跑完的记录点一下就能看完整过程，不用重新跑一遍。"
+      "模型调度按时间段与任务轻重自动分配：轻量活走快模型、复杂活走强模型、带图单独一档，实测 49 种组合全部落在预期档位。",
+      "手机端状态自动实时刷新：正在跑的任务数量与进度自己更新，不用找刷新按钮。",
+      "侧栏会话分层固定：已汇报固定在上，已结束／已完结统一沉到下面，顺序不再随时间乱跳。"
     ],
     "bugs": [
-      "修好「同时交第二件直接报已有任务在跑」：改为自动排队并自动接续，这条失败提示不再出现。",
-      "修好「刷新页面就看不到正在跑的过程」：现在能接回正在跑的那一轮，日志继续往下走，不会空着。",
-      "修好「任务跑完就找不到结果」：最近几次结果保留在弹窗内，随时点开回看。"
+      "修好手机端头像与任务卡图标破图不显示：图片恢复正常加载。",
+      "修好「明明在跑任务，首页进行中却显示 0」：判定在线的窗口太短，数据时有时无，现在稳定显示。",
+      "修好「还在跑的任务被提前标成已完结」：刚发出的话还没回、结果还在收的时候，不再盖结束章。",
+      "修好「点了取消排队，条目又自己冒回来」：本地缓存没跟着清，现在取消即消失。",
+      "修好页面卡在「正在查…」：改为自动实时更新，并去掉多余的刷新按钮。"
     ],
     "lessons": [
-      "判据要先被证伪：拿单个标志位加自设阈值就下结论，会把正常数据一起误伤；先拿同批真实分布做基线，再判。",
-      "「改了」不等于「对方认这个版本」：识别方与安装方必须同源，否则会出现「明明修好了还被判没修」，反复重做。",
-      "「更新」不等于「当前状态」：一次自动更新会把之前的选择重置回去，修完要顺手防住下一次重置。"
+      "健康的自愈机制应当是安静的：如果它每个周期都在「修复」，先怀疑检测手段本身，而不是被监控的服务。",
+      "报「已自动恢复」必须带凭据——恢复前后是同一个实例、同一条健康记录；一句「已重启」不算修好。",
+      "「没有新内容」未必是故障：先对照「它本来就该有什么」，再决定要不要报。"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "[What we fixed] Fixed \"hand in two jobs at once and the second one fails immediately\": the second job now queues up, starts automatically when the first finishes, and the queue survives a page refresh. A round that is already running can also be re-attached after a refresh instead of showing nothing. Also fixed \"the result is gone as soon as it finishes\": the last few runs stay in the dialog, one click replays the whole process. [What we improved] Five color themes you can switch anytime — Standard White (default), Sakura Pink, Mint Green, Starry Purple, and Dark Eye-care; your pick is remembered, and Dark Eye-care lowers contrast so long nights are easier on the eyes. The interface frame got a tidy-up too: the session list became rounded cards with a selected color bar, the top and bottom bars sit in rounded containers, and buttons are card-shaped so the hierarchy reads better; button order and position are untouched, so existing users do not have to relearn anything. [What we learned] Three notes from the internal playbook: (1) a test must be falsified before you judge with it — deciding from a single flag plus a self-set threshold hurts normal data too, so build a baseline from the real distribution first; (2) \"changed\" does not mean \"the other side recognizes this version\" — the checker and the installer must come from the same source, or you get \"already fixed but still judged unfixed\" and redo the work; (3) \"updated\" does not mean \"current state\" — one automatic update can reset earlier settings, so guard against the next reset right after you fix something.",
+      "summary": "[What we fixed] Avatars and task-card icons on mobile display again; the mobile home screen no longer drops to 0 running tasks now and then, so work in progress is always visible; a task that is still running is no longer stamped \"finished\" early, and reported items now stay above finished ones; canceling a queued item no longer makes it reappear, and the page no longer sticks on \"checking\". [What we improved] Model scheduling was rearranged: the assistant now picks a model by time of day and task weight - light work goes to a fast model, heavy work to a strong one, image work gets its own lane - and all 49 test combinations landed in the intended lane. Mobile status now refreshes itself in real time, and the redundant refresh button is gone. [What we learned] Three notes from the internal playbook: (1) a healthy self-healing mechanism should be quiet - if it \"repairs\" something every cycle, suspect the detector before the service; (2) never claim \"auto-recovered\" without proof: same instance, same health record - \"it restarted\" is not proof; (3) \"nothing new\" is not necessarily a fault - first check what was supposed to be there.",
       "sections": {
         "skills": [
-          "Five themes, switch anytime: Standard White (default), Sakura Pink, Mint Green, Starry Purple, Dark Eye-care; the choice is remembered, and Dark Eye-care uses lower contrast for night use.",
-          "Interface frame cleanup: session list as rounded cards with a selected color bar, top and bottom bars in rounded containers, buttons as cards for clearer hierarchy; button order and position unchanged.",
-          "Hand in several jobs at once: from the second one they queue, each starts automatically when the previous finishes, and the queue survives a refresh so you do not have to sit and watch.",
-          "Results stay in the dialog for replay: the last few runs are one click away, no need to run them again."
+          "Model scheduling by time of day and task weight: light jobs use a fast model, complex jobs a strong one, image work gets a separate lane; all 49 test combinations landed in the intended lane.",
+          "Mobile status refreshes itself: running-task counts and progress update on their own, no refresh button needed.",
+          "Sidebar sessions are layered and fixed: reported items stay on top, finished and closed ones sink below, and the order no longer drifts over time."
         ],
         "bugs": [
-          "Fixed \"submitting a second job reports that one is already running\": it now queues and starts automatically, and that failure message no longer appears.",
-          "Fixed \"a refresh hides the round that is running\": the running round is re-attached and the log keeps flowing instead of sitting empty.",
-          "Fixed \"the result disappears once the job finishes\": the last few results stay in the dialog and can be reopened at any time."
+          "Fixed broken avatars and task-card icons on mobile - images load normally again.",
+          "Fixed \"the home screen shows 0 running tasks while work is actually running\": the online window was too short and the data flickered; it now shows steadily.",
+          "Fixed \"a running task gets stamped finished too early\": while a just-sent message is still unanswered and results are still streaming in, no end stamp is applied.",
+          "Fixed \"cancel a queued item and it comes back by itself\": the local cache was not cleared with it; it now disappears for good.",
+          "Fixed the page sticking on \"checking...\": it now updates itself in real time, and the redundant refresh button is gone."
         ],
         "lessons": [
-          "Falsify the test before judging with it: a single flag plus a self-set threshold also damages normal data; build a baseline from the real distribution first.",
-          "\"Changed\" is not \"the other side recognizes this version\": the checker and the installer must share one source, or you get \"fixed but still judged unfixed\" and redo the work.",
-          "\"Updated\" is not \"current state\": an automatic update can reset earlier choices, so guard against the next reset right after fixing."
+          "A healthy self-healing mechanism should be quiet: if it \"repairs\" something every cycle, suspect the detector itself before the monitored service.",
+          "Never claim \"auto-recovered\" without proof - the same instance and the same health record before and after; \"it restarted\" is not a fix.",
+          "\"Nothing new\" is not necessarily a fault: compare against what was supposed to be there before deciding to report it."
         ]
       }
     },
     "ja": {
-      "summary": "【直したこと】「2件まとめて頼むと2件目がすぐ失敗する」を修正しました。2件目は自動で順番待ちになり、1件目が終われば自動で開始、ページを再読み込みしても順番待ちは消えません。実行中の回も再読み込み後にそのまま繋がり、ログが続きます。あわせて「終わったら結果が見当たらない」も修正：直近数回の結果はダイアログに残り、ワンクリックで全体を振り返れます。【改善・追加】配色を5種類に増やしていつでも切替可能——標準ホワイト（既定）、サクラピンク、ミントグリーン、スターリーパープル、夜色アイケア。選んだ配色は記憶され、夜色アイケアはコントラストを抑えて夜でも目が疲れにくいです。画面の骨格も整理しました：セッション一覧は角丸カード＋選択色バー、上下バーは角丸コンテナ、ボタンはカード型にして階層が分かりやすく。ボタンの順番と位置は一切変えていないので、既存の使い勝手はそのままです。【学んだこと】内部ノウハウから3点：①判定基準そのものを先に反証してから人や物事を判定する——フラグ1つと自分で決めたしきい値だけで結論を出すと正常なデータまで巻き込むので、まず同じ条件の実データ分布で基準を作る；②「直した」は「相手がこの版を認識している」ではない——判定側と導入側は同じ出所でなければ「直したのに未修正と判定される」が起きてやり直しになる；③「更新」は「現在の状態」ではない——自動更新は以前の設定を戻してしまうので、直した直後に次のリセットへ備える。",
+      "summary": "【直したこと】スマホのアバターとタスクカードのアイコンが再び表示されるようになりました。ホーム画面の「実行中」が時々 0 になる問題も解消し、進行中のタスクがいつでも見えます。実行中のタスクが早々に「完了」と表示されることもなくなり、「報告済み」は常に「終了」より上に並びます。「待機解除」した項目が勝手に戻ることも、画面が「確認中」のまま固まることもなくなりました。【改善・追加】モデルの割り当てを整理し、時間帯と作業の重さで自動選択するようにしました。軽い作業は速いモデル、重い作業は強いモデル、画像は専用の枠。49 通りの組み合わせテストはすべて想定した枠に収まりました。スマホ側の状態は自動でリアルタイム更新され、余計な更新ボタンは廃止しました。【学んだこと】社内の経験ノートから 3 点：①健全な自動復旧は「静か」であるべき。毎周期なにかを「修復」しているなら、まず監視対象ではなく検出手段を疑う。②「自動復旧しました」と言うには証拠が要る。同じインスタンス、同じ健全性記録で示すこと。「再起動しました」だけでは不十分。③「新しい内容がない」は故障とは限らない。まず「本来あるべきもの」と照合する。",
       "sections": {
         "skills": [
-          "配色5種類をいつでも切替：標準ホワイト（既定）、サクラピンク、ミントグリーン、スターリーパープル、夜色アイケア。選択は記憶され、夜色アイケアは夜向けにコントラストを下げています。",
-          "画面の骨格を整理：セッション一覧は角丸カード＋選択色バー、上下バーは角丸コンテナ、ボタンはカード型で階層が明確。ボタンの順番と位置は変更なし。",
-          "複数の作業をまとめて依頼：2件目以降は順番待ちになり、前が終われば自動で開始。再読み込みしても待ち行列は残るので見張る必要がありません。",
-          "結果はダイアログに残して振り返り：直近数回はワンクリックで全体を確認でき、もう一度走らせる必要はありません。"
+          "モデル割り当てを時間帯と作業の重さで自動化：軽い作業は速いモデル、複雑な作業は強いモデル、画像は専用枠。49 通りのテストはすべて想定枠に収まりました。",
+          "スマホ側の状態を自動でリアルタイム更新：実行中の件数と進捗がひとりでに更新され、更新ボタンを探す必要がありません。",
+          "サイドバーの並びを層で固定：報告済みは常に上、終了・完了は下にまとまり、時間で順番が入れ替わらなくなりました。"
         ],
         "bugs": [
-          "「2件目を頼むと既に実行中と出て失敗する」を修正：自動で順番待ちし、自動で続けて開始するように。この失敗表示は出なくなりました。",
-          "「再読み込みすると実行中の過程が見えない」を修正：実行中の回に繋ぎ直し、ログがそのまま流れます。",
-          "「終わったら結果が見当たらない」を修正：直近数回の結果はダイアログに残り、いつでも開けます。"
+          "スマホのアバターとタスクカードのアイコンが表示されない問題を修正。画像が正常に読み込まれます。",
+          "「実行中なのにホームが 0 件と表示する」問題を修正。オンライン判定の窓が短すぎて数値が点滅していたため、安定して表示されるようにしました。",
+          "「まだ実行中のタスクが早々に完了と表示される」問題を修正。送ったばかりの発言に返答がなく結果を受け取り中の間は、終了の印を付けません。",
+          "「待機解除したのに項目がひとりでに戻る」問題を修正。ローカルキャッシュが一緒に消えていなかったため、解除したら消えるようにしました。",
+          "画面が「確認中…」で固まる問題を修正。自動のリアルタイム更新に変え、余計な更新ボタンも外しました。"
         ],
         "lessons": [
-          "判定基準は先に反証する：フラグ1つ＋自分で決めたしきい値だけで結論を出すと正常なデータも傷つく。まず実データの分布で基準を作る。",
-          "「直した」は「相手がこの版を認識している」ではない：判定側と導入側は同じ出所であること。さもないと「直したのに未修正」でやり直しになる。",
-          "「更新」は「現在の状態」ではない：自動更新で以前の選択が戻るので、直した直後に次のリセットへ備える。"
+          "健全な自動復旧は静かであるべき：毎周期なにかを「修復」しているなら、監視対象より先に検出手段そのものを疑う。",
+          "「自動復旧しました」には証拠が要る。復旧の前後が同じインスタンス・同じ健全性記録であること。「再起動しました」だけでは直ったことにならない。",
+          "「新しい内容がない」は故障とは限らない。まず「本来あるべきもの」と照らし合わせてから報告を決める。"
         ]
       }
     },
     "ko": {
-      "summary": "[고친 것] \"두 가지를 한꺼번에 맡기면 두 번째가 바로 실패한다\"를 고쳤습니다. 이제 두 번째는 자동으로 대기열에 들어가고, 첫 번째가 끝나면 자동으로 이어서 시작하며, 페이지를 새로 고쳐도 대기열이 사라지지 않습니다. 이미 돌고 있는 회차도 새로 고친 뒤 그대로 이어져 로그가 계속 흐릅니다. \"끝나면 방금 결과를 찾을 수 없다\"도 고쳤습니다. 최근 몇 회 결과가 대화창에 남아 한 번의 클릭으로 전체 과정을 다시 볼 수 있습니다. [개선·추가] 색상 테마 다섯 가지를 언제든 전환할 수 있습니다 — 기본 화이트(기본값), 벚꽃 핑크, 민트 그린, 별빛 퍼플, 야간 눈편한 검정. 고른 테마는 기억되며, 야간 테마는 대비를 낮춰 밤에도 눈이 편합니다. 화면 뼈대도 정리했습니다. 세션 목록은 둥근 카드와 선택 색 막대로, 상단·하단 바는 둥근 컨테이너로, 버튼은 카드 형태로 바꿔 층이 더 분명해졌습니다. 버튼 순서와 위치는 그대로라 기존 사용자는 다시 익힐 필요가 없습니다. [배운 것] 내부 노하우에서 세 가지: ① 판정 기준 자체를 먼저 반증한 뒤 판단한다 — 플래그 하나와 스스로 정한 임계값만으로 결론을 내면 정상 데이터까지 다친다. 먼저 같은 조건의 실제 분포로 기준선을 만든다; ② \"고쳤다\"는 \"상대가 이 버전을 인식한다\"와 다르다 — 판정하는 쪽과 설치하는 쪽이 같은 출처여야 한다. 아니면 \"고쳤는데 미수정으로 판정\"되어 다시 하게 된다; ③ \"업데이트\"는 \"현재 상태\"가 아니다 — 자동 업데이트가 이전 설정을 되돌리므로, 고친 직후 다음 초기화를 막아 둔다.",
+      "summary": "[고친 것] 모바일 아바타와 작업 카드 아이콘이 다시 표시됩니다. 홈 화면의 '진행 중'이 간헐적으로 0으로 떨어지던 문제도 해결되어 진행 중인 작업을 항상 볼 수 있습니다. 실행 중인 작업이 성급하게 '완료'로 표시되지 않고, '보고됨' 항목은 항상 '종료' 위에 고정됩니다. '대기 취소'한 항목이 다시 나타나지 않고, 화면이 '확인 중'에서 멈추지도 않습니다. [개선/추가] 모델 배정을 재정리해 시간대와 작업 무게에 따라 자동 선택합니다. 가벼운 작업은 빠른 모델, 복잡한 작업은 강한 모델, 이미지는 별도 라인. 49가지 조합 테스트가 모두 의도한 라인에 들어갔습니다. 모바일 상태는 자동으로 실시간 갱신되며 불필요한 새로고침 버튼은 없앴습니다. [배운 것] 내부 경험 노트에서 세 가지: ①건강한 자동 복구는 '조용'해야 합니다. 매 주기 무언가를 '복구'한다면 감시 대상이 아니라 검출 수단을 먼저 의심하세요. ②'자동 복구됨'이라고 말하려면 증거가 필요합니다. 같은 인스턴스, 같은 상태 기록. '재시작했습니다'만으로는 부족합니다. ③'새 내용이 없다'가 곧 고장은 아닙니다. 먼저 '원래 있어야 할 것'과 대조하세요.",
       "sections": {
         "skills": [
-          "테마 다섯 가지 언제든 전환: 기본 화이트(기본값), 벚꽃 핑크, 민트 그린, 별빛 퍼플, 야간 눈편한 검정. 선택은 기억되고, 야간 테마는 대비를 낮춰 밤에 적합합니다.",
-          "화면 뼈대 정리: 세션 목록은 둥근 카드와 선택 색 막대, 상단·하단 바는 둥근 컨테이너, 버튼은 카드 형태로 층이 분명해졌습니다. 버튼 순서와 위치는 그대로입니다.",
-          "여러 작업을 한꺼번에 맡기기: 두 번째부터 대기열에 들어가고 앞 작업이 끝나면 자동으로 시작합니다. 새로 고쳐도 대기열이 남아 지켜볼 필요가 없습니다.",
-          "결과는 대화창에 남겨 다시 보기: 최근 몇 회는 한 번의 클릭으로 전체 과정을 확인할 수 있어 다시 돌릴 필요가 없습니다."
+          "시간대와 작업 무게에 따른 자동 모델 배정: 가벼운 작업은 빠른 모델, 복잡한 작업은 강한 모델, 이미지는 별도 라인. 49가지 테스트 조합이 모두 의도한 라인에 들어갔습니다.",
+          "모바일 상태가 스스로 실시간 갱신: 진행 중인 작업 수와 진행률이 알아서 업데이트되어 새로고침 버튼을 찾을 필요가 없습니다.",
+          "사이드바 목록을 층으로 고정: 보고된 항목은 항상 위, 종료·완료 항목은 아래로 모여 시간에 따라 순서가 흔들리지 않습니다."
         ],
         "bugs": [
-          "\"두 번째를 맡기면 이미 실행 중이라며 실패한다\"를 고쳤습니다. 자동 대기열과 자동 이어서 시작으로 바뀌었고, 그 실패 안내는 더 나오지 않습니다.",
-          "\"새로 고치면 돌고 있는 과정이 보이지 않는다\"를 고쳤습니다. 돌고 있는 회차에 다시 연결되어 로그가 계속 흐릅니다.",
-          "\"끝나면 결과를 찾을 수 없다\"를 고쳤습니다. 최근 몇 회 결과가 대화창에 남아 언제든 열어 볼 수 있습니다."
+          "모바일 아바타와 작업 카드 아이콘이 깨져 보이지 않던 문제를 고쳤습니다. 이미지가 정상적으로 로드됩니다.",
+          "'작업이 돌고 있는데 홈 화면 진행 중이 0으로 표시'되던 문제를 고쳤습니다. 온라인 판정 창이 너무 짧아 값이 깜빡였고, 이제 안정적으로 표시됩니다.",
+          "'아직 실행 중인 작업이 성급하게 완료로 표시'되던 문제를 고쳤습니다. 방금 보낸 말에 아직 답이 없고 결과를 받는 중일 때는 종료 도장을 찍지 않습니다.",
+          "'대기 취소를 눌렀는데 항목이 다시 나타나던' 문제를 고쳤습니다. 로컬 캐시가 함께 지워지지 않았고, 이제 취소하면 사라집니다.",
+          "화면이 '확인 중...'에서 멈추던 문제를 고쳤습니다. 자동 실시간 갱신으로 바꾸고 불필요한 새로고침 버튼도 없앴습니다."
         ],
         "lessons": [
-          "판정 기준을 먼저 반증하라: 플래그 하나와 스스로 정한 임계값만으로 결론을 내면 정상 데이터까지 다친다. 먼저 실제 분포로 기준선을 만든다.",
-          "\"고쳤다\"는 \"상대가 이 버전을 인식한다\"가 아니다: 판정하는 쪽과 설치하는 쪽이 같은 출처여야 한다. 아니면 \"고쳤는데 미수정\"으로 다시 하게 된다.",
-          "\"업데이트\"는 \"현재 상태\"가 아니다: 자동 업데이트가 이전 선택을 되돌리므로 고친 직후 다음 초기화를 막아 둔다."
+          "건강한 자동 복구는 조용해야 합니다: 매 주기 무언가를 '복구'한다면 감시 대상보다 검출 수단 자체를 먼저 의심하세요.",
+          "'자동 복구됨'이라고 하려면 증거가 필요합니다. 복구 전후가 같은 인스턴스, 같은 상태 기록이어야 합니다. '재시작했습니다'만으로는 고친 것이 아닙니다.",
+          "'새 내용이 없다'는 곧 고장이 아닙니다. 먼저 '원래 있어야 할 것'과 대조한 뒤 보고 여부를 정하세요."
         ]
       }
     },
     "es": {
-      "summary": "[Lo que arreglamos] Arreglado «entregas dos trabajos a la vez y el segundo falla al instante»: ahora el segundo entra en cola, arranca solo cuando termina el primero, y la cola sobrevive a recargar la página. Una ronda que ya está en marcha también se puede reconectar tras recargar, sin quedarse en blanco. También arreglado «al terminar ya no aparece el resultado»: las últimas rondas quedan en la ventana y con un clic se revisa todo el proceso. [Lo que mejoramos] Cinco temas de color para cambiar cuando quieras: Blanco estándar (por defecto), Rosa sakura, Verde menta, Púrpura estrellado y Oscuro descanso visual; tu elección se recuerda y el tema oscuro baja el contraste para no cansar la vista de noche. También ordenamos el armazón de la interfaz: la lista de sesiones pasó a tarjetas redondeadas con barra de color en la seleccionada, las barras superior e inferior van en contenedores redondeados y los botones son tipo tarjeta para que la jerarquía se lea mejor; el orden y la posición de los botones no cambian, así que nadie tiene que reaprender. [Lo que aprendimos] Tres notas del manual interno: (1) una prueba debe refutarse antes de juzgar con ella — decidir con una sola bandera y un umbral puesto a ojo también daña datos normales, así que primero se construye una línea base con la distribución real; (2) «cambiado» no significa «el otro lado reconoce esta versión» — quien verifica y quien instala deben venir de la misma fuente, o aparece «ya está arreglado pero sigue marcado como no arreglado» y hay que rehacer el trabajo; (3) «actualizado» no significa «estado actual» — una actualización automática puede devolver ajustes anteriores, así que hay que blindar el siguiente reinicio justo después de arreglar.",
+      "summary": "[Qué arreglamos] Los avatares y los iconos de las tarjetas de tareas vuelven a mostrarse en el móvil; la pantalla de inicio ya no baja a 0 tareas en curso de vez en cuando, así que el trabajo en marcha siempre se ve; una tarea que sigue ejecutándose ya no se marca como \"finalizada\" antes de tiempo, y lo ya informado queda siempre por encima de lo terminado; cancelar un elemento en cola ya no hace que reaparezca, y la página ya no se queda en \"comprobando\". [Qué mejoramos] Reorganizamos la asignación de modelos: ahora elige por franja horaria y peso de la tarea - lo ligero va a un modelo rápido, lo complejo a uno potente, las imágenes tienen su propia vía - y las 49 combinaciones de prueba cayeron en la vía prevista. El estado en el móvil se actualiza solo en tiempo real y el botón de refrescar sobrante desapareció. [Qué aprendimos] Tres notas del cuaderno interno: (1) un mecanismo de autoresuperación sano debe estar callado; si \"repara\" algo en cada ciclo, sospecha del detector antes que del servicio; (2) nunca digas \"se recuperó solo\" sin prueba: el mismo proceso y el mismo registro de salud antes y después; \"se reinició\" no es prueba; (3) \"no hay nada nuevo\" no es necesariamente un fallo: primero compara con lo que debería estar ahí.",
       "sections": {
         "skills": [
-          "Cinco temas para cambiar cuando quieras: Blanco estándar (por defecto), Rosa sakura, Verde menta, Púrpura estrellado y Oscuro descanso visual; la elección se recuerda y el tema oscuro usa menos contraste para la noche.",
-          "Armazón de la interfaz ordenado: lista de sesiones como tarjetas redondeadas con barra de color en la seleccionada, barras superior e inferior en contenedores redondeados, botones tipo tarjeta; orden y posición sin cambios.",
-          "Entregar varios trabajos a la vez: desde el segundo entran en cola, cada uno arranca solo al terminar el anterior, y la cola sobrevive a recargar, sin tener que quedarse mirando.",
-          "Los resultados quedan en la ventana: las últimas rondas están a un clic, sin volver a ejecutarlas."
+          "Asignación automática de modelo por franja horaria y peso de la tarea: lo ligero usa un modelo rápido, lo complejo uno potente, las imágenes tienen vía propia; las 49 combinaciones de prueba cayeron en la vía prevista.",
+          "El estado del móvil se actualiza solo en tiempo real: el número de tareas en curso y el progreso cambian por su cuenta, sin buscar botón de refrescar.",
+          "Las sesiones de la barra lateral quedan por capas y fijas: lo informado siempre arriba, lo terminado y cerrado abajo, y el orden ya no baila con el tiempo."
         ],
         "bugs": [
-          "Arreglado «al enviar un segundo trabajo avisa que ya hay uno en marcha»: ahora entra en cola y arranca solo, y ese aviso de fallo ya no aparece.",
-          "Arreglado «al recargar desaparece la ronda que está corriendo»: se reconecta a la ronda en curso y el registro sigue avanzando en vez de quedar vacío.",
-          "Arreglado «el resultado desaparece al terminar»: las últimas rondas quedan en la ventana y se pueden abrir en cualquier momento."
+          "Arreglados los avatares y los iconos de tarjetas de tareas que no se veían en el móvil: las imágenes cargan con normalidad.",
+          "Arreglado \"la pantalla de inicio marca 0 tareas en curso mientras algo se está ejecutando\": la ventana de conexión era demasiado corta y el dato parpadeaba; ahora se muestra estable.",
+          "Arreglado \"una tarea en curso se marca como finalizada antes de tiempo\": mientras un mensaje recién enviado sigue sin respuesta y los resultados aún llegan, no se pone el sello de fin.",
+          "Arreglado \"cancelas un elemento en cola y vuelve a aparecer\": la caché local no se limpiaba con él; ahora desaparece de verdad.",
+          "Arreglado que la página se quedara en \"comprobando...\": ahora se actualiza sola en tiempo real y el botón de refrescar sobrante ya no está."
         ],
         "lessons": [
-          "Refuta la prueba antes de juzgar con ella: una sola bandera más un umbral puesto a ojo también daña datos normales; primero construye la línea base con la distribución real.",
-          "«Cambiado» no es «el otro lado reconoce esta versión»: quien verifica y quien instala deben compartir una fuente, o aparece «arreglado pero marcado como no arreglado» y hay que rehacer.",
-          "«Actualizado» no es «estado actual»: una actualización automática puede devolver elecciones previas, así que blinda el siguiente reinicio justo después de arreglar."
+          "Un mecanismo de autoresuperación sano debe estar callado: si \"repara\" algo en cada ciclo, sospecha del propio detector antes que del servicio vigilado.",
+          "Nunca afirmes \"se recuperó solo\" sin prueba: el mismo proceso y el mismo registro de salud antes y después; \"se reinició\" no es una reparación.",
+          "\"No hay nada nuevo\" no es necesariamente un fallo: compara con lo que debería estar ahí antes de decidir si avisar."
         ]
       }
     },
     "fr": {
-      "summary": "[Ce qu'on a corrigé] Corrigé « on confie deux travaux à la fois et le second échoue aussitôt » : le second passe maintenant en file d'attente, démarre seul quand le premier se termine, et la file survit à un rafraîchissement de la page. Une série déjà lancée se raccroche aussi après un rafraîchissement au lieu de rester vide. Corrigé également « le résultat a disparu dès que c'est fini » : les dernières séries restent dans la fenêtre et un clic rejoue tout le déroulé. [Ce qu'on a amélioré] Cinq thèmes de couleur à changer quand vous voulez : Blanc standard (par défaut), Rose sakura, Vert menthe, Violet étoilé et Sombre confort visuel ; votre choix est mémorisé, et le thème sombre baisse le contraste pour ne pas fatiguer les yeux le soir. La structure de l'interface a été rangée : la liste des sessions devient des cartes arrondies avec une barre de couleur sur la sélection, les barres haute et basse sont dans des conteneurs arrondis, les boutons prennent une forme de carte pour une hiérarchie plus lisible ; l'ordre et la position des boutons ne changent pas, personne n'a donc à réapprendre. [Ce qu'on a appris] Trois notes du manuel interne : (1) il faut réfuter un critère avant de juger avec — conclure avec un seul indicateur et un seuil choisi à la main abîme aussi des données normales, donc on construit d'abord une référence sur la distribution réelle ; (2) « corrigé » ne veut pas dire « l'autre côté reconnaît cette version » — celui qui vérifie et celui qui installe doivent venir de la même source, sinon on obtient « corrigé mais toujours jugé non corrigé » et il faut tout refaire ; (3) « mis à jour » ne veut pas dire « état actuel » — une mise à jour automatique peut remettre des réglages antérieurs, il faut donc bloquer la remise à zéro suivante juste après avoir corrigé.",
+      "summary": "[Ce qu'on a corrigé] Les avatars et les icônes des cartes de tâches s'affichent de nouveau sur mobile ; l'accueil mobile ne retombe plus à 0 tâche en cours de temps en temps, donc le travail en cours reste toujours visible ; une tâche encore en cours n'est plus marquée « terminée » trop tôt, et les éléments déjà signalés restent au-dessus des terminés ; annuler un élément en file ne le fait plus réapparaître, et la page ne reste plus bloquée sur « vérification ». [Ce qu'on a amélioré] Réorganisation de l'attribution des modèles : le choix se fait selon le moment de la journée et le poids de la tâche - le léger part sur un modèle rapide, le complexe sur un modèle puissant, les images ont leur propre voie - et les 49 combinaisons de test sont toutes tombées dans la voie prévue. L'état sur mobile se rafraîchit tout seul en temps réel, et le bouton d'actualisation superflu a disparu. [Ce qu'on a appris] Trois notes du carnet interne : (1) un mécanisme d'auto-réparation sain doit rester silencieux ; s'il « répare » à chaque cycle, soupçonnez le détecteur avant le service ; (2) ne dites jamais « récupéré automatiquement » sans preuve : même instance, même fiche de santé avant et après ; « ça a redémarré » n'est pas une preuve ; (3) « rien de nouveau » n'est pas forcément une panne : comparez d'abord avec ce qui devrait s'y trouver.",
       "sections": {
         "skills": [
-          "Cinq thèmes à changer quand vous voulez : Blanc standard (par défaut), Rose sakura, Vert menthe, Violet étoilé, Sombre confort visuel ; le choix est mémorisé et le thème sombre réduit le contraste pour la nuit.",
-          "Structure de l'interface rangée : liste des sessions en cartes arrondies avec barre de couleur sur la sélection, barres haute et basse en conteneurs arrondis, boutons en forme de carte ; ordre et position inchangés.",
-          "Confier plusieurs travaux d'un coup : à partir du deuxième ils passent en file, chacun démarre seul à la fin du précédent, et la file survit au rafraîchissement sans avoir à rester devant.",
-          "Les résultats restent dans la fenêtre : les dernières séries sont à un clic, sans les relancer."
+          "Attribution automatique du modèle selon le moment de la journée et le poids de la tâche : le léger sur un modèle rapide, le complexe sur un modèle puissant, les images sur une voie dédiée ; les 49 combinaisons de test sont tombées dans la voie prévue.",
+          "L'état sur mobile se rafraîchit tout seul : le nombre de tâches en cours et la progression se mettent à jour sans qu'on cherche un bouton.",
+          "Les sessions de la barre latérale sont rangées par couches fixes : le signalé reste en haut, le terminé et le clôturé descendent en bas, et l'ordre ne bouge plus avec le temps."
         ],
         "bugs": [
-          "Corrigé « envoyer un deuxième travail affiche qu'un autre tourne déjà » : il passe en file et démarre seul, ce message d'échec n'apparaît plus.",
-          "Corrigé « un rafraîchissement masque la série en cours » : la série en cours se raccroche et le journal continue au lieu de rester vide.",
-          "Corrigé « le résultat disparaît à la fin » : les dernières séries restent dans la fenêtre et s'ouvrent à tout moment."
+          "Correction des avatars et des icônes de cartes de tâches qui ne s'affichaient pas sur mobile : les images se chargent de nouveau normalement.",
+          "Correction de « l'accueil affiche 0 tâche en cours alors que ça tourne » : la fenêtre de détection était trop courte et la donnée clignotait ; l'affichage est maintenant stable.",
+          "Correction de « une tâche en cours est marquée terminée trop tôt » : tant qu'un message tout juste envoyé n'a pas de réponse et que les résultats arrivent encore, aucun sceau de fin n'est posé.",
+          "Correction de « j'annule un élément en file et il revient tout seul » : le cache local n'était pas vidé en même temps ; il disparaît désormais pour de bon.",
+          "Correction de la page bloquée sur « vérification… » : elle se met à jour d'elle-même en temps réel, et le bouton d'actualisation superflu a été retiré."
         ],
         "lessons": [
-          "Réfuter le critère avant de juger avec : un seul indicateur plus un seuil choisi à la main abîme aussi des données normales ; construire d'abord la référence sur la distribution réelle.",
-          "« Corrigé » n'est pas « l'autre côté reconnaît cette version » : celui qui vérifie et celui qui installe doivent partager une source, sinon « corrigé mais jugé non corrigé » et tout est à refaire.",
-          "« Mis à jour » n'est pas « état actuel » : une mise à jour automatique peut remettre des choix antérieurs, donc bloque la remise à zéro suivante juste après la correction."
+          "Un mécanisme d'auto-réparation sain doit rester silencieux : s'il « répare » à chaque cycle, soupçonnez le détecteur lui-même avant le service surveillé.",
+          "Ne dites jamais « récupéré automatiquement » sans preuve : la même instance et la même fiche de santé avant et après ; « ça a redémarré » n'est pas une réparation.",
+          "« Rien de nouveau » n'est pas forcément une panne : comparez d'abord avec ce qui devrait s'y trouver avant de décider de signaler."
         ]
       }
     },
     "de": {
-      "summary": "[Was wir behoben haben] Behoben: „zwei Aufträge auf einmal übergeben, der zweite scheitert sofort“. Der zweite reiht sich jetzt ein, startet automatisch, sobald der erste fertig ist, und die Warteschlange übersteht ein Neuladen der Seite. Auch eine bereits laufende Runde lässt sich nach dem Neuladen wieder verbinden, statt leer zu bleiben. Ebenfalls behoben: „das Ergebnis ist nach dem Ende verschwunden“ – die letzten Läufe bleiben im Dialog und mit einem Klick sieht man den ganzen Ablauf. [Was wir verbessert haben] Fünf Farbthemen zum Umschalten: Standardweiß (Vorgabe), Sakura-Rosa, Minzgrün, Sternenlila und Dunkel augenschonend; die Wahl wird gemerkt, und das dunkle Thema senkt den Kontrast für abends. Auch das Grundgerüst der Oberfläche wurde aufgeräumt: die Sitzungsliste sind jetzt abgerundete Karten mit Farbbalken bei der Auswahl, obere und untere Leiste liegen in abgerundeten Containern, Schaltflächen sind kartenförmig, damit die Hierarchie klarer ist; Reihenfolge und Position der Schaltflächen bleiben unverändert, niemand muss umlernen. [Was wir gelernt haben] Drei Notizen aus dem internen Handbuch: (1) ein Prüfkriterium muss zuerst widerlegt werden, bevor man damit urteilt – eine einzelne Kennzahl plus selbst gesetzte Schwelle beschädigt auch normale Daten, also erst eine Basis aus der echten Verteilung bauen; (2) „geändert“ heißt nicht „die andere Seite erkennt diese Version“ – Prüfende und Installierende müssen aus derselben Quelle kommen, sonst entsteht „behoben, aber weiter als nicht behoben bewertet“ und die Arbeit wird wiederholt; (3) „aktualisiert“ heißt nicht „aktueller Zustand“ – ein automatisches Update kann frühere Einstellungen zurücksetzen, also direkt nach der Korrektur den nächsten Reset absichern.",
+      "summary": "[Was wir behoben haben] Avatare und Aufgabenkarten-Symbole werden auf dem Handy wieder angezeigt; die Startseite fällt nicht mehr gelegentlich auf 0 laufende Aufgaben, sodass laufende Arbeit immer sichtbar bleibt; eine noch laufende Aufgabe wird nicht mehr vorzeitig als „abgeschlossen“ gestempelt, und bereits Gemeldetes bleibt über Abgeschlossenem; das Abbrechen eines wartenden Eintrags lässt ihn nicht mehr wieder auftauchen, und die Seite bleibt nicht mehr bei „wird geprüft“ hängen. [Was wir verbessert haben] Die Modellzuweisung wurde neu geordnet: gewählt wird nach Tageszeit und Aufgabengewicht - Leichtes geht an ein schnelles Modell, Komplexes an ein starkes, Bilder bekommen eine eigene Spur - und alle 49 Testkombinationen landeten in der vorgesehenen Spur. Der Status auf dem Handy aktualisiert sich jetzt selbst in Echtzeit, der überflüssige Aktualisieren-Knopf ist weg. [Was wir gelernt haben] Drei Notizen aus dem internen Erfahrungsbuch: (1) eine gesunde Selbstheilung sollte leise sein - „repariert“ sie in jedem Zyklus etwas, verdächtige zuerst die Prüfung, nicht den Dienst; (2) behaupte nie „automatisch wiederhergestellt“ ohne Beleg: dieselbe Instanz, derselbe Gesundheitsdatensatz vorher und nachher; „neu gestartet“ ist kein Beleg; (3) „nichts Neues“ ist nicht automatisch ein Fehler - vergleiche zuerst mit dem, was dort stehen sollte.",
       "sections": {
         "skills": [
-          "Fünf Themen jederzeit umschaltbar: Standardweiß (Vorgabe), Sakura-Rosa, Minzgrün, Sternenlila, Dunkel augenschonend; die Wahl wird gemerkt, das dunkle Thema nutzt weniger Kontrast für abends.",
-          "Grundgerüst aufgeräumt: Sitzungsliste als abgerundete Karten mit Farbbalken bei der Auswahl, obere und untere Leiste in abgerundeten Containern, Schaltflächen kartenförmig; Reihenfolge und Position unverändert.",
-          "Mehrere Aufträge auf einmal: ab dem zweiten reihen sie sich ein, jeder startet automatisch nach dem vorherigen, und die Warteschlange übersteht das Neuladen – kein Danebensitzen nötig.",
-          "Ergebnisse bleiben im Dialog: die letzten Läufe sind einen Klick entfernt, kein erneuter Lauf nötig."
+          "Automatische Modellwahl nach Tageszeit und Aufgabengewicht: Leichtes nutzt ein schnelles Modell, Komplexes ein starkes, Bilder haben eine eigene Spur; alle 49 Testkombinationen landeten in der vorgesehenen Spur.",
+          "Der Status auf dem Handy aktualisiert sich selbst: Anzahl laufender Aufgaben und Fortschritt ändern sich von allein, kein Aktualisieren-Knopf nötig.",
+          "Seitenleisten-Sitzungen sind fest geschichtet: Gemeldetes bleibt oben, Beendetes und Abgeschlossenes rutscht nach unten, die Reihenfolge springt nicht mehr mit der Zeit."
         ],
         "bugs": [
-          "Behoben: „ein zweiter Auftrag meldet, es laufe schon einer“ – er reiht sich jetzt ein und startet automatisch; diese Fehlermeldung erscheint nicht mehr.",
-          "Behoben: „ein Neuladen verdeckt die laufende Runde“ – die laufende Runde wird wieder verbunden und das Protokoll läuft weiter statt leer zu bleiben.",
-          "Behoben: „das Ergebnis ist nach dem Ende weg“ – die letzten Läufe bleiben im Dialog und lassen sich jederzeit öffnen."
+          "Avatare und Aufgabenkarten-Symbole, die auf dem Handy nicht angezeigt wurden, sind repariert - Bilder laden wieder normal.",
+          "Behoben: „Die Startseite zeigt 0 laufende Aufgaben, obwohl etwas läuft“ - das Online-Fenster war zu kurz und der Wert flackerte; jetzt wird er stabil angezeigt.",
+          "Behoben: „Eine laufende Aufgabe wird vorzeitig als abgeschlossen gestempelt“ - solange eine gerade gesendete Nachricht unbeantwortet ist und Ergebnisse noch eintreffen, wird kein Endstempel gesetzt.",
+          "Behoben: „Wartenden Eintrag abbrechen und er kommt von selbst zurück“ - der lokale Zwischenspeicher wurde nicht mit gelöscht; jetzt verschwindet er dauerhaft.",
+          "Behoben: Die Seite blieb bei „wird geprüft…“ hängen - sie aktualisiert sich nun selbst in Echtzeit, der überflüssige Aktualisieren-Knopf ist entfernt."
         ],
         "lessons": [
-          "Prüfkriterium zuerst widerlegen: eine einzelne Kennzahl plus selbst gesetzte Schwelle beschädigt auch normale Daten; erst die Basis aus der echten Verteilung bauen.",
-          "„Geändert“ ist nicht „die andere Seite erkennt diese Version“: Prüfende und Installierende müssen dieselbe Quelle haben, sonst „behoben, aber als nicht behoben bewertet“ und alles wird wiederholt.",
-          "„Aktualisiert“ ist nicht „aktueller Zustand“: ein automatisches Update kann frühere Einstellungen zurücksetzen, also direkt nach der Korrektur den nächsten Reset absichern."
+          "Eine gesunde Selbstheilung sollte leise sein: „repariert“ sie in jedem Zyklus etwas, verdächtige zuerst die Prüfung selbst und nicht den überwachten Dienst.",
+          "Behaupte nie „automatisch wiederhergestellt“ ohne Beleg - dieselbe Instanz und derselbe Gesundheitsdatensatz vorher und nachher; „neu gestartet“ ist keine Reparatur.",
+          "„Nichts Neues“ ist nicht automatisch ein Fehler: vergleiche erst mit dem, was dort stehen sollte, und entscheide dann, ob gemeldet wird."
         ]
       }
     },
     "ru": {
-      "summary": "[Что исправили] Исправлено «отдаёшь две задачи сразу — вторая падает на месте»: теперь вторая встаёт в очередь, запускается сама после первой, и очередь переживает перезагрузку страницы. Уже идущий прогон тоже подхватывается после перезагрузки, а не остаётся пустым. Заодно исправлено «после завершения результата не найти»: последние прогоны остаются в окне, один клик — и виден весь ход. [Что улучшили] Пять цветовых тем на выбор: Стандартный белый (по умолчанию), Сакура-розовый, Мятно-зелёный, Звёздный фиолетовый и Тёмный для глаз; выбор запоминается, а тёмная тема снижает контраст, чтобы не уставали глаза вечером. Ещё привели в порядок каркас интерфейса: список сессий стал скруглёнными карточками с цветной полосой у выбранной, верхняя и нижняя панели — в скруглённых контейнерах, кнопки в виде карточек, иерархия читается лучше; порядок и положение кнопок не менялись, привыкать заново не нужно. [Что поняли] Три заметки из внутренней базы опыта: (1) критерий сначала нужно опровергнуть, а потом судить им — один флаг плюс свой порог задевает и нормальные данные, поэтому сначала строим базу по реальному распределению; (2) «исправил» не значит «другая сторона признаёт эту версию» — проверяющий и устанавливающий должны быть из одного источника, иначе получается «исправлено, но всё равно считается неисправленным» и работу делают заново; (3) «обновил» не значит «текущее состояние» — автообновление может вернуть прежние настройки, поэтому сразу после исправления надо закрыть следующий сброс.",
+      "summary": "[Что исправили] Аватары и иконки карточек задач снова отображаются на телефоне; главный экран больше не показывает 0 выполняющихся задач время от времени, поэтому текущая работа всегда видна; выполняющаяся задача больше не помечается «завершённой» заранее, а уже доложенное всегда стоит выше завершённого; отмена элемента в очереди больше не возвращает его обратно, и страница не застревает на «проверяю». [Что улучшили] Перестроили выбор модели: теперь он идёт по времени суток и весу задачи — лёгкое уходит на быструю модель, сложное на сильную, изображения имеют отдельную дорожку — и все 49 тестовых комбинаций попали в нужную дорожку. Статус на телефоне обновляется сам в реальном времени, лишняя кнопка обновления убрана. [Чему научились] Три заметки из внутренней книги опыта: (1) здоровое самовосстановление должно быть тихим — если оно «чинит» что-то каждый цикл, подозревайте сначала саму проверку, а не сервис; (2) нельзя говорить «восстановилось само» без доказательства: тот же экземпляр и та же запись здоровья до и после; «перезапустилось» — не доказательство; (3) «ничего нового» — не обязательно сбой: сначала сравните с тем, что там должно быть.",
       "sections": {
         "skills": [
-          "Пять тем в любой момент: Стандартный белый (по умолчанию), Сакура-розовый, Мятно-зелёный, Звёздный фиолетовый, Тёмный для глаз; выбор запоминается, тёмная тема использует меньший контраст для вечера.",
-          "Каркас интерфейса приведён в порядок: список сессий — скруглённые карточки с цветной полосой у выбранной, верхняя и нижняя панели в скруглённых контейнерах, кнопки-карточки; порядок и положение не менялись.",
-          "Несколько задач сразу: со второй они встают в очередь, каждая стартует сама после предыдущей, очередь переживает перезагрузку — сидеть и ждать не нужно.",
-          "Результаты остаются в окне: последние прогоны в один клик, заново запускать не нужно."
+          "Автоматический выбор модели по времени суток и весу задачи: лёгкое идёт на быструю модель, сложное на сильную, изображения — отдельная дорожка; все 49 тестовых комбинаций попали в нужную дорожку.",
+          "Статус на телефоне обновляется сам: число выполняющихся задач и прогресс меняются без участия пользователя, кнопка обновления не нужна.",
+          "Сессии в боковой панели жёстко разложены по слоям: доложенное всегда сверху, завершённое и закрытое уходит вниз, порядок больше не скачет со временем."
         ],
         "bugs": [
-          "Исправлено «при отправке второй задачи пишет, что одна уже идёт»: теперь она встаёт в очередь и стартует сама, это сообщение об ошибке больше не появляется.",
-          "Исправлено «после перезагрузки не видно идущий прогон»: идущий прогон подхватывается, лог продолжает идти вместо пустоты.",
-          "Исправлено «после завершения результат пропадает»: последние прогоны остаются в окне и открываются в любой момент."
+          "Исправлены аватары и иконки карточек задач, которые не отображались на телефоне: изображения снова загружаются нормально.",
+          "Исправлено «главный экран показывает 0 выполняющихся задач, хотя работа идёт»: окно определения онлайн было слишком коротким и значение мигало; теперь показывается стабильно.",
+          "Исправлено «выполняющаяся задача помечается завершённой заранее»: пока только что отправленное сообщение без ответа и результаты ещё идут, печать завершения не ставится.",
+          "Исправлено «отменяешь элемент в очереди, а он возвращается сам»: локальный кэш не очищался вместе с ним; теперь он исчезает окончательно.",
+          "Исправлено зависание страницы на «проверяю…»: теперь она обновляется сама в реальном времени, а лишняя кнопка обновления убрана."
         ],
         "lessons": [
-          "Сначала опровергни критерий: один флаг плюс свой порог задевает и нормальные данные; сначала построй базу по реальному распределению.",
-          "«Исправил» не равно «другая сторона признаёт версию»: проверяющий и устанавливающий должны быть из одного источника, иначе «исправлено, но считается неисправленным» и переделка.",
-          "«Обновил» не равно «текущее состояние»: автообновление может вернуть прежние настройки, поэтому сразу после исправления закрывай следующий сброс."
+          "Здоровое самовосстановление должно быть тихим: если оно «чинит» что-то каждый цикл, подозревайте саму проверку, а не наблюдаемый сервис.",
+          "Нельзя говорить «восстановилось само» без доказательства — тот же экземпляр и та же запись здоровья до и после; «перезапустилось» — это не починка.",
+          "«Ничего нового» — не обязательно сбой: сначала сравните с тем, что там должно быть, и только потом решайте, сообщать ли."
         ]
       }
     },
     "pt": {
-      "summary": "[O que corrigimos] Corrigido «envia dois trabalhos de uma vez e o segundo falha na hora»: agora o segundo entra na fila, começa sozinho quando o primeiro termina, e a fila sobrevive a recarregar a página. Uma rodada que já está rodando também se reconecta depois de recarregar, em vez de ficar em branco. Também corrigido «o resultado some assim que termina»: as últimas rodadas ficam na janela e um clique mostra todo o processo. [O que melhoramos] Cinco temas de cor para trocar quando quiser: Branco padrão (padrão), Rosa sakura, Verde menta, Roxo estrelado e Escuro conforto visual; a escolha é lembrada e o tema escuro usa menos contraste para não cansar a vista à noite. A estrutura da interface também foi organizada: a lista de sessões virou cartões arredondados com barra de cor na selecionada, as barras de cima e de baixo ficam em contêineres arredondados, os botões viraram cartões para a hierarquia ficar mais clara; a ordem e a posição dos botões não mudaram, então ninguém precisa reaprender. [O que aprendemos] Três notas do manual interno: (1) um critério precisa ser refutado antes de julgar com ele — decidir com um único indicador e um limite escolhido a olho também machuca dados normais, então primeiro se monta uma base com a distribuição real; (2) «corrigido» não significa «o outro lado reconhece esta versão» — quem verifica e quem instala precisam vir da mesma fonte, senão aparece «corrigido mas ainda marcado como não corrigido» e o trabalho é refeito; (3) «atualizado» não significa «estado atual» — uma atualização automática pode devolver ajustes anteriores, então proteja o próximo reset logo depois de corrigir.",
+      "summary": "[O que corrigimos] Avatares e ícones dos cartões de tarefas voltaram a aparecer no celular; a tela inicial não cai mais para 0 tarefas em execução de vez em quando, então o trabalho em andamento fica sempre visível; uma tarefa ainda em execução não é mais marcada como \"concluída\" antes da hora, e o que já foi reportado fica sempre acima do encerrado; cancelar um item na fila não faz mais ele reaparecer, e a página não trava mais em \"verificando\". [O que melhoramos] Reorganizamos a escolha de modelo: agora ela considera o horário e o peso da tarefa - o leve vai para um modelo rápido, o complexo para um forte, imagens têm uma faixa própria - e as 49 combinações de teste caíram na faixa prevista. O status no celular se atualiza sozinho em tempo real, e o botão de atualizar que sobrava foi removido. [O que aprendemos] Três notas do caderno interno: (1) um mecanismo de autorrecuperação saudável deve ficar quieto; se ele \"conserta\" algo a cada ciclo, desconfie do detector antes do serviço; (2) nunca diga \"recuperou sozinho\" sem prova: mesma instância e mesmo registro de saúde antes e depois; \"reiniciou\" não é prova; (3) \"nada novo\" não é necessariamente falha: primeiro compare com o que deveria estar ali.",
       "sections": {
         "skills": [
-          "Cinco temas para trocar quando quiser: Branco padrão (padrão), Rosa sakura, Verde menta, Roxo estrelado e Escuro conforto visual; a escolha é lembrada e o tema escuro usa menos contraste para a noite.",
-          "Estrutura da interface organizada: lista de sessões em cartões arredondados com barra de cor na selecionada, barras de cima e de baixo em contêineres arredondados, botões em cartão; ordem e posição sem mudança.",
-          "Enviar vários trabalhos de uma vez: do segundo em diante entram na fila, cada um começa sozinho ao terminar o anterior, e a fila sobrevive a recarregar, sem precisar ficar olhando.",
-          "Os resultados ficam na janela: as últimas rodadas estão a um clique, sem rodar de novo."
+          "Escolha automática de modelo por horário e peso da tarefa: o leve usa um modelo rápido, o complexo um forte, imagens têm faixa própria; as 49 combinações de teste caíram na faixa prevista.",
+          "O status no celular se atualiza sozinho: quantidade de tarefas em execução e progresso mudam por conta própria, sem precisar procurar botão de atualizar.",
+          "As sessões da barra lateral ficam em camadas fixas: o reportado sempre em cima, o encerrado e concluído desce para baixo, e a ordem não pula mais com o tempo."
         ],
         "bugs": [
-          "Corrigido «ao enviar um segundo trabalho avisa que já existe um rodando»: agora entra na fila e começa sozinho, e esse aviso de falha não aparece mais.",
-          "Corrigido «recarregar esconde a rodada que está rodando»: a rodada em curso se reconecta e o log continua em vez de ficar vazio.",
-          "Corrigido «o resultado some ao terminar»: as últimas rodadas ficam na janela e podem ser abertas a qualquer momento."
+          "Corrigidos avatares e ícones de cartões de tarefas que não apareciam no celular: as imagens voltaram a carregar normalmente.",
+          "Corrigido \"a tela inicial mostra 0 tarefas em execução enquanto algo roda\": a janela de detecção era curta demais e o dado piscava; agora aparece estável.",
+          "Corrigido \"uma tarefa em execução é marcada como concluída antes da hora\": enquanto uma mensagem recém-enviada está sem resposta e os resultados ainda chegam, nenhum selo de fim é aplicado.",
+          "Corrigido \"cancelo um item na fila e ele volta sozinho\": o cache local não era limpo junto; agora ele desaparece de vez.",
+          "Corrigido a página travando em \"verificando...\": agora ela se atualiza sozinha em tempo real, e o botão de atualizar que sobrava foi removido."
         ],
         "lessons": [
-          "Refute o critério antes de julgar com ele: um único indicador mais um limite escolhido a olho também machuca dados normais; primeiro monte a base com a distribuição real.",
-          "«Corrigido» não é «o outro lado reconhece esta versão»: quem verifica e quem instala precisam da mesma fonte, senão «corrigido mas marcado como não corrigido» e refaz tudo.",
-          "«Atualizado» não é «estado atual»: uma atualização automática pode devolver escolhas anteriores, então proteja o próximo reset logo depois de corrigir."
+          "Um mecanismo de autorrecuperação saudável deve ficar quieto: se ele \"conserta\" algo a cada ciclo, desconfie do próprio detector antes do serviço monitorado.",
+          "Nunca afirme \"recuperou sozinho\" sem prova: a mesma instância e o mesmo registro de saúde antes e depois; \"reiniciou\" não é conserto.",
+          "\"Nada novo\" não é necessariamente falha: compare antes com o que deveria estar ali e só então decida se reporta."
         ]
       }
     },
     "ar": {
-      "summary": "【ما أصلحناه】أصلحنا «تسليم مهمتين معًا فيفشل الثانية فورًا»: صارت الثانية تدخل الطابور وتنطلق تلقائيًا بعد انتهاء الأولى، ويبقى الطابور محفوظًا بعد تحديث الصفحة. والجولة الجارية تُستأنف بعد التحديث بدل أن تبقى فارغة. وأصلحنا كذلك «يختفي النتيجة بمجرد الانتهاء»: تبقى آخر الجولات في النافذة، وبنقرة واحدة ترى المسار كاملًا. 【ما حسّناه】خمس سمات لونية تُبدَّل في أي وقت: الأبيض القياسي (الافتراضي)، الوردي ساكورا، الأخضر النعناعي، البنفسجي النجمي، والداكن المريح للعين؛ يُحفظ اختيارك، والداكن يخفّض التباين حتى لا يتعب النظر ليلًا. ونظّمنا هيكل الواجهة أيضًا: قائمة الجلسات صارت بطاقات مستديرة مع شريط لوني للجلسة المحددة، والشريطان الأعلى والأسفل داخل حاويات مستديرة، والأزرار بشكل بطاقات ليصبح التسلسل أوضح؛ ترتيب الأزرار ومواضعها لم يتغير إطلاقًا، فلا حاجة لأن يتعلم المستخدم القديم شيئًا من جديد. 【ما تعلمناه】ثلاث ملاحظات من قاعدة الخبرة الداخلية: ① يجب تكذيب معيار الحكم قبل الحكم به — الاكتفاء بمؤشر واحد وعتبة نختارها بأنفسنا يضرّ حتى بالبيانات السليمة، فلابد أولًا من بناء خط أساس من التوزيع الحقيقي؛ ② «تم الإصلاح» لا تعني «الطرف الآخر يعترف بهذه النسخة» — يجب أن يكون المتحقق والمُثبِّت من مصدر واحد، وإلا ظهر «أُصلح لكنه ما زال يُحكم بأنه غير مُصلح» فتتكرر إعادة العمل؛ ③ «تم التحديث» لا تعني «الحالة الحالية» — تحديث تلقائي واحد قد يعيد الإعدادات السابقة، لذا احمِ إعادة التصفير التالية فور الانتهاء من الإصلاح.",
+      "summary": "[ما أصلحناه] عادت الصور الرمزية وأيقونات بطاقات المهام للظهور على الهاتف؛ ولم تعد الصفحة الرئيسية تنخفض إلى 0 مهام قيد التشغيل من وقت لآخر، فالعمل الجاري يظل ظاهرًا دائمًا؛ ولم تعد المهمة التي ما زالت تعمل تُوسم بـ«منتهية» قبل أوانها، وما تم الإبلاغ عنه يبقى دائمًا فوق المنتهي؛ ولم يعد إلغاء عنصر في قائمة الانتظار يعيده للظهور، ولم تعد الصفحة تتوقف عند «جارٍ التحقق». [ما حسّناه] أعدنا ترتيب اختيار النموذج: صار يتم حسب وقت اليوم وثقل المهمة - العمل الخفيف يذهب إلى نموذج سريع، والمعقّد إلى نموذج قوي، والصور لها مسار خاص - وقد وقعت كل التركيبات الـ49 في المسار المتوقع. وحالة الهاتف تتحدث الآن تلقائيًا في الوقت الحقيقي، وأُزيل زر التحديث الزائد. [ما تعلمناه] ثلاث ملاحظات من دفتر الخبرة الداخلي: (1) آلية الإصلاح الذاتي السليمة يجب أن تكون صامتة؛ فإن كانت «تصلح» شيئًا في كل دورة، فاشك في أداة الفحص قبل الخدمة المراقَبة؛ (2) لا تقل «تعافى تلقائيًا» دون دليل: نفس النسخة ونفس سجل السلامة قبل وبعد؛ و«أُعيد تشغيله» ليس دليلًا؛ (3) «لا جديد» ليس بالضرورة عطلًا: قارن أولًا بما كان يجب أن يكون موجودًا.",
       "sections": {
         "skills": [
-          "خمس سمات تُبدَّل في أي وقت: الأبيض القياسي (الافتراضي)، الوردي ساكورا، الأخضر النعناعي، البنفسجي النجمي، والداكن المريح للعين؛ يُحفظ الاختيار، والداكن يقلّل التباين للاستخدام الليلي.",
-          "تنظيم هيكل الواجهة: قائمة الجلسات بطاقات مستديرة مع شريط لوني للجلسة المحددة، والشريطان الأعلى والأسفل داخل حاويات مستديرة، والأزرار بشكل بطاقات؛ الترتيب والمواضع دون تغيير.",
-          "تسليم عدة مهام معًا: من الثانية تدخل الطابور، وكل واحدة تنطلق تلقائيًا بعد انتهاء ما قبلها، ويبقى الطابور بعد التحديث دون حاجة للانتظار أمام الشاشة.",
-          "تبقى النتائج في النافذة: آخر الجولات بنقرة واحدة، دون إعادة التشغيل."
+          "اختيار النموذج تلقائيًا حسب وقت اليوم وثقل المهمة: العمل الخفيف يستخدم نموذجًا سريعًا، والمعقّد نموذجًا قويًا، والصور لها مسار خاص؛ وكل التركيبات الـ49 وقعت في المسار المتوقع.",
+          "حالة الهاتف تتحدث تلقائيًا: عدد المهام الجارية ونسبة التقدم يتغيران من تلقاء نفسيهما، دون البحث عن زر تحديث.",
+          "جلسات الشريط الجانبي مرتبة بطبقات ثابتة: ما تم الإبلاغ عنه في الأعلى، والمنتهي والمغلق ينزل إلى الأسفل، ولم يعد الترتيب يتقلب مع الوقت."
         ],
         "bugs": [
-          "أُصلح «عند تسليم مهمة ثانية تُظهر أن هناك مهمة قيد التشغيل»: صارت تدخل الطابور وتنطلق تلقائيًا، ولم تعد هذه الرسالة تظهر.",
-          "أُصلح «تحديث الصفحة يخفي الجولة الجارية»: تُستأنف الجولة الجارية ويستمر السجل بدل أن يبقى فارغًا.",
-          "أُصلح «تختفي النتيجة بعد الانتهاء»: تبقى آخر الجولات في النافذة وتُفتح في أي وقت."
+          "أُصلحت الصور الرمزية وأيقونات بطاقات المهام التي لم تكن تظهر على الهاتف: الصور تُحمّل الآن طبيعيًا.",
+          "أُصلح «الصفحة الرئيسية تُظهر 0 مهام جارية رغم أن العمل يعمل»: كانت نافذة تحديد الاتصال قصيرة جدًا والبيانات تومض؛ والآن تُعرض بثبات.",
+          "أُصلح «مهمة ما زالت تعمل تُوسم منتهية قبل أوانها»: ما دامت رسالة أُرسلت للتو بلا رد والنتائج ما زالت تتوارد، فلا يُختم عليها بالانتهاء.",
+          "أُصلح «ألغي عنصرًا في الانتظار فيعود من تلقاء نفسه»: لم تكن الذاكرة المحلية تُمسح معه؛ والآن يختفي نهائيًا.",
+          "أُصلح توقف الصفحة عند «جارٍ التحقق...»: صارت تتحدث تلقائيًا في الوقت الحقيقي، وأُزيل زر التحديث الزائد."
         ],
         "lessons": [
-          "كذّب المعيار قبل الحكم به: مؤشر واحد وعتبة نختارها بأنفسنا يضرّان بالبيانات السليمة؛ ابنِ أولًا خط أساس من التوزيع الحقيقي.",
-          "«تم الإصلاح» ليست «الطرف الآخر يعترف بالنسخة»: المتحقق والمُثبِّت يجب أن يكونا من مصدر واحد، وإلا ظهر «أُصلح لكنه يُحكم بأنه غير مُصلح» وتُعاد الأعمال.",
-          "«تم التحديث» ليست «الحالة الحالية»: تحديث تلقائي قد يعيد الاختيارات السابقة، فاحمِ إعادة التصفير التالية فور الإصلاح."
+          "آلية الإصلاح الذاتي السليمة يجب أن تكون صامتة: إن كانت «تصلح» شيئًا في كل دورة، فاشك في أداة الفحص نفسها قبل الخدمة المراقَبة.",
+          "لا تقل «تعافى تلقائيًا» دون دليل: نفس النسخة ونفس سجل السلامة قبل وبعد؛ و«أُعيد تشغيله» ليس إصلاحًا.",
+          "«لا جديد» ليس بالضرورة عطلًا: قارن أولًا بما كان يجب أن يكون موجودًا ثم قرر هل تُبلغ أم لا."
         ]
       }
     }
