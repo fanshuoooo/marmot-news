@@ -1,132 +1,122 @@
 {
-  "ver": "1.5.94",
+  "ver": "1.5.95",
   "date": "2026-11-18",
-  "summary": "【修了什么】修好「关掉页面之后，后台的进度推送还在往已经关闭的通道写数据，结果把进程报错了」：现在每次写之前先确认通道还开着，已经关了就直接收摊，进程不再被打断（开发版已改好并验证，随下个版本一起发布）。【优化/新增了什么】今天没有新增功能，主要是稳定性观察和日常维护，用户这边看不到界面变化。【自我学习到了什么】两条（学自内部经验库）：①判断「连不上、没反应」先看耗时——几毫秒就失败，多半是对面端口根本没在听，不是网络慢，别急着换线路、重启；②「装好了」不等于「在跑」，验收要看真回执：进程在不在、有没有真数据产出，只看文件在位等于没验收。",
+  "summary": "【修了什么】修好「同一个问题重问，土拨鼠卡在跑命令中不回复」的死循环：根因是精确缓存把半截进度话（比如「我现在做安全备份…」这种没干完的中间话）也存了进来，重问时直接命中旧半截话，系统判『没收口』又挂后台票、再命中、再挂票，卡死十几分钟（日志实锤 05:04:37 精确缓存命中 43 字半截话）。现在只缓存真正干完收口的答复（带✅/已完成等强证据、且不是计划尾），读侧也同步加兜底——缓存里只要是半截话一律不放行给模型重答。后续重问同一问题不会再卡。【优化/新增了什么】无。【自我学习到了什么】精确缓存不能只按『问题文本一致』收，得先看『答案是不是真干完了』——半截进度话进缓存，等于把没做完的活当成答案反复糊给主人。",
   "sections": {
     "skills": [],
     "bugs": [
-      "修好「关掉页面后后台进度推送仍往已关闭的通道写数据、把进程报错」：写之前先判断通道是否已关闭，关了立即停止推送，进程不再被这类写入打断（开发版已改好并验证，随下个版本发布）。"
+      "修好「同一个问题重问，卡在跑命令中不回复」的死循环：精确缓存只存真正干完收口的答复（带✅/已完成等强证据、且不是计划尾），半截进度话不再进缓存；读侧同步加兜底，缓存里只要是半截话一律不放行（开发版已改好并验证）。"
     ],
     "lessons": [
-      "判断「连不上、没反应」先看响应耗时：几毫秒就失败，多数是对面端口根本没在监听，而不是网络慢——先去查端口，别急着换线路、重启。",
-      "「装好了」不等于「在跑」：验收要看真回执（进程在不在、有没有真实数据产出），只看文件在位等于没验收。"
+      "精确缓存不能只按『问题文本一致』收，得先看『答案是不是真干完了』——半截进度话进缓存，等于把没做完的活当成答案反复糊给主人。"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "[What we fixed] Fixed \"after you close the page, the background progress stream keeps writing to an already-closed channel and ends up throwing process errors\": it now checks whether the channel is still open before every write, and stops cleanly once it is closed, so the process is no longer interrupted (fixed and verified in the development build; ships with the next release). [What we improved] No new features today - mostly stability monitoring and routine maintenance, with no visible change on your side. [What we learned] Two notes from the internal playbook: (1) when something \"won't connect / doesn't respond\", look at the response time first - a failure in a few milliseconds usually means nothing is listening on the other port, not that the network is slow, so don't rush to switch routes or restart; (2) \"it's installed\" is not \"it's running\": accept work by real receipts - is the process there, is real data coming out - checking that a file exists is not acceptance.",
+      "summary": "[What we fixed] Fixed the deadlock where \"asking the same question again made the assistant hang in running without replying\": the exact cache was also storing half-finished progress lines (e.g. \"I am now making a safe backup…\"), so re-asking hit the stale half-sentence, was judged \"not finished\", re-queued a background ticket, hit the cache again, and looped for over ten minutes (log evidence: 05:04:37 exact-cache hit, 43 chars). Now only truly-finished answers (with ✅/\"已完成\" strong markers and not a plan-only tail) are cached, and a read-side guard rejects any half-sentence found in the cache. Re-asking the same question no longer hangs. [What we improved / added] None. [What we learned] The exact cache must not store by text-match alone: it must first check whether the answer is actually finished — a half-done progress line in the cache means serving unfinished work back to the user as an answer, over and over.",
       "sections": {
         "skills": [],
         "bugs": [
-          "Fixed \"after the page is closed the background progress stream keeps writing to a closed channel and throws process errors\": every write now checks whether the channel is still open and stops pushing immediately once it is closed, so the process is no longer interrupted by these writes (fixed and verified in the development build; ships with the next release)."
+          "Fixed the \"re-ask same question → stuck in running\" deadlock: the exact cache now stores only truly-finished answers (strong ✅/done markers and not a plan-tail), half-finished progress lines never enter the cache, and a read-side guard drops any half-sentence it finds (verified in dev build)."
         ],
         "lessons": [
-          "When something \"won't connect / doesn't respond\", check the response time first: a failure within a few milliseconds usually means nothing is listening on the other port rather than a slow network - inspect the port before switching routes or restarting.",
-          "\"Installed\" is not \"running\": accept work by real receipts - is the process alive, is real data coming out; a file sitting in place is not acceptance."
+          "The exact cache must not match by question text alone — it must first confirm the answer is actually finished; a half-done progress line in the cache means handing unfinished work back to the user repeatedly."
         ]
       }
     },
     "ja": {
-      "summary": "【修正したこと】「ページを閉じた後も、バックグラウンドの進捗配信がすでに閉じた経路へ書き込み続け、プロセスがエラーになる」問題を修正しました。書き込みの前に経路が開いているかを必ず確認し、閉じていれば即座に配信を止めるので、プロセスが中断されなくなります（開発版で修正・検証済み、次回バージョンで配信）。【改善・追加】本日は新機能なし。安定性の監視と日常メンテナンスが中心で、画面の見た目に変化はありません。【学んだこと】内部の経験ノートから2点：①「つながらない・反応がない」ときは、まず応答時間を見る——数ミリ秒で失敗するなら、相手側のポートが待ち受けていない可能性が高く、回線が遅いわけではありません。回線の切り替えや再起動を急がないこと。②「入れた」は「動いている」ではありません。受け入れ確認は実際の証拠で——プロセスが生きているか、実データが出ているか。ファイルがあるだけでは確認になりません。",
+      "summary": "【修正したこと】「同じ質問をもう一度すると、実行中のまま返事が来なくなる」デッドロックを修正しました。根本原因は、正確キャッシュが「いま安全バックアップ中…」のような途中経過の文まで保存していたため、再質問で古い途中文に当たり、「未完了」と判定→チケット再発行→再ヒット→再発行、と十数分ループしていたことです（実証ログ: 05:04:37 正確キャッシュ命中 43文字）。これからは本当に完了した回答（✅/「已完成」などの強い証拠があり、計画だけで終わっていないもの）だけをキャッシュし、読み出し側でも途中文は一律破棄します。同じ質問の再問い合わせで固まることはもうありません。【改善・追加】なし。【学んだこと】正確キャッシュは「質問の文言が一致するか」だけでは保存してはならず、「回答が本当に終わっているか」を先に確認する必要がある——途中経過をキャッシュすると、未完了の作業を回答として何度も持ち主に返すことになる。",
       "sections": {
         "skills": [],
         "bugs": [
-          "「ページを閉じた後にバックグラウンドの進捗配信が閉じた経路へ書き込み続け、プロセスがエラーになる」問題を修正：書き込み前に経路が閉じていないか確認し、閉じていれば即停止するため、こうした書き込みでプロセスが中断されなくなりました（開発版で修正・検証済み、次回バージョンで配信）。"
+          "「同じ質問を再送→実行中のまま固まる」デッドロックを修正：正確キャッシュは本当に完了した回答（強い✅/完了マーカーあり、計画止まりでない）だけを保存し、途中経過はキャッシュに入れず、読み出し側でも途中文は破棄します（開発版で検証済み）。"
         ],
         "lessons": [
-          "「つながらない・反応がない」ときは応答時間を先に見る：数ミリ秒で失敗する場合は、回線が遅いのではなく相手のポートが待ち受けていないことが多い。まずポートを確認し、回線の切り替えや再起動を急がない。",
-          "「入れた」は「動いている」ではない：受け入れは実際の証拠で判断する（プロセスが生きているか、実データが出ているか）。ファイルがあるだけでは確認にならない。"
+          "正確キャッシュは質問文の一致だけで保存してはいけない——回答が本当に完了しているかを先に確認すること。途中経過をキャッシュすると、未完了の作業を回答として何度も返してしまう。"
         ]
       }
     },
     "ko": {
-      "summary": "[수정한 것] \"페이지를 닫은 뒤에도 백그라운드 진행 스트림이 이미 닫힌 통로에 계속 데이터를 써서 프로세스 오류가 나던 문제\"를 고쳤습니다. 이제 쓰기 전에 통로가 열려 있는지 먼저 확인하고, 닫혀 있으면 바로 전송을 멈추므로 프로세스가 중단되지 않습니다(개발판에서 수정·검증 완료, 다음 버전에 포함). [개선·추가] 오늘은 새로운 기능이 없습니다. 안정성 관찰과 일상 유지보수가 중심이었고 화면상 달라진 점은 없습니다. [배운 것] 내부 경험 노트에서 두 가지: ① \"연결이 안 된다·반응이 없다\"면 먼저 응답 시간을 봅니다. 몇 밀리초 만에 실패하면 상대 포트가 듣고 있지 않을 가능성이 크고, 회선이 느린 것이 아닙니다. 회선 교체나 재시작을 서두르지 마세요. ② \"설치했다\"는 \"돌고 있다\"가 아닙니다. 검수는 실제 증거로: 프로세스가 살아 있는지, 실제 데이터가 나오는지. 파일이 있는 것만으로는 검수가 아닙니다.",
+      "summary": "[수정한 것] \"같은 질문을 다시 하면 실행 중 상태에서 응답하지 않는\" 교착을 고쳤습니다. 근본 원인은 정확 캐시가 \"지금 안전 백업 중…\" 같은 중간 진행 문장까지 저장해, 재질문 시 옛 중간 문장에 맞아 \"미완료\"로 판정→티켓 재발급→재히트→재발급, 십수 분 루프했기 때문입니다(실증 로그: 05:04:37 정확 캐시 히트 43자). 이제는 정말 끝난 답변(✅/\"已完成\" 등 강한 증거가 있고 계획만으로 끝나지 않은 것)만 캐시하고, 읽기 측에서도 중간 문장은 무조건 버립니다. 같은 질문을 다시 해도 더는 멈추지 않습니다. [개선·추가] 없음. [배운 것] 정확 캐시는 \"질문 문구가 일치하는가\"만으로 저장하면 안 되고 \"답변이 정말 끝났는가\"를 먼저 확인해야 합니다——중간 진행을 캐시하면 완료되지 않은 작업을 답으로 여러 번 돌려주게 됩니다.",
       "sections": {
         "skills": [],
         "bugs": [
-          "\"페이지를 닫은 뒤 백그라운드 진행 스트림이 닫힌 통로에 계속 써서 프로세스 오류가 나던 문제\" 수정: 쓰기 전에 통로 상태를 확인하고 닫혀 있으면 즉시 중단하여, 이런 쓰기로 프로세스가 중단되지 않습니다(개발판에서 수정·검증 완료, 다음 버전에 포함)."
+          "\"같은 질문 재전송→실행 중 교착\" 수정: 정확 캐시는 정말 완료된 답변(강한 ✅/완료 마커, 계획 중단 아님)만 저장하고, 중간 진행은 캐시에 넣지 않으며, 읽기 측에서도 중간 문장을 폐기합니다(개발판에서 검증)."
         ],
         "lessons": [
-          "\"연결이 안 된다·반응이 없다\"면 응답 시간을 먼저 본다: 몇 밀리초 만에 실패하면 회선이 느린 게 아니라 상대 포트가 듣고 있지 않은 경우가 많다. 포트를 먼저 확인하고 회선 교체·재시작을 서두르지 않는다.",
-          "\"설치했다\"는 \"돌고 있다\"가 아니다: 검수는 실제 증거로 판단한다(프로세스 생존, 실제 데이터 산출). 파일이 있는 것만으로는 검수가 아니다."
+          "정확 캐시는 질문 문구 일치만으로 저장하면 안 됩니다——답변이 정말 완료되었는지 먼저 확인해야 합니다. 중간 진행을 캐시하면 미완료 작업을 답으로 여러 번 반환하게 됩니다."
         ]
       }
     },
     "es": {
-      "summary": "[Lo que arreglamos] Corregido: «al cerrar la página, el flujo de progreso en segundo plano seguía escribiendo en un canal ya cerrado y terminaba provocando errores en el proceso». Ahora se comprueba si el canal sigue abierto antes de cada escritura y, si ya está cerrado, se detiene de inmediato, así que el proceso ya no se interrumpe (corregido y verificado en la versión de desarrollo; se publica con la próxima versión). [Lo que mejoramos] Hoy no hay funciones nuevas: sobre todo observación de estabilidad y mantenimiento diario, sin cambios visibles para ti. [Lo que aprendimos] Dos notas del cuaderno interno: (1) cuando algo «no conecta / no responde», mira primero el tiempo de respuesta: fallar en pocos milisegundos suele significar que no hay nada escuchando en el otro puerto, no que la red vaya lenta, así que no corras a cambiar de ruta ni a reiniciar; (2) «está instalado» no es «está funcionando»: se acepta con pruebas reales —¿está vivo el proceso?, ¿salen datos de verdad?—; que un archivo esté en su sitio no es una validación.",
+      "summary": "[Lo que arreglamos] Corregido el bloqueo en que «volver a preguntar lo mismo dejaba al asistente atascado en ejecución sin responder»: la caché exacta guardaba también frases de progreso a medias (p. ej. «ahora estoy haciendo una copia de seguridad…»), así que al volver a preguntar se topaba con la frase vieja a medias, se juzgaba «no terminado», se reencolaba la tarea, volvía a acertar la caché y repetía el bucle durante más de diez minutos (registro: 05:04:37 hit de caché exacta, 43 caracteres). Ahora solo se guardan respuestas realmente terminadas (con marcadores fuertes ✅/«已完成» y sin ser solo un plan), y una protección de lectura descarta cualquier frase a medias. Volver a preguntar lo mismo ya no se bloquea. [Lo que mejoramos / añadimos] Nada. [Lo que aprendimos] La caché exacta no debe guardar solo por coincidencia de texto: primero debe comprobar que la respuesta está realmente terminada — una línea de progreso a medias en la caché es devolver trabajo sin acabar como respuesta, una y otra vez.",
       "sections": {
         "skills": [],
         "bugs": [
-          "Corregido: «tras cerrar la página, el flujo de progreso en segundo plano seguía escribiendo en un canal cerrado y provocaba errores en el proceso». Ahora cada escritura comprueba si el canal está abierto y deja de enviar en cuanto se cierra, así que el proceso ya no se interrumpe (corregido y verificado en la versión de desarrollo; se publica con la próxima versión)."
+          "Corregido el bloqueo «re-preguntar lo mismo → atascado en ejecución»: la caché exacta ahora solo guarda respuestas realmente terminadas (marcadores fuertes ✅/hecho, no un plan a medias), las líneas de progreso a medias nunca entran, y una protección de lectura descarta cualquier frase a medias (verificado en compilación de desarrollo)."
         ],
         "lessons": [
-          "Cuando algo «no conecta / no responde», revisa primero el tiempo de respuesta: un fallo en pocos milisegundos suele indicar que el otro puerto no está escuchando, no que la red sea lenta; revisa el puerto antes de cambiar de ruta o reiniciar.",
-          "«Instalado» no es «funcionando»: valida con pruebas reales (¿el proceso está vivo?, ¿hay datos reales saliendo?); que un archivo esté presente no es una validación."
+          "La caché exacta no debe coincidir solo por texto de pregunta — primero hay que confirmar que la respuesta está terminada; una línea de progreso a medias en la caché es devolver trabajo sin acabar repetidamente."
         ]
       }
     },
     "fr": {
-      "summary": "[Ce qu'on a corrigé] Corrigé : « après la fermeture de la page, le flux de progression en arrière-plan continuait d'écrire dans un canal déjà fermé, ce qui finissait par provoquer des erreurs de processus ». Désormais, chaque écriture vérifie d'abord que le canal est ouvert et s'arrête net s'il est fermé : le processus n'est plus interrompu (corrigé et vérifié en version de développement ; livré avec la prochaine version). [Ce qu'on a amélioré] Pas de nouvelle fonction aujourd'hui : surtout de la surveillance de stabilité et de la maintenance courante, sans changement visible de votre côté. [Ce qu'on a appris] Deux notes du carnet interne : (1) quand « ça ne se connecte pas / ça ne répond pas », regardez d'abord le temps de réponse — un échec en quelques millisecondes signifie le plus souvent que rien n'écoute sur le port en face, pas que le réseau est lent ; inutile de changer de route ou de redémarrer dans l'urgence ; (2) « c'est installé » n'est pas « ça tourne » : on valide sur des preuves réelles — le processus est-il vivant, des données réelles sortent-elles ? Un fichier présent ne vaut pas validation.",
+      "summary": "[Ce qu’on a corrigé] Corrigé le blocage où « reposer la même question laissait l’assistant coincé en cours d’exécution sans répondre » : le cache exact stockait aussi des lignes de progrès à moitié finies (ex. « je fais maintenant une sauvegarde de sécurité… »), donc reposer la question retombait sur la vieille phrase à moitié finie, jugée « non terminée », re-déclenchait un ticket, retombait sur le cache, et bouclait pendant plus de dix minutes (journal : 05:04:37 hit cache exact, 43 caractères). Désormais seules les réponses réellement terminées (marqueurs forts ✅/«已完成» et sans être un simple plan) sont mises en cache, et une garde en lecture écarte toute phrase à moitié finie. Reposer la même question ne bloque plus. [Ce qu’on a amélioré / ajouté] Rien. [Ce qu’on a appris] Le cache exact ne doit pas stocker sur la seule correspondance de texte : il doit d’abord vérifier que la réponse est réellement finie — une ligne de progrès à moitié finie dans le cache, c’est renvoyer du travail non terminé comme réponse, encore et encore.",
       "sections": {
         "skills": [],
         "bugs": [
-          "Corrigé : « après fermeture de la page, le flux de progression en arrière-plan continuait d'écrire dans un canal fermé et provoquait des erreurs de processus ». Chaque écriture vérifie maintenant que le canal est ouvert et cesse l'envoi dès qu'il est fermé : le processus n'est plus interrompu (corrigé et vérifié en version de développement ; livré avec la prochaine version)."
+          "Corrigé le blocage « reposer la même question → coincé en cours d’exécution » : le cache exact ne stocke plus que les réponses réellement terminées (marqueurs forts ✅/fait, pas un plan à moitié fini), les lignes de progrès à moitié finies n’y entrent jamais, et une garde en lecture écarte toute phrase incomplète (vérifié en build de développement)."
         ],
         "lessons": [
-          "Quand « ça ne se connecte pas / ça ne répond pas », regardez d'abord le temps de réponse : un échec en quelques millisecondes indique le plus souvent que le port en face n'écoute pas, et non un réseau lent ; vérifiez le port avant de changer de route ou de redémarrer.",
-          "« Installé » n'est pas « en marche » : validez sur des preuves réelles (processus vivant, données réelles produites) ; un fichier présent ne suffit pas."
+          "Le cache exact ne doit pas correspondre seulement par le texte de la question — il faut d’abord confirmer que la réponse est terminée ; une ligne de progrès à moitié finie dans le cache renvoie du travail non fini de façon répétée."
         ]
       }
     },
     "de": {
-      "summary": "[Was wir behoben haben] Behoben: „Nach dem Schließen der Seite schrieb der Fortschritts-Stream im Hintergrund weiter in einen bereits geschlossenen Kanal und löste dadurch Prozessfehler aus“. Jetzt wird vor jedem Schreiben geprüft, ob der Kanal noch offen ist; ist er geschlossen, wird sofort gestoppt, sodass der Prozess nicht mehr unterbrochen wird (in der Entwicklungsversion behoben und geprüft; kommt mit der nächsten Version). [Was wir verbessert haben] Heute keine neuen Funktionen – vor allem Stabilitätsbeobachtung und Routinewartung, ohne sichtbare Änderung für dich. [Was wir gelernt haben] Zwei Notizen aus dem internen Erfahrungsbuch: (1) Wenn etwas „keine Verbindung bekommt / nicht reagiert“, zuerst die Antwortzeit ansehen – ein Fehler nach wenigen Millisekunden heißt meist, dass am anderen Port nichts lauscht, und nicht, dass das Netz langsam ist; also nicht gleich Route wechseln oder neu starten; (2) „installiert“ ist nicht „läuft“: Abnahme nur mit echten Belegen – lebt der Prozess, kommen echte Daten heraus? Eine vorhandene Datei ist keine Abnahme.",
+      "summary": "[Was wir behoben haben] Behoben der Deadlock, bei dem „dieselbe Frage erneut stellen den Assistenten im laufenden Zustand ohne Antwort“ hängen ließ: Der exakte Cache speicherte auch halbfertige Fortschrittszeilen (z. B. „ich mache jetzt ein Sicherheits-Backup…“), sodass erneutes Fragen auf den alten halben Satz traf, als „nicht fertig“ gewertet wurde, ein Ticket erneut anhing, wieder den Cache traf und über zehn Minuten im Kreis lief (Logbeleg: 05:04:37 exakter Cache-Treffer, 43 Zeichen). Jetzt werden nur wirklich fertige Antworten (mit starken Markern ✅/„已完成“ und nicht nur ein Plan) gecacht, und eine Lese-Schutzwache verwirft jede halbfertige Zeile. Erneutes Fragen hängt nicht mehr. [Was wir verbessert / hinzugefügt haben] Nichts. [Was wir gelernt haben] Der exakte Cache darf nicht nur nach Textübereinstimmung speichern: Er muss zuerst prüfen, ob die Antwort wirklich fertig ist — eine halbfertige Fortschrittszeile im Cache bedeutet, unfertige Arbeit immer wieder als Antwort zurückzugeben.",
       "sections": {
         "skills": [],
         "bugs": [
-          "Behoben: „Nach dem Schließen der Seite schrieb der Fortschritts-Stream im Hintergrund weiter in einen geschlossenen Kanal und löste Prozessfehler aus“. Jedes Schreiben prüft nun, ob der Kanal offen ist, und stoppt sofort, wenn er geschlossen wurde; der Prozess wird dadurch nicht mehr unterbrochen (in der Entwicklungsversion behoben und geprüft; kommt mit der nächsten Version)."
+          "Deadlock „dieselbe Frage erneut → hängt im laufenden Zustand“ behoben: Der exakte Cache speichert nur noch wirklich fertige Antworten (starke ✅/Fertig-Marker, kein halber Plan), halbfertige Fortschrittszeilen kommen nie hinein, und eine Lese-Wache verwirft jede unvollständige Zeile (im Dev-Build verifiziert)."
         ],
         "lessons": [
-          "Wenn etwas „keine Verbindung bekommt / nicht reagiert“, zuerst die Antwortzeit prüfen: Ein Fehler nach wenigen Millisekunden deutet meist darauf, dass der andere Port nicht lauscht, nicht auf ein langsames Netz; erst den Port prüfen, dann Route wechseln oder neu starten.",
-          "„Installiert“ ist nicht „läuft“: Abnahme mit echten Belegen (Prozess lebt, echte Daten kommen heraus); eine vorhandene Datei ist keine Abnahme."
+          "Der exakte Cache darf nicht nur nach dem Fragetext passen — zuerst ist zu bestätigen, dass die Antwort wirklich fertig ist; eine halbfertige Fortschrittszeile im Cache gibt unfertige Arbeit wiederholt zurück."
         ]
       }
     },
     "ru": {
-      "summary": "[Что исправили] Исправлено: «после закрытия страницы фоновый поток прогресса продолжал писать в уже закрытый канал и в итоге вызывал ошибки процесса». Теперь перед каждой записью проверяется, открыт ли канал, и при закрытии отправка сразу прекращается — процесс больше не прерывается (исправлено и проверено в рабочей сборке; выйдет со следующей версией). [Что улучшили] Новых функций сегодня нет: в основном наблюдение за стабильностью и текущее обслуживание, заметных изменений для вас нет. [Что мы поняли] Две заметки из внутренней базы опыта: (1) когда «не подключается / не отвечает», смотрите сначала время ответа — отказ за несколько миллисекунд чаще означает, что на том порту вообще никто не слушает, а не что сеть медленная; не спешите менять маршрут или перезапускать; (2) «установлено» не значит «работает»: приёмка только по реальным доказательствам — жив ли процесс, идут ли реальные данные; наличие файла приёмкой не является.",
+      "summary": "[Что исправили] Исправлен дедлок «повторный вопрос оставлял помощника зависшим в состоянии выполнения без ответа»: точный кэш сохранял и промежуточные строки прогресса (напр. «сейчас делаю резервную копию…»), поэтому повторный вопрос попадал на старую половину фразы, считался «незавершённым», заново ставил задачу, снова попадал в кэш и крутился больше десяти минут (запись в журнале: 05:04:37 попадание точного кэша, 43 символа). Теперь кэшируются только действительно завершённые ответы (с сильными маркерами ✅/«已完成» и не просто план), а защита на чтении отбрасывает любую половину фразы. Повторный вопрос больше не зависает. [Что улучшили / добавили] Ничего. [Что мы поняли] Точный кэш нельзя сохранять только по совпадению текста — сначала надо проверить, что ответ действительно завершён: промежуточная строка прогресса в кэше означает снова и снова возвращать незавершённую работу как ответ.",
       "sections": {
         "skills": [],
         "bugs": [
-          "Исправлено: «после закрытия страницы фоновый поток прогресса продолжал писать в закрытый канал и вызывал ошибки процесса». Теперь каждая запись проверяет, открыт ли канал, и при закрытии передача сразу останавливается — процесс больше не прерывается (исправлено и проверено в рабочей сборке; выйдет со следующей версией)."
+          "Исправлен дедлок «повторный вопрос → зависание в выполнении»: точный кэш теперь сохраняет только действительно завершённые ответы (сильные маркеры ✅/готово, не полуплан), промежуточные строки прогресса в него не попадают, а защита на чтении отбрасывает любую неполную строку (проверено в dev-сборке)."
         ],
         "lessons": [
-          "Когда «не подключается / не отвечает», сначала смотрите время ответа: отказ за несколько миллисекунд обычно означает, что порт на той стороне не слушает, а не что сеть медленная; проверьте порт, прежде чем менять маршрут или перезапускать.",
-          "«Установлено» не значит «работает»: приёмка — только по реальным доказательствам (процесс жив, идут реальные данные); наличие файла не является приёмкой."
+          "Точный кэш не должен совпадать только по тексту вопроса — сначала нужно подтвердить, что ответ действительно завершён; промежуточная строка прогресса в кэше возвращает незавершённую работу повторно."
         ]
       }
     },
     "pt": {
-      "summary": "[O que corrigimos] Corrigido: «ao fechar a página, o fluxo de progresso em segundo plano continuava a escrever num canal já fechado e acabava gerando erros no processo». Agora cada escrita verifica se o canal continua aberto e, se já estiver fechado, para de imediato, então o processo deixa de ser interrompido (corrigido e verificado na versão de desenvolvimento; será publicado na próxima versão). [O que melhorámos] Hoje não há funcionalidades novas: sobretudo observação de estabilidade e manutenção diária, sem alterações visíveis do seu lado. [O que aprendemos] Duas notas do caderno interno: (1) quando algo «não liga / não responde», veja primeiro o tempo de resposta — falhar em poucos milissegundos normalmente significa que não há nada a escutar na outra porta, e não que a rede esteja lenta; não corra a trocar de rota nem a reiniciar; (2) «está instalado» não é «está a funcionar»: a validação é feita com provas reais — o processo está vivo, saem dados reais? Um ficheiro presente não é validação.",
+      "summary": "[O que corrigimos] Corrigido o bloqueio em que «voltar a fazer a mesma pergunta deixava o assistente preso em execução sem responder»: a cache exata também guardava linhas de progresso a meio (ex. «agora estou a fazer um backup de segurança…»), pelo que voltar a perguntar batia na velha meia-frase, era julgado «não concluído», reencolhia a tarefa, voltava a bater na cache e ficava em ciclo durante mais de dez minutos (registo: 05:04:37 hit de cache exata, 43 caracteres). Agora só são guardadas respostas realmente concluídas (com marcadores fortes ✅/«已完成» e sem ser apenas um plano), e uma guarda de leitura descarta qualquer meia-frase. Voltar a fazer a mesma pergunta já não bloqueia. [O que melhorámos / adicionámos] Nada. [O que aprendemos] A cache exata não deve guardar só por correspondência de texto: tem de confirmar primeiro que a resposta está realmente concluída — uma linha de progresso a meio na cache é devolver trabalho inacabado como resposta, vezes sem conta.",
       "sections": {
         "skills": [],
         "bugs": [
-          "Corrigido: «depois de fechar a página, o fluxo de progresso em segundo plano continuava a escrever num canal fechado e provocava erros no processo». Cada escrita passa a verificar se o canal está aberto e deixa de enviar assim que ele fecha, pelo que o processo já não é interrompido (corrigido e verificado na versão de desenvolvimento; será publicado na próxima versão)."
+          "Corrigido o bloqueio «voltar a fazer a mesma pergunta → preso em execução»: a cache exata agora guarda apenas respostas realmente concluídas (marcadores fortes ✅/feito, não um plano a meio), as linhas de progresso a meio nunca entram, e uma guarda de leitura descarta qualquer frase incompleta (verificado na build de desenvolvimento)."
         ],
         "lessons": [
-          "Quando algo «não liga / não responde», veja primeiro o tempo de resposta: uma falha em poucos milissegundos costuma indicar que a porta do outro lado não está a escutar, e não que a rede esteja lenta; verifique a porta antes de trocar de rota ou reiniciar.",
-          "«Instalado» não é «a funcionar»: valide com provas reais (processo vivo, dados reais a sair); um ficheiro presente não é validação."
+          "A cache exata não deve corresponder apenas pelo texto da pergunta — é preciso confirmar primeiro que a resposta está concluída; uma linha de progresso a meio na cache devolve trabalho inacabado repetidamente."
         ]
       }
     },
     "ar": {
-      "summary": "[ما أصلحناه] أُصلح عيب: «بعد إغلاق الصفحة، ظلّ مسار التقدّم في الخلفية يكتب في قناة أُغلقت بالفعل، فانتهى الأمر بأخطاء في العملية». الآن يتم التأكد من أن القناة ما زالت مفتوحة قبل كل كتابة، وإن كانت مغلقة يتوقف الإرسال فورًا، فلم تعد العملية تُقطع (أُصلح وجُرّب في نسخة التطوير، وسيُنشر مع الإصدار القادم). [ما حسّنّاه] لا ميزات جديدة اليوم؛ كان التركيز على مراقبة الاستقرار والصيانة اليومية، دون تغييرات مرئية من جهتك. [ما تعلّمناه] ملاحظتان من دفتر الخبرة الداخلي: (١) عندما «لا يتصل / لا يستجيب» شيء، انظر أولًا إلى زمن الاستجابة: الفشل خلال بضعة أجزاء من الثانية يعني غالبًا أن المنفذ المقابل لا يستمع أصلًا، وليس أن الشبكة بطيئة، فلا تسرع بتغيير المسار أو إعادة التشغيل؛ (٢) «مُثبَّت» لا تعني «يعمل»: القبول يكون بأدلة حقيقية — هل العملية حيّة؟ هل تخرج بيانات حقيقية؟ وجود الملف ليس قبولًا.",
+      "summary": "[ما أصلحناه] أصلحنا الجمود حيث «إعادة طرح نفس السؤال تجعل المساعد يعلق في حالة التشغيل دون رد»: كانت الذاكرة الوسيطة الدقيقة تحفظ أيضًا سطور التقدّم غير المكتملة (مثل «أقوم الآن بنسخ احتياطي آمن…»)، فإعادة السؤال تصطدم بتلك الجملة القديمة الناقصة، وتُحكم «غير مكتملة»، فتُعاد المهمة، ثم تصطدم بالذاكرة مرة أخرى، وتتكرر الحلقة لأكثر من عشر دقائق (دليل السجل: 05:04:37 ضربة ذاكرة وسيطة دقيقة، 43 حرفًا). الآن لا تُحفظ إلا الإجابات المكتملة فعلًا (بعلامات قوية ✅/«已完成» وليست مجرّد خطة)، وحارس على القراءة يتجاهل أي جملة ناقصة. إعادة طرح نفس السؤال لم تعد تعلّق. [ما حسّنّاه/أضفناه] لا شيء. [ما تعلّمناه] لا ينبغي أن تحفظ الذاكرة الدقيقة بمطابقة النص فقط: يجب أولًا التحقق من أن الإجابة مكتملة فعلًا — فسطر التقدّم الناقص في الذاكرة يعني إعادة عملٍ غير مكتمل كإجابة، مرارًا وتكرارًا.",
       "sections": {
         "skills": [],
         "bugs": [
-          "أُصلح: «بعد إغلاق الصفحة ظلّ مسار التقدّم في الخلفية يكتب في قناة مغلقة وسبّب أخطاء في العملية». صار كل كتابة تتحقق من أن القناة مفتوحة وتتوقف عن الإرسال فور إغلاقها، فلم تعد العملية تُقطع (أُصلح وجُرّب في نسخة التطوير، وسيُنشر مع الإصدار القادم)."
+          "أُصلح الجمود «إعادة طرح نفس السؤال → يعلق في التشغيل»: الذاكرة الدقيقة الآن لا تحفظ إلا الإجابات المكتملة فعلًا (علامات قوية ✅/تم، وليست خطة ناقصة)، وسطور التقدّم الناقصة لا تدخلها أبدًا، وحارس القراءة يتجاهل أي جملة ناقصة (تم التحقق في بناء التطوير)."
         ],
         "lessons": [
-          "عندما «لا يتصل / لا يستجيب» شيء، افحص زمن الاستجابة أولًا: الفشل خلال بضعة أجزاء من الثانية يعني عادةً أن المنفذ المقابل لا يستمع، لا أن الشبكة بطيئة؛ افحص المنفذ قبل تغيير المسار أو إعادة التشغيل.",
-          "«مُثبَّت» ليست «يعمل»: القبول بأدلة حقيقية (العملية حيّة، وهناك بيانات حقيقية تُنتج)؛ وجود الملف وحده ليس قبولًا."
+          "لا يجب أن تتطابق الذاكرة الدقيقة بنص السؤال فقط — يجب أولًا التأكد من أن الإجابة مكتملة؛ فسطر التقدّم الناقص في الذاكرة يعيد عملًا غير مكتمل بشكل متكرر."
         ]
       }
     }
