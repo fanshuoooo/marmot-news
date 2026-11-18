@@ -1,222 +1,132 @@
 {
   "ver": "1.5.94",
-  "date": "2026-11-17",
-  "summary": "【修了什么】手机端头像与任务卡图标恢复显示；手机首页「进行中」不再偶尔归零，正在跑的任务随时能看到；还在跑的任务不会被提前标成「已完结」，已汇报的固定排在已结束上面；「取消排队」后条目不会再自己冒回来，页面也不再卡在「正在查」这三个字上。【优化/新增了什么】模型调度重排：按时间段和任务轻重自动挑合适的模型，轻活走快模型、重活走强模型、带图单独一档，实测 49 种组合全部落在预期档位；手机端状态改成自动实时刷新，多余的刷新按钮去掉了。【自我学习到了什么】三条（学自内部经验库）：①健康的自愈机制应当是安静的，如果它每个周期都在「修复」，先怀疑检测手段本身，而不是被监控的服务；②报「已自动恢复」必须带凭据——恢复前后是同一个实例、同一条健康记录，一句「已重启」不算修好；③「没有新内容」未必是故障，先对照「它本来就该有什么」再判断。",
+  "date": "2026-11-18",
+  "summary": "【修了什么】修好「关掉页面之后，后台的进度推送还在往已经关闭的通道写数据，结果把进程报错了」：现在每次写之前先确认通道还开着，已经关了就直接收摊，进程不再被打断（开发版已改好并验证，随下个版本一起发布）。【优化/新增了什么】今天没有新增功能，主要是稳定性观察和日常维护，用户这边看不到界面变化。【自我学习到了什么】两条（学自内部经验库）：①判断「连不上、没反应」先看耗时——几毫秒就失败，多半是对面端口根本没在听，不是网络慢，别急着换线路、重启；②「装好了」不等于「在跑」，验收要看真回执：进程在不在、有没有真数据产出，只看文件在位等于没验收。",
   "sections": {
-    "skills": [
-      "模型调度按时间段与任务轻重自动分配：轻量活走快模型、复杂活走强模型、带图单独一档，实测 49 种组合全部落在预期档位。",
-      "手机端状态自动实时刷新：正在跑的任务数量与进度自己更新，不用找刷新按钮。",
-      "侧栏会话分层固定：已汇报固定在上，已结束／已完结统一沉到下面，顺序不再随时间乱跳。"
-    ],
+    "skills": [],
     "bugs": [
-      "修好手机端头像与任务卡图标破图不显示：图片恢复正常加载。",
-      "修好「明明在跑任务，首页进行中却显示 0」：判定在线的窗口太短，数据时有时无，现在稳定显示。",
-      "修好「还在跑的任务被提前标成已完结」：刚发出的话还没回、结果还在收的时候，不再盖结束章。",
-      "修好「点了取消排队，条目又自己冒回来」：本地缓存没跟着清，现在取消即消失。",
-      "修好页面卡在「正在查…」：改为自动实时更新，并去掉多余的刷新按钮。"
+      "修好「关掉页面后后台进度推送仍往已关闭的通道写数据、把进程报错」：写之前先判断通道是否已关闭，关了立即停止推送，进程不再被这类写入打断（开发版已改好并验证，随下个版本发布）。"
     ],
     "lessons": [
-      "健康的自愈机制应当是安静的：如果它每个周期都在「修复」，先怀疑检测手段本身，而不是被监控的服务。",
-      "报「已自动恢复」必须带凭据——恢复前后是同一个实例、同一条健康记录；一句「已重启」不算修好。",
-      "「没有新内容」未必是故障：先对照「它本来就该有什么」，再决定要不要报。"
+      "判断「连不上、没反应」先看响应耗时：几毫秒就失败，多数是对面端口根本没在监听，而不是网络慢——先去查端口，别急着换线路、重启。",
+      "「装好了」不等于「在跑」：验收要看真回执（进程在不在、有没有真实数据产出），只看文件在位等于没验收。"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "[What we fixed] Avatars and task-card icons on mobile display again; the mobile home screen no longer drops to 0 running tasks now and then, so work in progress is always visible; a task that is still running is no longer stamped \"finished\" early, and reported items now stay above finished ones; canceling a queued item no longer makes it reappear, and the page no longer sticks on \"checking\". [What we improved] Model scheduling was rearranged: the assistant now picks a model by time of day and task weight - light work goes to a fast model, heavy work to a strong one, image work gets its own lane - and all 49 test combinations landed in the intended lane. Mobile status now refreshes itself in real time, and the redundant refresh button is gone. [What we learned] Three notes from the internal playbook: (1) a healthy self-healing mechanism should be quiet - if it \"repairs\" something every cycle, suspect the detector before the service; (2) never claim \"auto-recovered\" without proof: same instance, same health record - \"it restarted\" is not proof; (3) \"nothing new\" is not necessarily a fault - first check what was supposed to be there.",
+      "summary": "[What we fixed] Fixed \"after you close the page, the background progress stream keeps writing to an already-closed channel and ends up throwing process errors\": it now checks whether the channel is still open before every write, and stops cleanly once it is closed, so the process is no longer interrupted (fixed and verified in the development build; ships with the next release). [What we improved] No new features today - mostly stability monitoring and routine maintenance, with no visible change on your side. [What we learned] Two notes from the internal playbook: (1) when something \"won't connect / doesn't respond\", look at the response time first - a failure in a few milliseconds usually means nothing is listening on the other port, not that the network is slow, so don't rush to switch routes or restart; (2) \"it's installed\" is not \"it's running\": accept work by real receipts - is the process there, is real data coming out - checking that a file exists is not acceptance.",
       "sections": {
-        "skills": [
-          "Model scheduling by time of day and task weight: light jobs use a fast model, complex jobs a strong one, image work gets a separate lane; all 49 test combinations landed in the intended lane.",
-          "Mobile status refreshes itself: running-task counts and progress update on their own, no refresh button needed.",
-          "Sidebar sessions are layered and fixed: reported items stay on top, finished and closed ones sink below, and the order no longer drifts over time."
-        ],
+        "skills": [],
         "bugs": [
-          "Fixed broken avatars and task-card icons on mobile - images load normally again.",
-          "Fixed \"the home screen shows 0 running tasks while work is actually running\": the online window was too short and the data flickered; it now shows steadily.",
-          "Fixed \"a running task gets stamped finished too early\": while a just-sent message is still unanswered and results are still streaming in, no end stamp is applied.",
-          "Fixed \"cancel a queued item and it comes back by itself\": the local cache was not cleared with it; it now disappears for good.",
-          "Fixed the page sticking on \"checking...\": it now updates itself in real time, and the redundant refresh button is gone."
+          "Fixed \"after the page is closed the background progress stream keeps writing to a closed channel and throws process errors\": every write now checks whether the channel is still open and stops pushing immediately once it is closed, so the process is no longer interrupted by these writes (fixed and verified in the development build; ships with the next release)."
         ],
         "lessons": [
-          "A healthy self-healing mechanism should be quiet: if it \"repairs\" something every cycle, suspect the detector itself before the monitored service.",
-          "Never claim \"auto-recovered\" without proof - the same instance and the same health record before and after; \"it restarted\" is not a fix.",
-          "\"Nothing new\" is not necessarily a fault: compare against what was supposed to be there before deciding to report it."
+          "When something \"won't connect / doesn't respond\", check the response time first: a failure within a few milliseconds usually means nothing is listening on the other port rather than a slow network - inspect the port before switching routes or restarting.",
+          "\"Installed\" is not \"running\": accept work by real receipts - is the process alive, is real data coming out; a file sitting in place is not acceptance."
         ]
       }
     },
     "ja": {
-      "summary": "【直したこと】スマホのアバターとタスクカードのアイコンが再び表示されるようになりました。ホーム画面の「実行中」が時々 0 になる問題も解消し、進行中のタスクがいつでも見えます。実行中のタスクが早々に「完了」と表示されることもなくなり、「報告済み」は常に「終了」より上に並びます。「待機解除」した項目が勝手に戻ることも、画面が「確認中」のまま固まることもなくなりました。【改善・追加】モデルの割り当てを整理し、時間帯と作業の重さで自動選択するようにしました。軽い作業は速いモデル、重い作業は強いモデル、画像は専用の枠。49 通りの組み合わせテストはすべて想定した枠に収まりました。スマホ側の状態は自動でリアルタイム更新され、余計な更新ボタンは廃止しました。【学んだこと】社内の経験ノートから 3 点：①健全な自動復旧は「静か」であるべき。毎周期なにかを「修復」しているなら、まず監視対象ではなく検出手段を疑う。②「自動復旧しました」と言うには証拠が要る。同じインスタンス、同じ健全性記録で示すこと。「再起動しました」だけでは不十分。③「新しい内容がない」は故障とは限らない。まず「本来あるべきもの」と照合する。",
+      "summary": "【修正したこと】「ページを閉じた後も、バックグラウンドの進捗配信がすでに閉じた経路へ書き込み続け、プロセスがエラーになる」問題を修正しました。書き込みの前に経路が開いているかを必ず確認し、閉じていれば即座に配信を止めるので、プロセスが中断されなくなります（開発版で修正・検証済み、次回バージョンで配信）。【改善・追加】本日は新機能なし。安定性の監視と日常メンテナンスが中心で、画面の見た目に変化はありません。【学んだこと】内部の経験ノートから2点：①「つながらない・反応がない」ときは、まず応答時間を見る——数ミリ秒で失敗するなら、相手側のポートが待ち受けていない可能性が高く、回線が遅いわけではありません。回線の切り替えや再起動を急がないこと。②「入れた」は「動いている」ではありません。受け入れ確認は実際の証拠で——プロセスが生きているか、実データが出ているか。ファイルがあるだけでは確認になりません。",
       "sections": {
-        "skills": [
-          "モデル割り当てを時間帯と作業の重さで自動化：軽い作業は速いモデル、複雑な作業は強いモデル、画像は専用枠。49 通りのテストはすべて想定枠に収まりました。",
-          "スマホ側の状態を自動でリアルタイム更新：実行中の件数と進捗がひとりでに更新され、更新ボタンを探す必要がありません。",
-          "サイドバーの並びを層で固定：報告済みは常に上、終了・完了は下にまとまり、時間で順番が入れ替わらなくなりました。"
-        ],
+        "skills": [],
         "bugs": [
-          "スマホのアバターとタスクカードのアイコンが表示されない問題を修正。画像が正常に読み込まれます。",
-          "「実行中なのにホームが 0 件と表示する」問題を修正。オンライン判定の窓が短すぎて数値が点滅していたため、安定して表示されるようにしました。",
-          "「まだ実行中のタスクが早々に完了と表示される」問題を修正。送ったばかりの発言に返答がなく結果を受け取り中の間は、終了の印を付けません。",
-          "「待機解除したのに項目がひとりでに戻る」問題を修正。ローカルキャッシュが一緒に消えていなかったため、解除したら消えるようにしました。",
-          "画面が「確認中…」で固まる問題を修正。自動のリアルタイム更新に変え、余計な更新ボタンも外しました。"
+          "「ページを閉じた後にバックグラウンドの進捗配信が閉じた経路へ書き込み続け、プロセスがエラーになる」問題を修正：書き込み前に経路が閉じていないか確認し、閉じていれば即停止するため、こうした書き込みでプロセスが中断されなくなりました（開発版で修正・検証済み、次回バージョンで配信）。"
         ],
         "lessons": [
-          "健全な自動復旧は静かであるべき：毎周期なにかを「修復」しているなら、監視対象より先に検出手段そのものを疑う。",
-          "「自動復旧しました」には証拠が要る。復旧の前後が同じインスタンス・同じ健全性記録であること。「再起動しました」だけでは直ったことにならない。",
-          "「新しい内容がない」は故障とは限らない。まず「本来あるべきもの」と照らし合わせてから報告を決める。"
+          "「つながらない・反応がない」ときは応答時間を先に見る：数ミリ秒で失敗する場合は、回線が遅いのではなく相手のポートが待ち受けていないことが多い。まずポートを確認し、回線の切り替えや再起動を急がない。",
+          "「入れた」は「動いている」ではない：受け入れは実際の証拠で判断する（プロセスが生きているか、実データが出ているか）。ファイルがあるだけでは確認にならない。"
         ]
       }
     },
     "ko": {
-      "summary": "[고친 것] 모바일 아바타와 작업 카드 아이콘이 다시 표시됩니다. 홈 화면의 '진행 중'이 간헐적으로 0으로 떨어지던 문제도 해결되어 진행 중인 작업을 항상 볼 수 있습니다. 실행 중인 작업이 성급하게 '완료'로 표시되지 않고, '보고됨' 항목은 항상 '종료' 위에 고정됩니다. '대기 취소'한 항목이 다시 나타나지 않고, 화면이 '확인 중'에서 멈추지도 않습니다. [개선/추가] 모델 배정을 재정리해 시간대와 작업 무게에 따라 자동 선택합니다. 가벼운 작업은 빠른 모델, 복잡한 작업은 강한 모델, 이미지는 별도 라인. 49가지 조합 테스트가 모두 의도한 라인에 들어갔습니다. 모바일 상태는 자동으로 실시간 갱신되며 불필요한 새로고침 버튼은 없앴습니다. [배운 것] 내부 경험 노트에서 세 가지: ①건강한 자동 복구는 '조용'해야 합니다. 매 주기 무언가를 '복구'한다면 감시 대상이 아니라 검출 수단을 먼저 의심하세요. ②'자동 복구됨'이라고 말하려면 증거가 필요합니다. 같은 인스턴스, 같은 상태 기록. '재시작했습니다'만으로는 부족합니다. ③'새 내용이 없다'가 곧 고장은 아닙니다. 먼저 '원래 있어야 할 것'과 대조하세요.",
+      "summary": "[수정한 것] \"페이지를 닫은 뒤에도 백그라운드 진행 스트림이 이미 닫힌 통로에 계속 데이터를 써서 프로세스 오류가 나던 문제\"를 고쳤습니다. 이제 쓰기 전에 통로가 열려 있는지 먼저 확인하고, 닫혀 있으면 바로 전송을 멈추므로 프로세스가 중단되지 않습니다(개발판에서 수정·검증 완료, 다음 버전에 포함). [개선·추가] 오늘은 새로운 기능이 없습니다. 안정성 관찰과 일상 유지보수가 중심이었고 화면상 달라진 점은 없습니다. [배운 것] 내부 경험 노트에서 두 가지: ① \"연결이 안 된다·반응이 없다\"면 먼저 응답 시간을 봅니다. 몇 밀리초 만에 실패하면 상대 포트가 듣고 있지 않을 가능성이 크고, 회선이 느린 것이 아닙니다. 회선 교체나 재시작을 서두르지 마세요. ② \"설치했다\"는 \"돌고 있다\"가 아닙니다. 검수는 실제 증거로: 프로세스가 살아 있는지, 실제 데이터가 나오는지. 파일이 있는 것만으로는 검수가 아닙니다.",
       "sections": {
-        "skills": [
-          "시간대와 작업 무게에 따른 자동 모델 배정: 가벼운 작업은 빠른 모델, 복잡한 작업은 강한 모델, 이미지는 별도 라인. 49가지 테스트 조합이 모두 의도한 라인에 들어갔습니다.",
-          "모바일 상태가 스스로 실시간 갱신: 진행 중인 작업 수와 진행률이 알아서 업데이트되어 새로고침 버튼을 찾을 필요가 없습니다.",
-          "사이드바 목록을 층으로 고정: 보고된 항목은 항상 위, 종료·완료 항목은 아래로 모여 시간에 따라 순서가 흔들리지 않습니다."
-        ],
+        "skills": [],
         "bugs": [
-          "모바일 아바타와 작업 카드 아이콘이 깨져 보이지 않던 문제를 고쳤습니다. 이미지가 정상적으로 로드됩니다.",
-          "'작업이 돌고 있는데 홈 화면 진행 중이 0으로 표시'되던 문제를 고쳤습니다. 온라인 판정 창이 너무 짧아 값이 깜빡였고, 이제 안정적으로 표시됩니다.",
-          "'아직 실행 중인 작업이 성급하게 완료로 표시'되던 문제를 고쳤습니다. 방금 보낸 말에 아직 답이 없고 결과를 받는 중일 때는 종료 도장을 찍지 않습니다.",
-          "'대기 취소를 눌렀는데 항목이 다시 나타나던' 문제를 고쳤습니다. 로컬 캐시가 함께 지워지지 않았고, 이제 취소하면 사라집니다.",
-          "화면이 '확인 중...'에서 멈추던 문제를 고쳤습니다. 자동 실시간 갱신으로 바꾸고 불필요한 새로고침 버튼도 없앴습니다."
+          "\"페이지를 닫은 뒤 백그라운드 진행 스트림이 닫힌 통로에 계속 써서 프로세스 오류가 나던 문제\" 수정: 쓰기 전에 통로 상태를 확인하고 닫혀 있으면 즉시 중단하여, 이런 쓰기로 프로세스가 중단되지 않습니다(개발판에서 수정·검증 완료, 다음 버전에 포함)."
         ],
         "lessons": [
-          "건강한 자동 복구는 조용해야 합니다: 매 주기 무언가를 '복구'한다면 감시 대상보다 검출 수단 자체를 먼저 의심하세요.",
-          "'자동 복구됨'이라고 하려면 증거가 필요합니다. 복구 전후가 같은 인스턴스, 같은 상태 기록이어야 합니다. '재시작했습니다'만으로는 고친 것이 아닙니다.",
-          "'새 내용이 없다'는 곧 고장이 아닙니다. 먼저 '원래 있어야 할 것'과 대조한 뒤 보고 여부를 정하세요."
+          "\"연결이 안 된다·반응이 없다\"면 응답 시간을 먼저 본다: 몇 밀리초 만에 실패하면 회선이 느린 게 아니라 상대 포트가 듣고 있지 않은 경우가 많다. 포트를 먼저 확인하고 회선 교체·재시작을 서두르지 않는다.",
+          "\"설치했다\"는 \"돌고 있다\"가 아니다: 검수는 실제 증거로 판단한다(프로세스 생존, 실제 데이터 산출). 파일이 있는 것만으로는 검수가 아니다."
         ]
       }
     },
     "es": {
-      "summary": "[Qué arreglamos] Los avatares y los iconos de las tarjetas de tareas vuelven a mostrarse en el móvil; la pantalla de inicio ya no baja a 0 tareas en curso de vez en cuando, así que el trabajo en marcha siempre se ve; una tarea que sigue ejecutándose ya no se marca como \"finalizada\" antes de tiempo, y lo ya informado queda siempre por encima de lo terminado; cancelar un elemento en cola ya no hace que reaparezca, y la página ya no se queda en \"comprobando\". [Qué mejoramos] Reorganizamos la asignación de modelos: ahora elige por franja horaria y peso de la tarea - lo ligero va a un modelo rápido, lo complejo a uno potente, las imágenes tienen su propia vía - y las 49 combinaciones de prueba cayeron en la vía prevista. El estado en el móvil se actualiza solo en tiempo real y el botón de refrescar sobrante desapareció. [Qué aprendimos] Tres notas del cuaderno interno: (1) un mecanismo de autoresuperación sano debe estar callado; si \"repara\" algo en cada ciclo, sospecha del detector antes que del servicio; (2) nunca digas \"se recuperó solo\" sin prueba: el mismo proceso y el mismo registro de salud antes y después; \"se reinició\" no es prueba; (3) \"no hay nada nuevo\" no es necesariamente un fallo: primero compara con lo que debería estar ahí.",
+      "summary": "[Lo que arreglamos] Corregido: «al cerrar la página, el flujo de progreso en segundo plano seguía escribiendo en un canal ya cerrado y terminaba provocando errores en el proceso». Ahora se comprueba si el canal sigue abierto antes de cada escritura y, si ya está cerrado, se detiene de inmediato, así que el proceso ya no se interrumpe (corregido y verificado en la versión de desarrollo; se publica con la próxima versión). [Lo que mejoramos] Hoy no hay funciones nuevas: sobre todo observación de estabilidad y mantenimiento diario, sin cambios visibles para ti. [Lo que aprendimos] Dos notas del cuaderno interno: (1) cuando algo «no conecta / no responde», mira primero el tiempo de respuesta: fallar en pocos milisegundos suele significar que no hay nada escuchando en el otro puerto, no que la red vaya lenta, así que no corras a cambiar de ruta ni a reiniciar; (2) «está instalado» no es «está funcionando»: se acepta con pruebas reales —¿está vivo el proceso?, ¿salen datos de verdad?—; que un archivo esté en su sitio no es una validación.",
       "sections": {
-        "skills": [
-          "Asignación automática de modelo por franja horaria y peso de la tarea: lo ligero usa un modelo rápido, lo complejo uno potente, las imágenes tienen vía propia; las 49 combinaciones de prueba cayeron en la vía prevista.",
-          "El estado del móvil se actualiza solo en tiempo real: el número de tareas en curso y el progreso cambian por su cuenta, sin buscar botón de refrescar.",
-          "Las sesiones de la barra lateral quedan por capas y fijas: lo informado siempre arriba, lo terminado y cerrado abajo, y el orden ya no baila con el tiempo."
-        ],
+        "skills": [],
         "bugs": [
-          "Arreglados los avatares y los iconos de tarjetas de tareas que no se veían en el móvil: las imágenes cargan con normalidad.",
-          "Arreglado \"la pantalla de inicio marca 0 tareas en curso mientras algo se está ejecutando\": la ventana de conexión era demasiado corta y el dato parpadeaba; ahora se muestra estable.",
-          "Arreglado \"una tarea en curso se marca como finalizada antes de tiempo\": mientras un mensaje recién enviado sigue sin respuesta y los resultados aún llegan, no se pone el sello de fin.",
-          "Arreglado \"cancelas un elemento en cola y vuelve a aparecer\": la caché local no se limpiaba con él; ahora desaparece de verdad.",
-          "Arreglado que la página se quedara en \"comprobando...\": ahora se actualiza sola en tiempo real y el botón de refrescar sobrante ya no está."
+          "Corregido: «tras cerrar la página, el flujo de progreso en segundo plano seguía escribiendo en un canal cerrado y provocaba errores en el proceso». Ahora cada escritura comprueba si el canal está abierto y deja de enviar en cuanto se cierra, así que el proceso ya no se interrumpe (corregido y verificado en la versión de desarrollo; se publica con la próxima versión)."
         ],
         "lessons": [
-          "Un mecanismo de autoresuperación sano debe estar callado: si \"repara\" algo en cada ciclo, sospecha del propio detector antes que del servicio vigilado.",
-          "Nunca afirmes \"se recuperó solo\" sin prueba: el mismo proceso y el mismo registro de salud antes y después; \"se reinició\" no es una reparación.",
-          "\"No hay nada nuevo\" no es necesariamente un fallo: compara con lo que debería estar ahí antes de decidir si avisar."
+          "Cuando algo «no conecta / no responde», revisa primero el tiempo de respuesta: un fallo en pocos milisegundos suele indicar que el otro puerto no está escuchando, no que la red sea lenta; revisa el puerto antes de cambiar de ruta o reiniciar.",
+          "«Instalado» no es «funcionando»: valida con pruebas reales (¿el proceso está vivo?, ¿hay datos reales saliendo?); que un archivo esté presente no es una validación."
         ]
       }
     },
     "fr": {
-      "summary": "[Ce qu'on a corrigé] Les avatars et les icônes des cartes de tâches s'affichent de nouveau sur mobile ; l'accueil mobile ne retombe plus à 0 tâche en cours de temps en temps, donc le travail en cours reste toujours visible ; une tâche encore en cours n'est plus marquée « terminée » trop tôt, et les éléments déjà signalés restent au-dessus des terminés ; annuler un élément en file ne le fait plus réapparaître, et la page ne reste plus bloquée sur « vérification ». [Ce qu'on a amélioré] Réorganisation de l'attribution des modèles : le choix se fait selon le moment de la journée et le poids de la tâche - le léger part sur un modèle rapide, le complexe sur un modèle puissant, les images ont leur propre voie - et les 49 combinaisons de test sont toutes tombées dans la voie prévue. L'état sur mobile se rafraîchit tout seul en temps réel, et le bouton d'actualisation superflu a disparu. [Ce qu'on a appris] Trois notes du carnet interne : (1) un mécanisme d'auto-réparation sain doit rester silencieux ; s'il « répare » à chaque cycle, soupçonnez le détecteur avant le service ; (2) ne dites jamais « récupéré automatiquement » sans preuve : même instance, même fiche de santé avant et après ; « ça a redémarré » n'est pas une preuve ; (3) « rien de nouveau » n'est pas forcément une panne : comparez d'abord avec ce qui devrait s'y trouver.",
+      "summary": "[Ce qu'on a corrigé] Corrigé : « après la fermeture de la page, le flux de progression en arrière-plan continuait d'écrire dans un canal déjà fermé, ce qui finissait par provoquer des erreurs de processus ». Désormais, chaque écriture vérifie d'abord que le canal est ouvert et s'arrête net s'il est fermé : le processus n'est plus interrompu (corrigé et vérifié en version de développement ; livré avec la prochaine version). [Ce qu'on a amélioré] Pas de nouvelle fonction aujourd'hui : surtout de la surveillance de stabilité et de la maintenance courante, sans changement visible de votre côté. [Ce qu'on a appris] Deux notes du carnet interne : (1) quand « ça ne se connecte pas / ça ne répond pas », regardez d'abord le temps de réponse — un échec en quelques millisecondes signifie le plus souvent que rien n'écoute sur le port en face, pas que le réseau est lent ; inutile de changer de route ou de redémarrer dans l'urgence ; (2) « c'est installé » n'est pas « ça tourne » : on valide sur des preuves réelles — le processus est-il vivant, des données réelles sortent-elles ? Un fichier présent ne vaut pas validation.",
       "sections": {
-        "skills": [
-          "Attribution automatique du modèle selon le moment de la journée et le poids de la tâche : le léger sur un modèle rapide, le complexe sur un modèle puissant, les images sur une voie dédiée ; les 49 combinaisons de test sont tombées dans la voie prévue.",
-          "L'état sur mobile se rafraîchit tout seul : le nombre de tâches en cours et la progression se mettent à jour sans qu'on cherche un bouton.",
-          "Les sessions de la barre latérale sont rangées par couches fixes : le signalé reste en haut, le terminé et le clôturé descendent en bas, et l'ordre ne bouge plus avec le temps."
-        ],
+        "skills": [],
         "bugs": [
-          "Correction des avatars et des icônes de cartes de tâches qui ne s'affichaient pas sur mobile : les images se chargent de nouveau normalement.",
-          "Correction de « l'accueil affiche 0 tâche en cours alors que ça tourne » : la fenêtre de détection était trop courte et la donnée clignotait ; l'affichage est maintenant stable.",
-          "Correction de « une tâche en cours est marquée terminée trop tôt » : tant qu'un message tout juste envoyé n'a pas de réponse et que les résultats arrivent encore, aucun sceau de fin n'est posé.",
-          "Correction de « j'annule un élément en file et il revient tout seul » : le cache local n'était pas vidé en même temps ; il disparaît désormais pour de bon.",
-          "Correction de la page bloquée sur « vérification… » : elle se met à jour d'elle-même en temps réel, et le bouton d'actualisation superflu a été retiré."
+          "Corrigé : « après fermeture de la page, le flux de progression en arrière-plan continuait d'écrire dans un canal fermé et provoquait des erreurs de processus ». Chaque écriture vérifie maintenant que le canal est ouvert et cesse l'envoi dès qu'il est fermé : le processus n'est plus interrompu (corrigé et vérifié en version de développement ; livré avec la prochaine version)."
         ],
         "lessons": [
-          "Un mécanisme d'auto-réparation sain doit rester silencieux : s'il « répare » à chaque cycle, soupçonnez le détecteur lui-même avant le service surveillé.",
-          "Ne dites jamais « récupéré automatiquement » sans preuve : la même instance et la même fiche de santé avant et après ; « ça a redémarré » n'est pas une réparation.",
-          "« Rien de nouveau » n'est pas forcément une panne : comparez d'abord avec ce qui devrait s'y trouver avant de décider de signaler."
+          "Quand « ça ne se connecte pas / ça ne répond pas », regardez d'abord le temps de réponse : un échec en quelques millisecondes indique le plus souvent que le port en face n'écoute pas, et non un réseau lent ; vérifiez le port avant de changer de route ou de redémarrer.",
+          "« Installé » n'est pas « en marche » : validez sur des preuves réelles (processus vivant, données réelles produites) ; un fichier présent ne suffit pas."
         ]
       }
     },
     "de": {
-      "summary": "[Was wir behoben haben] Avatare und Aufgabenkarten-Symbole werden auf dem Handy wieder angezeigt; die Startseite fällt nicht mehr gelegentlich auf 0 laufende Aufgaben, sodass laufende Arbeit immer sichtbar bleibt; eine noch laufende Aufgabe wird nicht mehr vorzeitig als „abgeschlossen“ gestempelt, und bereits Gemeldetes bleibt über Abgeschlossenem; das Abbrechen eines wartenden Eintrags lässt ihn nicht mehr wieder auftauchen, und die Seite bleibt nicht mehr bei „wird geprüft“ hängen. [Was wir verbessert haben] Die Modellzuweisung wurde neu geordnet: gewählt wird nach Tageszeit und Aufgabengewicht - Leichtes geht an ein schnelles Modell, Komplexes an ein starkes, Bilder bekommen eine eigene Spur - und alle 49 Testkombinationen landeten in der vorgesehenen Spur. Der Status auf dem Handy aktualisiert sich jetzt selbst in Echtzeit, der überflüssige Aktualisieren-Knopf ist weg. [Was wir gelernt haben] Drei Notizen aus dem internen Erfahrungsbuch: (1) eine gesunde Selbstheilung sollte leise sein - „repariert“ sie in jedem Zyklus etwas, verdächtige zuerst die Prüfung, nicht den Dienst; (2) behaupte nie „automatisch wiederhergestellt“ ohne Beleg: dieselbe Instanz, derselbe Gesundheitsdatensatz vorher und nachher; „neu gestartet“ ist kein Beleg; (3) „nichts Neues“ ist nicht automatisch ein Fehler - vergleiche zuerst mit dem, was dort stehen sollte.",
+      "summary": "[Was wir behoben haben] Behoben: „Nach dem Schließen der Seite schrieb der Fortschritts-Stream im Hintergrund weiter in einen bereits geschlossenen Kanal und löste dadurch Prozessfehler aus“. Jetzt wird vor jedem Schreiben geprüft, ob der Kanal noch offen ist; ist er geschlossen, wird sofort gestoppt, sodass der Prozess nicht mehr unterbrochen wird (in der Entwicklungsversion behoben und geprüft; kommt mit der nächsten Version). [Was wir verbessert haben] Heute keine neuen Funktionen – vor allem Stabilitätsbeobachtung und Routinewartung, ohne sichtbare Änderung für dich. [Was wir gelernt haben] Zwei Notizen aus dem internen Erfahrungsbuch: (1) Wenn etwas „keine Verbindung bekommt / nicht reagiert“, zuerst die Antwortzeit ansehen – ein Fehler nach wenigen Millisekunden heißt meist, dass am anderen Port nichts lauscht, und nicht, dass das Netz langsam ist; also nicht gleich Route wechseln oder neu starten; (2) „installiert“ ist nicht „läuft“: Abnahme nur mit echten Belegen – lebt der Prozess, kommen echte Daten heraus? Eine vorhandene Datei ist keine Abnahme.",
       "sections": {
-        "skills": [
-          "Automatische Modellwahl nach Tageszeit und Aufgabengewicht: Leichtes nutzt ein schnelles Modell, Komplexes ein starkes, Bilder haben eine eigene Spur; alle 49 Testkombinationen landeten in der vorgesehenen Spur.",
-          "Der Status auf dem Handy aktualisiert sich selbst: Anzahl laufender Aufgaben und Fortschritt ändern sich von allein, kein Aktualisieren-Knopf nötig.",
-          "Seitenleisten-Sitzungen sind fest geschichtet: Gemeldetes bleibt oben, Beendetes und Abgeschlossenes rutscht nach unten, die Reihenfolge springt nicht mehr mit der Zeit."
-        ],
+        "skills": [],
         "bugs": [
-          "Avatare und Aufgabenkarten-Symbole, die auf dem Handy nicht angezeigt wurden, sind repariert - Bilder laden wieder normal.",
-          "Behoben: „Die Startseite zeigt 0 laufende Aufgaben, obwohl etwas läuft“ - das Online-Fenster war zu kurz und der Wert flackerte; jetzt wird er stabil angezeigt.",
-          "Behoben: „Eine laufende Aufgabe wird vorzeitig als abgeschlossen gestempelt“ - solange eine gerade gesendete Nachricht unbeantwortet ist und Ergebnisse noch eintreffen, wird kein Endstempel gesetzt.",
-          "Behoben: „Wartenden Eintrag abbrechen und er kommt von selbst zurück“ - der lokale Zwischenspeicher wurde nicht mit gelöscht; jetzt verschwindet er dauerhaft.",
-          "Behoben: Die Seite blieb bei „wird geprüft…“ hängen - sie aktualisiert sich nun selbst in Echtzeit, der überflüssige Aktualisieren-Knopf ist entfernt."
+          "Behoben: „Nach dem Schließen der Seite schrieb der Fortschritts-Stream im Hintergrund weiter in einen geschlossenen Kanal und löste Prozessfehler aus“. Jedes Schreiben prüft nun, ob der Kanal offen ist, und stoppt sofort, wenn er geschlossen wurde; der Prozess wird dadurch nicht mehr unterbrochen (in der Entwicklungsversion behoben und geprüft; kommt mit der nächsten Version)."
         ],
         "lessons": [
-          "Eine gesunde Selbstheilung sollte leise sein: „repariert“ sie in jedem Zyklus etwas, verdächtige zuerst die Prüfung selbst und nicht den überwachten Dienst.",
-          "Behaupte nie „automatisch wiederhergestellt“ ohne Beleg - dieselbe Instanz und derselbe Gesundheitsdatensatz vorher und nachher; „neu gestartet“ ist keine Reparatur.",
-          "„Nichts Neues“ ist nicht automatisch ein Fehler: vergleiche erst mit dem, was dort stehen sollte, und entscheide dann, ob gemeldet wird."
+          "Wenn etwas „keine Verbindung bekommt / nicht reagiert“, zuerst die Antwortzeit prüfen: Ein Fehler nach wenigen Millisekunden deutet meist darauf, dass der andere Port nicht lauscht, nicht auf ein langsames Netz; erst den Port prüfen, dann Route wechseln oder neu starten.",
+          "„Installiert“ ist nicht „läuft“: Abnahme mit echten Belegen (Prozess lebt, echte Daten kommen heraus); eine vorhandene Datei ist keine Abnahme."
         ]
       }
     },
     "ru": {
-      "summary": "[Что исправили] Аватары и иконки карточек задач снова отображаются на телефоне; главный экран больше не показывает 0 выполняющихся задач время от времени, поэтому текущая работа всегда видна; выполняющаяся задача больше не помечается «завершённой» заранее, а уже доложенное всегда стоит выше завершённого; отмена элемента в очереди больше не возвращает его обратно, и страница не застревает на «проверяю». [Что улучшили] Перестроили выбор модели: теперь он идёт по времени суток и весу задачи — лёгкое уходит на быструю модель, сложное на сильную, изображения имеют отдельную дорожку — и все 49 тестовых комбинаций попали в нужную дорожку. Статус на телефоне обновляется сам в реальном времени, лишняя кнопка обновления убрана. [Чему научились] Три заметки из внутренней книги опыта: (1) здоровое самовосстановление должно быть тихим — если оно «чинит» что-то каждый цикл, подозревайте сначала саму проверку, а не сервис; (2) нельзя говорить «восстановилось само» без доказательства: тот же экземпляр и та же запись здоровья до и после; «перезапустилось» — не доказательство; (3) «ничего нового» — не обязательно сбой: сначала сравните с тем, что там должно быть.",
+      "summary": "[Что исправили] Исправлено: «после закрытия страницы фоновый поток прогресса продолжал писать в уже закрытый канал и в итоге вызывал ошибки процесса». Теперь перед каждой записью проверяется, открыт ли канал, и при закрытии отправка сразу прекращается — процесс больше не прерывается (исправлено и проверено в рабочей сборке; выйдет со следующей версией). [Что улучшили] Новых функций сегодня нет: в основном наблюдение за стабильностью и текущее обслуживание, заметных изменений для вас нет. [Что мы поняли] Две заметки из внутренней базы опыта: (1) когда «не подключается / не отвечает», смотрите сначала время ответа — отказ за несколько миллисекунд чаще означает, что на том порту вообще никто не слушает, а не что сеть медленная; не спешите менять маршрут или перезапускать; (2) «установлено» не значит «работает»: приёмка только по реальным доказательствам — жив ли процесс, идут ли реальные данные; наличие файла приёмкой не является.",
       "sections": {
-        "skills": [
-          "Автоматический выбор модели по времени суток и весу задачи: лёгкое идёт на быструю модель, сложное на сильную, изображения — отдельная дорожка; все 49 тестовых комбинаций попали в нужную дорожку.",
-          "Статус на телефоне обновляется сам: число выполняющихся задач и прогресс меняются без участия пользователя, кнопка обновления не нужна.",
-          "Сессии в боковой панели жёстко разложены по слоям: доложенное всегда сверху, завершённое и закрытое уходит вниз, порядок больше не скачет со временем."
-        ],
+        "skills": [],
         "bugs": [
-          "Исправлены аватары и иконки карточек задач, которые не отображались на телефоне: изображения снова загружаются нормально.",
-          "Исправлено «главный экран показывает 0 выполняющихся задач, хотя работа идёт»: окно определения онлайн было слишком коротким и значение мигало; теперь показывается стабильно.",
-          "Исправлено «выполняющаяся задача помечается завершённой заранее»: пока только что отправленное сообщение без ответа и результаты ещё идут, печать завершения не ставится.",
-          "Исправлено «отменяешь элемент в очереди, а он возвращается сам»: локальный кэш не очищался вместе с ним; теперь он исчезает окончательно.",
-          "Исправлено зависание страницы на «проверяю…»: теперь она обновляется сама в реальном времени, а лишняя кнопка обновления убрана."
+          "Исправлено: «после закрытия страницы фоновый поток прогресса продолжал писать в закрытый канал и вызывал ошибки процесса». Теперь каждая запись проверяет, открыт ли канал, и при закрытии передача сразу останавливается — процесс больше не прерывается (исправлено и проверено в рабочей сборке; выйдет со следующей версией)."
         ],
         "lessons": [
-          "Здоровое самовосстановление должно быть тихим: если оно «чинит» что-то каждый цикл, подозревайте саму проверку, а не наблюдаемый сервис.",
-          "Нельзя говорить «восстановилось само» без доказательства — тот же экземпляр и та же запись здоровья до и после; «перезапустилось» — это не починка.",
-          "«Ничего нового» — не обязательно сбой: сначала сравните с тем, что там должно быть, и только потом решайте, сообщать ли."
+          "Когда «не подключается / не отвечает», сначала смотрите время ответа: отказ за несколько миллисекунд обычно означает, что порт на той стороне не слушает, а не что сеть медленная; проверьте порт, прежде чем менять маршрут или перезапускать.",
+          "«Установлено» не значит «работает»: приёмка — только по реальным доказательствам (процесс жив, идут реальные данные); наличие файла не является приёмкой."
         ]
       }
     },
     "pt": {
-      "summary": "[O que corrigimos] Avatares e ícones dos cartões de tarefas voltaram a aparecer no celular; a tela inicial não cai mais para 0 tarefas em execução de vez em quando, então o trabalho em andamento fica sempre visível; uma tarefa ainda em execução não é mais marcada como \"concluída\" antes da hora, e o que já foi reportado fica sempre acima do encerrado; cancelar um item na fila não faz mais ele reaparecer, e a página não trava mais em \"verificando\". [O que melhoramos] Reorganizamos a escolha de modelo: agora ela considera o horário e o peso da tarefa - o leve vai para um modelo rápido, o complexo para um forte, imagens têm uma faixa própria - e as 49 combinações de teste caíram na faixa prevista. O status no celular se atualiza sozinho em tempo real, e o botão de atualizar que sobrava foi removido. [O que aprendemos] Três notas do caderno interno: (1) um mecanismo de autorrecuperação saudável deve ficar quieto; se ele \"conserta\" algo a cada ciclo, desconfie do detector antes do serviço; (2) nunca diga \"recuperou sozinho\" sem prova: mesma instância e mesmo registro de saúde antes e depois; \"reiniciou\" não é prova; (3) \"nada novo\" não é necessariamente falha: primeiro compare com o que deveria estar ali.",
+      "summary": "[O que corrigimos] Corrigido: «ao fechar a página, o fluxo de progresso em segundo plano continuava a escrever num canal já fechado e acabava gerando erros no processo». Agora cada escrita verifica se o canal continua aberto e, se já estiver fechado, para de imediato, então o processo deixa de ser interrompido (corrigido e verificado na versão de desenvolvimento; será publicado na próxima versão). [O que melhorámos] Hoje não há funcionalidades novas: sobretudo observação de estabilidade e manutenção diária, sem alterações visíveis do seu lado. [O que aprendemos] Duas notas do caderno interno: (1) quando algo «não liga / não responde», veja primeiro o tempo de resposta — falhar em poucos milissegundos normalmente significa que não há nada a escutar na outra porta, e não que a rede esteja lenta; não corra a trocar de rota nem a reiniciar; (2) «está instalado» não é «está a funcionar»: a validação é feita com provas reais — o processo está vivo, saem dados reais? Um ficheiro presente não é validação.",
       "sections": {
-        "skills": [
-          "Escolha automática de modelo por horário e peso da tarefa: o leve usa um modelo rápido, o complexo um forte, imagens têm faixa própria; as 49 combinações de teste caíram na faixa prevista.",
-          "O status no celular se atualiza sozinho: quantidade de tarefas em execução e progresso mudam por conta própria, sem precisar procurar botão de atualizar.",
-          "As sessões da barra lateral ficam em camadas fixas: o reportado sempre em cima, o encerrado e concluído desce para baixo, e a ordem não pula mais com o tempo."
-        ],
+        "skills": [],
         "bugs": [
-          "Corrigidos avatares e ícones de cartões de tarefas que não apareciam no celular: as imagens voltaram a carregar normalmente.",
-          "Corrigido \"a tela inicial mostra 0 tarefas em execução enquanto algo roda\": a janela de detecção era curta demais e o dado piscava; agora aparece estável.",
-          "Corrigido \"uma tarefa em execução é marcada como concluída antes da hora\": enquanto uma mensagem recém-enviada está sem resposta e os resultados ainda chegam, nenhum selo de fim é aplicado.",
-          "Corrigido \"cancelo um item na fila e ele volta sozinho\": o cache local não era limpo junto; agora ele desaparece de vez.",
-          "Corrigido a página travando em \"verificando...\": agora ela se atualiza sozinha em tempo real, e o botão de atualizar que sobrava foi removido."
+          "Corrigido: «depois de fechar a página, o fluxo de progresso em segundo plano continuava a escrever num canal fechado e provocava erros no processo». Cada escrita passa a verificar se o canal está aberto e deixa de enviar assim que ele fecha, pelo que o processo já não é interrompido (corrigido e verificado na versão de desenvolvimento; será publicado na próxima versão)."
         ],
         "lessons": [
-          "Um mecanismo de autorrecuperação saudável deve ficar quieto: se ele \"conserta\" algo a cada ciclo, desconfie do próprio detector antes do serviço monitorado.",
-          "Nunca afirme \"recuperou sozinho\" sem prova: a mesma instância e o mesmo registro de saúde antes e depois; \"reiniciou\" não é conserto.",
-          "\"Nada novo\" não é necessariamente falha: compare antes com o que deveria estar ali e só então decida se reporta."
+          "Quando algo «não liga / não responde», veja primeiro o tempo de resposta: uma falha em poucos milissegundos costuma indicar que a porta do outro lado não está a escutar, e não que a rede esteja lenta; verifique a porta antes de trocar de rota ou reiniciar.",
+          "«Instalado» não é «a funcionar»: valide com provas reais (processo vivo, dados reais a sair); um ficheiro presente não é validação."
         ]
       }
     },
     "ar": {
-      "summary": "[ما أصلحناه] عادت الصور الرمزية وأيقونات بطاقات المهام للظهور على الهاتف؛ ولم تعد الصفحة الرئيسية تنخفض إلى 0 مهام قيد التشغيل من وقت لآخر، فالعمل الجاري يظل ظاهرًا دائمًا؛ ولم تعد المهمة التي ما زالت تعمل تُوسم بـ«منتهية» قبل أوانها، وما تم الإبلاغ عنه يبقى دائمًا فوق المنتهي؛ ولم يعد إلغاء عنصر في قائمة الانتظار يعيده للظهور، ولم تعد الصفحة تتوقف عند «جارٍ التحقق». [ما حسّناه] أعدنا ترتيب اختيار النموذج: صار يتم حسب وقت اليوم وثقل المهمة - العمل الخفيف يذهب إلى نموذج سريع، والمعقّد إلى نموذج قوي، والصور لها مسار خاص - وقد وقعت كل التركيبات الـ49 في المسار المتوقع. وحالة الهاتف تتحدث الآن تلقائيًا في الوقت الحقيقي، وأُزيل زر التحديث الزائد. [ما تعلمناه] ثلاث ملاحظات من دفتر الخبرة الداخلي: (1) آلية الإصلاح الذاتي السليمة يجب أن تكون صامتة؛ فإن كانت «تصلح» شيئًا في كل دورة، فاشك في أداة الفحص قبل الخدمة المراقَبة؛ (2) لا تقل «تعافى تلقائيًا» دون دليل: نفس النسخة ونفس سجل السلامة قبل وبعد؛ و«أُعيد تشغيله» ليس دليلًا؛ (3) «لا جديد» ليس بالضرورة عطلًا: قارن أولًا بما كان يجب أن يكون موجودًا.",
+      "summary": "[ما أصلحناه] أُصلح عيب: «بعد إغلاق الصفحة، ظلّ مسار التقدّم في الخلفية يكتب في قناة أُغلقت بالفعل، فانتهى الأمر بأخطاء في العملية». الآن يتم التأكد من أن القناة ما زالت مفتوحة قبل كل كتابة، وإن كانت مغلقة يتوقف الإرسال فورًا، فلم تعد العملية تُقطع (أُصلح وجُرّب في نسخة التطوير، وسيُنشر مع الإصدار القادم). [ما حسّنّاه] لا ميزات جديدة اليوم؛ كان التركيز على مراقبة الاستقرار والصيانة اليومية، دون تغييرات مرئية من جهتك. [ما تعلّمناه] ملاحظتان من دفتر الخبرة الداخلي: (١) عندما «لا يتصل / لا يستجيب» شيء، انظر أولًا إلى زمن الاستجابة: الفشل خلال بضعة أجزاء من الثانية يعني غالبًا أن المنفذ المقابل لا يستمع أصلًا، وليس أن الشبكة بطيئة، فلا تسرع بتغيير المسار أو إعادة التشغيل؛ (٢) «مُثبَّت» لا تعني «يعمل»: القبول يكون بأدلة حقيقية — هل العملية حيّة؟ هل تخرج بيانات حقيقية؟ وجود الملف ليس قبولًا.",
       "sections": {
-        "skills": [
-          "اختيار النموذج تلقائيًا حسب وقت اليوم وثقل المهمة: العمل الخفيف يستخدم نموذجًا سريعًا، والمعقّد نموذجًا قويًا، والصور لها مسار خاص؛ وكل التركيبات الـ49 وقعت في المسار المتوقع.",
-          "حالة الهاتف تتحدث تلقائيًا: عدد المهام الجارية ونسبة التقدم يتغيران من تلقاء نفسيهما، دون البحث عن زر تحديث.",
-          "جلسات الشريط الجانبي مرتبة بطبقات ثابتة: ما تم الإبلاغ عنه في الأعلى، والمنتهي والمغلق ينزل إلى الأسفل، ولم يعد الترتيب يتقلب مع الوقت."
-        ],
+        "skills": [],
         "bugs": [
-          "أُصلحت الصور الرمزية وأيقونات بطاقات المهام التي لم تكن تظهر على الهاتف: الصور تُحمّل الآن طبيعيًا.",
-          "أُصلح «الصفحة الرئيسية تُظهر 0 مهام جارية رغم أن العمل يعمل»: كانت نافذة تحديد الاتصال قصيرة جدًا والبيانات تومض؛ والآن تُعرض بثبات.",
-          "أُصلح «مهمة ما زالت تعمل تُوسم منتهية قبل أوانها»: ما دامت رسالة أُرسلت للتو بلا رد والنتائج ما زالت تتوارد، فلا يُختم عليها بالانتهاء.",
-          "أُصلح «ألغي عنصرًا في الانتظار فيعود من تلقاء نفسه»: لم تكن الذاكرة المحلية تُمسح معه؛ والآن يختفي نهائيًا.",
-          "أُصلح توقف الصفحة عند «جارٍ التحقق...»: صارت تتحدث تلقائيًا في الوقت الحقيقي، وأُزيل زر التحديث الزائد."
+          "أُصلح: «بعد إغلاق الصفحة ظلّ مسار التقدّم في الخلفية يكتب في قناة مغلقة وسبّب أخطاء في العملية». صار كل كتابة تتحقق من أن القناة مفتوحة وتتوقف عن الإرسال فور إغلاقها، فلم تعد العملية تُقطع (أُصلح وجُرّب في نسخة التطوير، وسيُنشر مع الإصدار القادم)."
         ],
         "lessons": [
-          "آلية الإصلاح الذاتي السليمة يجب أن تكون صامتة: إن كانت «تصلح» شيئًا في كل دورة، فاشك في أداة الفحص نفسها قبل الخدمة المراقَبة.",
-          "لا تقل «تعافى تلقائيًا» دون دليل: نفس النسخة ونفس سجل السلامة قبل وبعد؛ و«أُعيد تشغيله» ليس إصلاحًا.",
-          "«لا جديد» ليس بالضرورة عطلًا: قارن أولًا بما كان يجب أن يكون موجودًا ثم قرر هل تُبلغ أم لا."
+          "عندما «لا يتصل / لا يستجيب» شيء، افحص زمن الاستجابة أولًا: الفشل خلال بضعة أجزاء من الثانية يعني عادةً أن المنفذ المقابل لا يستمع، لا أن الشبكة بطيئة؛ افحص المنفذ قبل تغيير المسار أو إعادة التشغيل.",
+          "«مُثبَّت» ليست «يعمل»: القبول بأدلة حقيقية (العملية حيّة، وهناك بيانات حقيقية تُنتج)؛ وجود الملف وحده ليس قبولًا."
         ]
       }
     }
