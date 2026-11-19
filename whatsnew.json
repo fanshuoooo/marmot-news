@@ -1,142 +1,122 @@
 {
   "ver": "1.5.95",
-  "date": "2026-11-18",
-  "summary": "【修了什么】修好「同一个问题重问，土拨鼠卡在跑命令中不回复」的死循环：根因是精确缓存把半截进度话（比如「我现在做安全备份…」这种没干完的中间话）也存了进来，重问时直接命中旧半截话，系统判『没收口』又挂后台票、再命中、再挂票，卡死十几分钟（日志实锤 05:04:37 精确缓存命中 43 字半截话）。现在只缓存真正干完收口的答复（带✅/已完成等强证据、且不是计划尾），读侧也同步加兜底——缓存里只要是半截话一律不放行给模型重答。后续重问同一问题不会再卡。【优化/新增了什么】无。【自我学习到了什么】精确缓存不能只按『问题文本一致』收，得先看『答案是不是真干完了』——半截进度话进缓存，等于把没做完的活当成答案反复糊给主人。另两条（学自内部经验库）：②判断「连不上、没反应」先看耗时——几毫秒就失败，多半是对面端口根本没在听，不是网络慢，别急着换线路、重启；③巡检要测用户真实走的那条路，测自己方便的那条路，等于用假数据给自己发绿灯。",
+  "date": "2026-11-19",
+  "summary": "【修了什么】今日无新功能上线，也没有对外可见的 bug 修复。倒是把一件事查清了：自动巡检突然连续失败，不是网络抽风，而是对面那台服务器的安全指纹变了（对方重装了系统）。没有擅自去点「信任新指纹」——接受一个来历不明的指纹不可逆，这种事得由人来定，所以巡检先停着，等人拍板。【优化/新增了什么】无。【自我学习到了什么】①安全指纹突然变了，先分清是「对面重装」还是「有人冒充」，别顺手点信任；不可逆的动作要交回给人。②修不动的时候要换维度查，别在同一层反复修——同一个变量改两次指标不动，就当这条路废了，立刻换层。（学自内部经验库）③隔离和根治是两件事，别把止血当治好；汇报里要把「已经止血」和「要不要根治」分开说。（学自内部经验库）",
   "sections": {
     "skills": [],
-    "bugs": [
-      "修好「同一个问题重问，卡在跑命令中不回复」的死循环：精确缓存只存真正干完收口的答复（带✅/已完成等强证据、且不是计划尾），半截进度话不再进缓存；读侧同步加兜底，缓存里只要是半截话一律不放行（开发版已改好并验证）。"
-    ],
+    "bugs": [],
     "lessons": [
-      "精确缓存不能只按『问题文本一致』收，得先看『答案是不是真干完了』——半截进度话进缓存，等于把没做完的活当成答案反复糊给主人。",
-      "判断「连不上、没反应」先看响应耗时：几毫秒就失败，多数是对面端口根本没在监听，而不是网络慢——先去查端口，别急着换线路、重启。",
-      "巡检要测用户真实走的那条路；测自己顺手的那条路，等于用假数据给自己发绿灯。"
+      "安全指纹突然变了，先分清是「对面重装系统」还是「有人冒充」，别顺手点信任——接受一个来历不明的指纹不可逆，这种决定要交回给人。",
+      "修不动的时候要换维度查，别在同一层反复修：同一个变量改两次指标不动，就当这条路废了，立刻换层。（学自内部经验库）",
+      "隔离和根治是两件事，别把止血当治好；汇报里把「已经止血」和「要不要根治」分开说，别混成一句「修好了」。（学自内部经验库）"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "[What we fixed] Fixed the deadlock where \"asking the same question again made the assistant hang in running without replying\": the exact cache was also storing half-finished progress lines (e.g. \"I am now making a safe backup…\"), so re-asking hit the stale half-sentence, was judged \"not finished\", re-queued a background ticket, hit the cache again, and looped for over ten minutes (log evidence: 05:04:37 exact-cache hit, 43 chars). Now only truly-finished answers (with ✅/\"已完成\" strong markers and not a plan-only tail) are cached, and a read-side guard rejects any half-sentence found in the cache. Re-asking the same question no longer hangs. [What we improved / added] None. [What we learned] The exact cache must not store by text-match alone: it must first check whether the answer is actually finished — a half-done progress line in the cache means serving unfinished work back to the user as an answer, over and over. Two more notes from the internal playbook: (2) when something will not connect or does not respond, check the response time first - a failure within a few milliseconds usually means nothing is listening on the other side, not a slow network, so do not rush to switch routes or restart; (3) check the path your users actually take - testing a convenient side path just gives yourself a false green light.",
+      "summary": "[What we fixed] No new features shipped today, and no user-visible bug fix. What we did sort out: an automated health check suddenly kept failing, and it was not flaky networking - the security fingerprint of the machine on the other end had changed (the other side reinstalled its system). We did not go ahead and tap \"trust the new fingerprint\": accepting an unknown fingerprint is irreversible, so that call belongs to a person. The check stays paused until then. [What we improved / added] Nothing. [What we learned] (1) When a security fingerprint suddenly changes, first work out whether the other side was reinstalled or someone is impersonating it - don't tap \"trust\" out of habit; irreversible actions go back to a human. (2) When a fix won't move, change the dimension you are looking at instead of re-fixing the same layer - if the same variable changed twice moves no metric, that path is dead, switch layers immediately. (from the internal playbook) (3) Containment and cure are two different things: don't pass off a tourniquet as a cure, and report \"stopped the bleeding\" separately from \"still needs a real fix\". (from the internal playbook)",
       "sections": {
         "skills": [],
-        "bugs": [
-          "Fixed the \"re-ask same question → stuck in running\" deadlock: the exact cache now stores only truly-finished answers (strong ✅/done markers and not a plan-tail), half-finished progress lines never enter the cache, and a read-side guard drops any half-sentence it finds (verified in dev build)."
-        ],
+        "bugs": [],
         "lessons": [
-          "The exact cache must not match by question text alone — it must first confirm the answer is actually finished; a half-done progress line in the cache means handing unfinished work back to the user repeatedly.",
-          "When something will not connect or does not respond, check the response time first: a failure within a few milliseconds usually means nothing is listening on the other port rather than a slow network - inspect the port before switching routes or restarting.",
-          "Check the path your users actually take; testing a convenient side path only gives yourself a false green light built on fake data."
+          "When a security fingerprint suddenly changes, first work out whether the other side was reinstalled or someone is impersonating it - don't tap \"trust\" out of habit; accepting an unknown fingerprint is irreversible and that decision goes back to a human.",
+          "When a fix won't move, change the dimension you are looking at instead of re-fixing the same layer: if the same variable changed twice moves no metric, that path is dead - switch layers immediately. (from the internal playbook)",
+          "Containment and cure are two different things: don't pass off a tourniquet as a cure, and report \"stopped the bleeding\" separately from \"still needs a real fix\". (from the internal playbook)"
         ]
       }
     },
     "ja": {
-      "summary": "【修正したこと】「同じ質問をもう一度すると、実行中のまま返事が来なくなる」デッドロックを修正しました。根本原因は、正確キャッシュが「いま安全バックアップ中…」のような途中経過の文まで保存していたため、再質問で古い途中文に当たり、「未完了」と判定→チケット再発行→再ヒット→再発行、と十数分ループしていたことです（実証ログ: 05:04:37 正確キャッシュ命中 43文字）。これからは本当に完了した回答（✅/「已完成」などの強い証拠があり、計画だけで終わっていないもの）だけをキャッシュし、読み出し側でも途中文は一律破棄します。同じ質問の再問い合わせで固まることはもうありません。【改善・追加】なし。【学んだこと】正確キャッシュは「質問の文言が一致するか」だけでは保存してはならず、「回答が本当に終わっているか」を先に確認する必要がある——途中経過をキャッシュすると、未完了の作業を回答として何度も持ち主に返すことになる。もう2点（社内の経験ノートより）：②「つながらない・反応がない」ときは、まず応答時間を見る——数ミリ秒で失敗するなら、相手側のポートが待ち受けていない可能性が高く、回線が遅いわけではありません。回線の切り替えや再起動を急がないこと。③点検は利用者が実際に通る経路で行うこと。自分の都合のよい経路で測るのは、偽のデータで自分に青信号を出すのと同じです。",
+      "summary": "【修正したこと】本日は新機能のリリースも、ユーザーに見える不具合修正もありません。ただ一つはっきりさせたことがあります。自動点検が突然連続で失敗したのは、回線の一時的な不調ではなく、接続先マシンのセキュリティ指紋が変わっていたためでした（相手がOSを再インストール）。そのまま「新しい指紋を信頼する」を押すことはしていません。出所の分からない指紋を受け入れるのは取り返しがつかないので、その判断は人に委ねます。点検は判断待ちで止めています。【改善・追加】なし。【学んだこと】①セキュリティ指紋が突然変わったら、まず「相手の再インストール」か「誰かの成りすまし」かを見分けること。習慣で「信頼」を押さない。取り返しのつかない操作は人に返す。②直らないときは同じ層で直し続けず、見る次元を変えること。同じ変数を2回変えても指標が動かなければその道は捨て、すぐ層を変える。（社内の経験ノートより）③封じ込めと根治は別物で、止血を治癒と言い換えないこと。報告では「止血済み」と「根治が必要か」を分けて書く。（社内の経験ノートより）",
       "sections": {
         "skills": [],
-        "bugs": [
-          "「同じ質問を再送→実行中のまま固まる」デッドロックを修正：正確キャッシュは本当に完了した回答（強い✅/完了マーカーあり、計画止まりでない）だけを保存し、途中経過はキャッシュに入れず、読み出し側でも途中文は破棄します（開発版で検証済み）。"
-        ],
+        "bugs": [],
         "lessons": [
-          "正確キャッシュは質問文の一致だけで保存してはいけない——回答が本当に完了しているかを先に確認すること。途中経過をキャッシュすると、未完了の作業を回答として何度も返してしまう。",
-          "「つながらない・反応がない」ときは応答時間を先に見る：数ミリ秒で失敗する場合は、回線が遅いのではなく相手のポートが待ち受けていないことが多い。まずポートを確認し、回線の切り替えや再起動を急がない。",
-          "点検は利用者が実際に通る経路で行う。自分の都合のよい経路で測ると、偽のデータで自分に青信号を出すことになる。"
+          "セキュリティ指紋が突然変わったら、まず「相手の再インストール」か「誰かの成りすまし」かを見分けること。習慣で「信頼」を押さない——出所不明の指紋の受け入れは取り返しがつかず、その判断は人に返す。",
+          "直らないときは同じ層で直し続けず、見る次元を変えること。同じ変数を2回変えても指標が動かなければその道は捨て、すぐ層を変える。（社内の経験ノートより）",
+          "封じ込めと根治は別物で、止血を治癒と言い換えないこと。報告では「止血済み」と「根治が必要か」を分けて書く。（社内の経験ノートより）"
         ]
       }
     },
     "ko": {
-      "summary": "[수정한 것] \"같은 질문을 다시 하면 실행 중 상태에서 응답하지 않는\" 교착을 고쳤습니다. 근본 원인은 정확 캐시가 \"지금 안전 백업 중…\" 같은 중간 진행 문장까지 저장해, 재질문 시 옛 중간 문장에 맞아 \"미완료\"로 판정→티켓 재발급→재히트→재발급, 십수 분 루프했기 때문입니다(실증 로그: 05:04:37 정확 캐시 히트 43자). 이제는 정말 끝난 답변(✅/\"已完成\" 등 강한 증거가 있고 계획만으로 끝나지 않은 것)만 캐시하고, 읽기 측에서도 중간 문장은 무조건 버립니다. 같은 질문을 다시 해도 더는 멈추지 않습니다. [개선·추가] 없음. [배운 것] 정확 캐시는 \"질문 문구가 일치하는가\"만으로 저장하면 안 되고 \"답변이 정말 끝났는가\"를 먼저 확인해야 합니다——중간 진행을 캐시하면 완료되지 않은 작업을 답으로 여러 번 돌려주게 됩니다. 내부 경험 노트에서 두 가지 더: (2) 연결이 안 되거나 응답이 없을 때는 먼저 응답 시간을 보세요. 몇 밀리초 만에 실패하면 상대 포트가 듣고 있지 않은 경우가 많고, 회선이 느린 것이 아닙니다. 회선 교체나 재시작을 서두르지 마세요. (3) 점검은 사용자가 실제로 지나는 경로로 해야 합니다. 내게 편한 경로로 측정하면 가짜 데이터로 스스로에게 청신호를 주는 것과 같습니다.",
+      "summary": "[수정한 것] 오늘 새 기능 배포도, 사용자에게 보이는 버그 수정도 없습니다. 다만 한 가지는 확실히 밝혀냈습니다. 자동 점검이 갑자기 연속 실패한 것은 회선이 흔들린 게 아니라, 반대편 기계의 보안 지문이 바뀌었기 때문이었습니다(상대가 OS를 재설치). 그렇다고 \"새 지문 신뢰\"를 눌러 버리지는 않았습니다. 출처를 모르는 지문을 받아들이는 건 되돌릴 수 없는 일이라 그 판단은 사람에게 넘깁니다. 점검은 판단 대기로 멈춰 있습니다. [개선·추가] 없음. [배운 것] ①보안 지문이 갑자기 바뀌면 먼저 \"상대 재설치\"인지 \"누군가의 사칭\"인지 가려야 합니다. 습관적으로 \"신뢰\"를 누르지 말고, 되돌릴 수 없는 조작은 사람에게 돌려보냅니다. ②안 고쳐질 때는 같은 층에서 계속 고치지 말고 보는 차원을 바꾸세요. 같은 변수를 두 번 바꿔도 지표가 안 움직이면 그 길은 버리고 즉시 층을 바꿉니다. (사내 경험 노트) ③격리와 근치는 다릅니다. 지혈을 치료라고 말하지 말고, 보고에서는 \"지혈 완료\"와 \"근치가 필요한가\"를 나눠 쓰세요. (사내 경험 노트)",
       "sections": {
         "skills": [],
-        "bugs": [
-          "\"같은 질문 재전송→실행 중 교착\" 수정: 정확 캐시는 정말 완료된 답변(강한 ✅/완료 마커, 계획 중단 아님)만 저장하고, 중간 진행은 캐시에 넣지 않으며, 읽기 측에서도 중간 문장을 폐기합니다(개발판에서 검증)."
-        ],
+        "bugs": [],
         "lessons": [
-          "정확 캐시는 질문 문구 일치만으로 저장하면 안 됩니다——답변이 정말 완료되었는지 먼저 확인해야 합니다. 중간 진행을 캐시하면 미완료 작업을 답으로 여러 번 반환하게 됩니다.",
-          "연결이 안 되거나 응답이 없을 때는 응답 시간을 먼저 본다. 몇 밀리초 만에 실패하면 회선이 느린 것이 아니라 상대 포트가 듣고 있지 않은 경우가 많으니, 먼저 포트를 확인하고 회선 교체나 재시작을 서두르지 않는다.",
-          "점검은 사용자가 실제로 지나는 경로로 한다. 내게 편한 경로로 측정하면 가짜 데이터로 스스로에게 청신호를 주는 셈이다."
+          "보안 지문이 갑자기 바뀌면 먼저 \"상대 재설치\"인지 \"누군가의 사칭\"인지 가려야 한다. 습관적으로 \"신뢰\"를 누르지 말 것 — 출처 모르는 지문 수용은 되돌릴 수 없어 그 판단은 사람에게 돌려보낸다.",
+          "안 고쳐질 때는 같은 층에서 계속 고치지 말고 보는 차원을 바꾼다. 같은 변수를 두 번 바꿔도 지표가 안 움직이면 그 길은 버리고 즉시 층을 바꾼다. (사내 경험 노트)",
+          "격리와 근치는 다르다. 지혈을 치료라고 말하지 말고, 보고에서는 \"지혈 완료\"와 \"근치가 필요한가\"를 나눠 쓴다. (사내 경험 노트)"
         ]
       }
     },
     "es": {
-      "summary": "[Lo que arreglamos] Corregido el bloqueo en que «volver a preguntar lo mismo dejaba al asistente atascado en ejecución sin responder»: la caché exacta guardaba también frases de progreso a medias (p. ej. «ahora estoy haciendo una copia de seguridad…»), así que al volver a preguntar se topaba con la frase vieja a medias, se juzgaba «no terminado», se reencolaba la tarea, volvía a acertar la caché y repetía el bucle durante más de diez minutos (registro: 05:04:37 hit de caché exacta, 43 caracteres). Ahora solo se guardan respuestas realmente terminadas (con marcadores fuertes ✅/«已完成» y sin ser solo un plan), y una protección de lectura descarta cualquier frase a medias. Volver a preguntar lo mismo ya no se bloquea. [Lo que mejoramos / añadimos] Nada. [Lo que aprendimos] La caché exacta no debe guardar solo por coincidencia de texto: primero debe comprobar que la respuesta está realmente terminada — una línea de progreso a medias en la caché es devolver trabajo sin acabar como respuesta, una y otra vez. Dos notas más del cuaderno interno: (2) cuando algo no conecta o no responde, mira primero el tiempo de respuesta: un fallo en pocos milisegundos suele significar que no hay nada escuchando en el otro puerto, no que la red vaya lenta, así que no cambies de ruta ni reinicies a la ligera; (3) revisa la ruta que tus usuarios recorren de verdad: probar un camino cómodo solo te da una luz verde falsa.",
+      "summary": "[Lo que arreglamos] Hoy no hay funciones nuevas ni corrección visible para el usuario. Lo que sí aclaramos: una comprobación automática empezó a fallar en cadena y no era la red — la huella de seguridad de la máquina del otro lado había cambiado (reinstalaron el sistema). No pulsamos \"confiar en la nueva huella\": aceptar una huella desconocida es irreversible y esa decisión es de una persona. La comprobación queda en pausa hasta entonces. [Lo que mejoramos / añadimos] Nada. [Lo que aprendimos] (1) Cuando una huella de seguridad cambia de golpe, primero averigua si reinstalaron el otro lado o si alguien se está haciendo pasar por él; no pulses \"confiar\" por costumbre: lo irreversible vuelve a manos de una persona. (2) Cuando un arreglo no avanza, cambia la dimensión que miras en vez de re-arreglar la misma capa: si cambiar dos veces la misma variable no mueve ninguna métrica, ese camino está muerto, cambia de capa ya. (del cuaderno interno) (3) Contener y curar son cosas distintas: no vendas un torniquete como cura, e informa \"ya no sangra\" por separado de \"falta arreglarlo de raíz\". (del cuaderno interno)",
       "sections": {
         "skills": [],
-        "bugs": [
-          "Corregido el bloqueo «re-preguntar lo mismo → atascado en ejecución»: la caché exacta ahora solo guarda respuestas realmente terminadas (marcadores fuertes ✅/hecho, no un plan a medias), las líneas de progreso a medias nunca entran, y una protección de lectura descarta cualquier frase a medias (verificado en compilación de desarrollo)."
-        ],
+        "bugs": [],
         "lessons": [
-          "La caché exacta no debe coincidir solo por texto de pregunta — primero hay que confirmar que la respuesta está terminada; una línea de progreso a medias en la caché es devolver trabajo sin acabar repetidamente.",
-          "Cuando algo no conecta o no responde, mira primero el tiempo de respuesta: un fallo en pocos milisegundos suele significar que no hay nada escuchando en el otro puerto y no que la red vaya lenta; revisa el puerto antes de cambiar de ruta o reiniciar.",
-          "Revisa la ruta que tus usuarios recorren de verdad; probar un camino cómodo solo te da una luz verde falsa basada en datos falsos."
+          "Cuando una huella de seguridad cambia de golpe, primero averigua si reinstalaron el otro lado o si alguien se hace pasar por él; no pulses \"confiar\" por costumbre: aceptar una huella desconocida es irreversible y esa decisión vuelve a manos de una persona.",
+          "Cuando un arreglo no avanza, cambia la dimensión que miras en vez de re-arreglar la misma capa: si cambiar dos veces la misma variable no mueve ninguna métrica, ese camino está muerto, cambia de capa ya. (del cuaderno interno)",
+          "Contener y curar son cosas distintas: no vendas un torniquete como cura, e informa \"ya no sangra\" por separado de \"falta arreglarlo de raíz\". (del cuaderno interno)"
         ]
       }
     },
     "fr": {
-      "summary": "[Ce qu’on a corrigé] Corrigé le blocage où « reposer la même question laissait l’assistant coincé en cours d’exécution sans répondre » : le cache exact stockait aussi des lignes de progrès à moitié finies (ex. « je fais maintenant une sauvegarde de sécurité… »), donc reposer la question retombait sur la vieille phrase à moitié finie, jugée « non terminée », re-déclenchait un ticket, retombait sur le cache, et bouclait pendant plus de dix minutes (journal : 05:04:37 hit cache exact, 43 caractères). Désormais seules les réponses réellement terminées (marqueurs forts ✅/«已完成» et sans être un simple plan) sont mises en cache, et une garde en lecture écarte toute phrase à moitié finie. Reposer la même question ne bloque plus. [Ce qu’on a amélioré / ajouté] Rien. [Ce qu’on a appris] Le cache exact ne doit pas stocker sur la seule correspondance de texte : il doit d’abord vérifier que la réponse est réellement finie — une ligne de progrès à moitié finie dans le cache, c’est renvoyer du travail non terminé comme réponse, encore et encore.Deux notes de plus du carnet interne : (2) quand quelque chose ne se connecte pas ou ne répond pas, regardez d’abord le temps de réponse - un échec en quelques millisecondes signifie souvent que rien n’écoute sur l’autre port, pas que le réseau est lent, donc ne changez pas de route ni ne redémarrez à la légère ; (3) vérifiez le chemin que vos utilisateurs empruntent réellement : tester un chemin pratique ne vous donne qu’un feu vert trompeur.",
+      "summary": "[Ce qu'on a corrigé] Aujourd'hui, pas de nouvelle fonction ni de correction visible pour l'utilisateur. En revanche, une chose est éclaircie : une vérification automatique s'est mise à échouer en série, et ce n'était pas le réseau — l'empreinte de sécurité de la machine d'en face avait changé (le système a été réinstallé côté distant). Nous n'avons pas appuyé sur « faire confiance à la nouvelle empreinte » : accepter une empreinte inconnue est irréversible, et cette décision revient à une personne. La vérification reste en pause jusque-là. [Ce qu'on a amélioré / ajouté] Rien. [Ce qu'on a appris] (1) Quand une empreinte de sécurité change d'un coup, cherchez d'abord si le côté distant a été réinstallé ou si quelqu'un se fait passer pour lui — n'appuyez pas sur « faire confiance » par réflexe : l'irréversible revient à un humain. (2) Quand une correction ne bouge pas, changez la dimension que vous regardez plutôt que de recorriger la même couche : si changer deux fois la même variable ne bouge aucune métrique, cette voie est morte, changez de couche tout de suite. (du carnet interne) (3) Confiner et guérir sont deux choses : ne faites pas passer un garrot pour une guérison, et rendez compte séparément de « le saignement est arrêté » et de « il reste à traiter à la racine ». (du carnet interne)",
       "sections": {
         "skills": [],
-        "bugs": [
-          "Corrigé le blocage « reposer la même question → coincé en cours d’exécution » : le cache exact ne stocke plus que les réponses réellement terminées (marqueurs forts ✅/fait, pas un plan à moitié fini), les lignes de progrès à moitié finies n’y entrent jamais, et une garde en lecture écarte toute phrase incomplète (vérifié en build de développement)."
-        ],
+        "bugs": [],
         "lessons": [
-          "Le cache exact ne doit pas correspondre seulement par le texte de la question — il faut d’abord confirmer que la réponse est terminée ; une ligne de progrès à moitié finie dans le cache renvoie du travail non fini de façon répétée.",
-          "Quand quelque chose ne se connecte pas ou ne répond pas, regardez d’abord le temps de réponse : un échec en quelques millisecondes signifie souvent que rien n’écoute sur l’autre port plutôt qu’un réseau lent - inspectez le port avant de changer de route ou de redémarrer.",
-          "Vérifiez le chemin que vos utilisateurs empruntent réellement ; tester un chemin pratique ne vous donne qu’un feu vert trompeur fondé sur de fausses données."
+          "Quand une empreinte de sécurité change d'un coup, cherchez d'abord si le côté distant a été réinstallé ou si quelqu'un se fait passer pour lui ; n'appuyez pas sur « faire confiance » par réflexe — accepter une empreinte inconnue est irréversible et cette décision revient à un humain.",
+          "Quand une correction ne bouge pas, changez la dimension que vous regardez plutôt que de recorriger la même couche : si changer deux fois la même variable ne bouge aucune métrique, cette voie est morte, changez de couche tout de suite. (du carnet interne)",
+          "Confiner et guérir sont deux choses : ne faites pas passer un garrot pour une guérison, et rendez compte séparément de « le saignement est arrêté » et de « il reste à traiter à la racine ». (du carnet interne)"
         ]
       }
     },
     "de": {
-      "summary": "[Was wir behoben haben] Behoben der Deadlock, bei dem „dieselbe Frage erneut stellen den Assistenten im laufenden Zustand ohne Antwort“ hängen ließ: Der exakte Cache speicherte auch halbfertige Fortschrittszeilen (z. B. „ich mache jetzt ein Sicherheits-Backup…“), sodass erneutes Fragen auf den alten halben Satz traf, als „nicht fertig“ gewertet wurde, ein Ticket erneut anhing, wieder den Cache traf und über zehn Minuten im Kreis lief (Logbeleg: 05:04:37 exakter Cache-Treffer, 43 Zeichen). Jetzt werden nur wirklich fertige Antworten (mit starken Markern ✅/„已完成“ und nicht nur ein Plan) gecacht, und eine Lese-Schutzwache verwirft jede halbfertige Zeile. Erneutes Fragen hängt nicht mehr. [Was wir verbessert / hinzugefügt haben] Nichts. [Was wir gelernt haben] Der exakte Cache darf nicht nur nach Textübereinstimmung speichern: Er muss zuerst prüfen, ob die Antwort wirklich fertig ist — eine halbfertige Fortschrittszeile im Cache bedeutet, unfertige Arbeit immer wieder als Antwort zurückzugeben. Zwei weitere Notizen aus dem internen Erfahrungsheft: (2) wenn etwas nicht verbindet oder nicht antwortet, zuerst die Antwortzeit ansehen - ein Fehler in wenigen Millisekunden heißt meist, dass am anderen Port nichts lauscht, nicht dass das Netz langsam ist, also nicht vorschnell Route wechseln oder neu starten; (3) prüfe den Weg, den deine Nutzer wirklich gehen - einen bequemen Nebenweg zu testen gibt dir nur ein falsches grünes Licht.",
+      "summary": "[Was wir behoben haben] Heute keine neue Funktion und keine für Nutzer sichtbare Fehlerbehebung. Klar geworden ist aber eines: Eine automatische Prüfung fiel plötzlich reihenweise aus, und es lag nicht am Netz — der Sicherheits-Fingerabdruck der Maschine auf der anderen Seite hatte sich geändert (dort wurde das System neu installiert). Wir haben nicht einfach „neuem Fingerabdruck vertrauen“ gedrückt: Einen unbekannten Fingerabdruck zu akzeptieren ist unumkehrbar, und diese Entscheidung gehört zu einem Menschen. Die Prüfung bleibt bis dahin pausiert. [Was wir verbessert / hinzugefügt haben] Nichts. [Was wir gelernt haben] (1) Ändert sich ein Sicherheits-Fingerabdruck plötzlich, erst klären, ob die Gegenseite neu installiert wurde oder jemand sich ausgibt — nicht reflexartig „vertrauen“ drücken; Unumkehrbares geht zurück an einen Menschen. (2) Wenn eine Reparatur nicht vorankommt, wechsle die Dimension, die du betrachtest, statt dieselbe Schicht erneut zu reparieren: Bewegt dieselbe Variable zweimal geändert keine Messgröße, ist dieser Weg tot — sofort die Schicht wechseln. (aus dem internen Erfahrungsheft) (3) Eindämmen und Heilen sind zwei Dinge: Verkaufe kein Abbinden als Heilung und berichte „Blutung gestoppt“ getrennt von „muss noch an der Wurzel behoben werden“. (aus dem internen Erfahrungsheft)",
       "sections": {
         "skills": [],
-        "bugs": [
-          "Deadlock „dieselbe Frage erneut → hängt im laufenden Zustand“ behoben: Der exakte Cache speichert nur noch wirklich fertige Antworten (starke ✅/Fertig-Marker, kein halber Plan), halbfertige Fortschrittszeilen kommen nie hinein, und eine Lese-Wache verwirft jede unvollständige Zeile (im Dev-Build verifiziert)."
-        ],
+        "bugs": [],
         "lessons": [
-          "Der exakte Cache darf nicht nur nach dem Fragetext passen — zuerst ist zu bestätigen, dass die Antwort wirklich fertig ist; eine halbfertige Fortschrittszeile im Cache gibt unfertige Arbeit wiederholt zurück.",
-          "Wenn etwas nicht verbindet oder nicht antwortet, zuerst die Antwortzeit ansehen: ein Fehler in wenigen Millisekunden heißt meist, dass am anderen Port nichts lauscht, und nicht, dass das Netz langsam ist - erst den Port prüfen, dann Route wechseln oder neu starten.",
-          "Prüfe den Weg, den deine Nutzer wirklich gehen; einen bequemen Nebenweg zu testen gibt dir nur ein falsches grünes Licht auf Basis falscher Daten."
+          "Ändert sich ein Sicherheits-Fingerabdruck plötzlich, erst klären, ob die Gegenseite neu installiert wurde oder jemand sich ausgibt; nicht reflexartig \"vertrauen\" drücken — einen unbekannten Fingerabdruck zu akzeptieren ist unumkehrbar und diese Entscheidung gehört zu einem Menschen.",
+          "Wenn eine Reparatur nicht vorankommt, wechsle die Dimension, die du betrachtest, statt dieselbe Schicht erneut zu reparieren: Bewegt dieselbe Variable zweimal geändert keine Messgröße, ist dieser Weg tot — sofort die Schicht wechseln. (aus dem internen Erfahrungsheft)",
+          "Eindämmen und Heilen sind zwei Dinge: Verkaufe kein Abbinden als Heilung und berichte \"Blutung gestoppt\" getrennt von \"muss noch an der Wurzel behoben werden\". (aus dem internen Erfahrungsheft)"
         ]
       }
     },
     "ru": {
-      "summary": "[Что исправили] Исправлен дедлок «повторный вопрос оставлял помощника зависшим в состоянии выполнения без ответа»: точный кэш сохранял и промежуточные строки прогресса (напр. «сейчас делаю резервную копию…»), поэтому повторный вопрос попадал на старую половину фразы, считался «незавершённым», заново ставил задачу, снова попадал в кэш и крутился больше десяти минут (запись в журнале: 05:04:37 попадание точного кэша, 43 символа). Теперь кэшируются только действительно завершённые ответы (с сильными маркерами ✅/«已完成» и не просто план), а защита на чтении отбрасывает любую половину фразы. Повторный вопрос больше не зависает. [Что улучшили / добавили] Ничего. [Что мы поняли] Точный кэш нельзя сохранять только по совпадению текста — сначала надо проверить, что ответ действительно завершён: промежуточная строка прогресса в кэше означает снова и снова возвращать незавершённую работу как ответ. Ещё две заметки из внутренней базы опыта: (2) когда что-то не подключается или не отвечает, сначала смотрите время ответа — отказ за несколько миллисекунд чаще означает, что на том порту никто не слушает, а не что сеть медленная, поэтому не спешите менять маршрут или перезапускать; (3) проверяйте тот путь, которым реально идут ваши пользователи: проверка удобного обходного пути даёт лишь ложный зелёный свет.",
+      "summary": "[Что исправили] Сегодня нет ни новых функций, ни заметных пользователю исправлений. Зато выяснили одно: автоматическая проверка вдруг начала падать подряд, и дело было не в сети — сменился отпечаток безопасности машины на той стороне (там переустановили систему). Мы не стали нажимать «доверять новому отпечатку»: принять незнакомый отпечаток необратимо, и такое решение остаётся за человеком. Проверка пока на паузе. [Что улучшили / добавили] Ничего. [Что мы поняли] (1) Если отпечаток безопасности вдруг изменился, сначала выясните: ту сторону переустановили или кто-то выдаёт себя за неё, — не жмите «доверять» по привычке; необратимое возвращается к человеку. (2) Когда починка не движется, смените измерение, а не чините тот же слой заново: если одна и та же переменная, изменённая дважды, не двигает ни одной метрики, этот путь мёртв — сразу меняйте слой. (из внутренней базы опыта) (3) Локализация и излечение — разные вещи: не выдавайте жгут за лечение и сообщайте «кровотечение остановлено» отдельно от «нужно исправлять в корне». (из внутренней базы опыта)",
       "sections": {
         "skills": [],
-        "bugs": [
-          "Исправлен дедлок «повторный вопрос → зависание в выполнении»: точный кэш теперь сохраняет только действительно завершённые ответы (сильные маркеры ✅/готово, не полуплан), промежуточные строки прогресса в него не попадают, а защита на чтении отбрасывает любую неполную строку (проверено в dev-сборке)."
-        ],
+        "bugs": [],
         "lessons": [
-          "Точный кэш не должен совпадать только по тексту вопроса — сначала нужно подтвердить, что ответ действительно завершён; промежуточная строка прогресса в кэше возвращает незавершённую работу повторно.",
-          "Когда что-то не подключается или не отвечает, сначала смотрите время ответа: отказ за несколько миллисекунд чаще означает, что на том порту никто не слушает, а не что сеть медленная — сначала проверьте порт, потом меняйте маршрут или перезапускайте.",
-          "Проверяйте тот путь, которым реально идут ваши пользователи; проверка удобного обходного пути даёт лишь ложный зелёный свет на основе ложных данных."
+          "Если отпечаток безопасности вдруг изменился, сначала выясните: ту сторону переустановили или кто-то выдаёт себя за неё; не жмите \"доверять\" по привычке — принять незнакомый отпечаток необратимо, и это решение остаётся за человеком.",
+          "Когда починка не движется, смените измерение, а не чините тот же слой заново: если одна и та же переменная, изменённая дважды, не двигает ни одной метрики, этот путь мёртв — сразу меняйте слой. (из внутренней базы опыта)",
+          "Локализация и излечение — разные вещи: не выдавайте жгут за лечение и сообщайте \"кровотечение остановлено\" отдельно от \"нужно исправлять в корне\". (из внутренней базы опыта)"
         ]
       }
     },
     "pt": {
-      "summary": "[O que corrigimos] Corrigido o bloqueio em que «voltar a fazer a mesma pergunta deixava o assistente preso em execução sem responder»: a cache exata também guardava linhas de progresso a meio (ex. «agora estou a fazer um backup de segurança…»), pelo que voltar a perguntar batia na velha meia-frase, era julgado «não concluído», reencolhia a tarefa, voltava a bater na cache e ficava em ciclo durante mais de dez minutos (registo: 05:04:37 hit de cache exata, 43 caracteres). Agora só são guardadas respostas realmente concluídas (com marcadores fortes ✅/«已完成» e sem ser apenas um plano), e uma guarda de leitura descarta qualquer meia-frase. Voltar a fazer a mesma pergunta já não bloqueia. [O que melhorámos / adicionámos] Nada. [O que aprendemos] A cache exata não deve guardar só por correspondência de texto: tem de confirmar primeiro que a resposta está realmente concluída — uma linha de progresso a meio na cache é devolver trabalho inacabado como resposta, vezes sem conta.Mais duas notas do caderno interno: (2) quando algo não conecta ou não responde, olhe primeiro o tempo de resposta - uma falha em poucos milissegundos geralmente significa que não há nada escutando na outra porta, e não que a rede esteja lenta, então não troque de rota nem reinicie às pressas; (3) verifique o caminho que seus usuários realmente percorrem: testar um caminho conveniente só te dá um sinal verde falso.",
+      "summary": "[O que corrigimos] Hoje sem funcionalidades novas e sem correção visível para o utilizador. Mas esclarecemos uma coisa: uma verificação automática começou a falhar em série e não era a rede — a impressão digital de segurança da máquina do outro lado mudou (reinstalaram o sistema). Não carregámos em \"confiar na nova impressão digital\": aceitar uma impressão desconhecida é irreversível e essa decisão é de uma pessoa. A verificação fica em pausa até lá. [O que melhorámos / adicionámos] Nada. [O que aprendemos] (1) Quando uma impressão digital de segurança muda de repente, primeiro perceba se reinstalaram o outro lado ou se alguém se faz passar por ele; não carregue em \"confiar\" por hábito — o irreversível volta para as mãos de uma pessoa. (2) Quando uma correção não avança, mude a dimensão que observa em vez de recarregar a mesma camada: se mudar a mesma variável duas vezes não move nenhuma métrica, esse caminho está morto, mude de camada já. (do caderno interno) (3) Conter e curar são coisas diferentes: não venda um garrote como cura e relate \"parou de sangrar\" separadamente de \"falta resolver na raiz\". (do caderno interno)",
       "sections": {
         "skills": [],
-        "bugs": [
-          "Corrigido o bloqueio «voltar a fazer a mesma pergunta → preso em execução»: a cache exata agora guarda apenas respostas realmente concluídas (marcadores fortes ✅/feito, não um plano a meio), as linhas de progresso a meio nunca entram, e uma guarda de leitura descarta qualquer frase incompleta (verificado na build de desenvolvimento)."
-        ],
+        "bugs": [],
         "lessons": [
-          "A cache exata não deve corresponder apenas pelo texto da pergunta — é preciso confirmar primeiro que a resposta está concluída; uma linha de progresso a meio na cache devolve trabalho inacabado repetidamente.",
-          "Quando algo não conecta ou não responde, olhe primeiro o tempo de resposta: uma falha em poucos milissegundos geralmente significa que não há nada escutando na outra porta, e não que a rede esteja lenta - verifique a porta antes de trocar de rota ou reiniciar.",
-          "Verifique o caminho que seus usuários realmente percorrem; testar um caminho conveniente só te dá um sinal verde falso baseado em dados falsos."
+          "Quando uma impressão digital de segurança muda de repente, primeiro perceba se reinstalaram o outro lado ou se alguém se faz passar por ele; não carregue em \"confiar\" por hábito — aceitar uma impressão desconhecida é irreversível e essa decisão volta para as mãos de uma pessoa.",
+          "Quando uma correção não avança, mude a dimensão que observa em vez de recarregar a mesma camada: se mudar a mesma variável duas vezes não move nenhuma métrica, esse caminho está morto, mude de camada já. (do caderno interno)",
+          "Conter e curar são coisas diferentes: não venda um garrote como cura e relate \"parou de sangrar\" separadamente de \"falta resolver na raiz\". (do caderno interno)"
         ]
       }
     },
     "ar": {
-      "summary": "[ما أصلحناه] أصلحنا الجمود حيث «إعادة طرح نفس السؤال تجعل المساعد يعلق في حالة التشغيل دون رد»: كانت الذاكرة الوسيطة الدقيقة تحفظ أيضًا سطور التقدّم غير المكتملة (مثل «أقوم الآن بنسخ احتياطي آمن…»)، فإعادة السؤال تصطدم بتلك الجملة القديمة الناقصة، وتُحكم «غير مكتملة»، فتُعاد المهمة، ثم تصطدم بالذاكرة مرة أخرى، وتتكرر الحلقة لأكثر من عشر دقائق (دليل السجل: 05:04:37 ضربة ذاكرة وسيطة دقيقة، 43 حرفًا). الآن لا تُحفظ إلا الإجابات المكتملة فعلًا (بعلامات قوية ✅/«已完成» وليست مجرّد خطة)، وحارس على القراءة يتجاهل أي جملة ناقصة. إعادة طرح نفس السؤال لم تعد تعلّق. [ما حسّنّاه/أضفناه] لا شيء. [ما تعلّمناه] لا ينبغي أن تحفظ الذاكرة الدقيقة بمطابقة النص فقط: يجب أولًا التحقق من أن الإجابة مكتملة فعلًا — فسطر التقدّم الناقص في الذاكرة يعني إعادة عملٍ غير مكتمل كإجابة، مرارًا وتكرارًا. وملاحظتان أخريان من دفتر الخبرة الداخلي: (2) عندما لا يتصل شيء أو لا يستجيب، انظر أولًا إلى زمن الاستجابة — الفشل في بضعة أجزاء من الألف من الثانية يعني غالبًا أن لا شيء يستمع على المنفذ الآخر، وليس أن الشبكة بطيئة، فلا تسارع إلى تغيير المسار أو إعادة التشغيل؛ (3) افحص المسار الذي يسلكه مستخدموك فعليًا، فاختبار مسار مريح لك يمنحك ضوءًا أخضر زائفًا.",
+      "summary": "[ما أصلحناه] اليوم لا ميزات جديدة ولا إصلاح ظاهر للمستخدم. لكننا أوضحنا أمرًا: بدأ فحص تلقائي يفشل على التوالي، ولم تكن المشكلة في الشبكة — بل تغيّرت بصمة الأمان لجهاز الطرف الآخر (أُعيد تثبيت نظامه). لم نضغط «الثقة بالبصمة الجديدة»: قبول بصمة مجهولة لا رجعة فيه، وهذا القرار يعود إلى إنسان. الفحص متوقف حتى ذلك الحين. [ما حسّنّاه/أضفناه] لا شيء. [ما تعلّمناه] (1) عندما تتغير بصمة أمان فجأة، تبيّن أولًا: هل أُعيد تثبيت الطرف الآخر أم أن أحدًا ينتحل شخصيته؛ لا تضغط «الثقة» بحكم العادة — فما لا رجعة فيه يعود إلى إنسان. (2) عندما لا يتقدّم الإصلاح، غيّر البُعد الذي تنظر إليه بدل إعادة إصلاح الطبقة نفسها: إذا لم يُحرّك المتغيّر نفسه تغييره مرتين أي مقياس، فهذا المسار ميت — غيّر الطبقة فورًا. (من دفتر الخبرة الداخلي) (3) الاحتواء والشفاء أمران مختلفان: لا تُقدّم العصابة اليدوية كعلاج، وأبلغ عن «توقف النزيف» منفصلًا عن «لا يزال يحتاج إصلاحًا جذريًا». (من دفتر الخبرة الداخلي)",
       "sections": {
         "skills": [],
-        "bugs": [
-          "أُصلح الجمود «إعادة طرح نفس السؤال → يعلق في التشغيل»: الذاكرة الدقيقة الآن لا تحفظ إلا الإجابات المكتملة فعلًا (علامات قوية ✅/تم، وليست خطة ناقصة)، وسطور التقدّم الناقصة لا تدخلها أبدًا، وحارس القراءة يتجاهل أي جملة ناقصة (تم التحقق في بناء التطوير)."
-        ],
+        "bugs": [],
         "lessons": [
-          "لا يجب أن تتطابق الذاكرة الدقيقة بنص السؤال فقط — يجب أولًا التأكد من أن الإجابة مكتملة؛ فسطر التقدّم الناقص في الذاكرة يعيد عملًا غير مكتمل بشكل متكرر.",
-          "عندما لا يتصل شيء أو لا يستجيب، انظر أولًا إلى زمن الاستجابة: الفشل في بضعة أجزاء من الألف من الثانية يعني غالبًا أن لا شيء يستمع على المنفذ الآخر وليس أن الشبكة بطيئة — افحص المنفذ قبل تغيير المسار أو إعادة التشغيل.",
-          "افحص المسار الذي يسلكه مستخدموك فعليًا؛ اختبار مسار مريح لك يمنحك ضوءًا أخضر زائفًا مبنيًا على بيانات غير حقيقية."
+          "عندما تتغير بصمة أمان فجأة، تبيّن أولًا هل أُعيد تثبيت الطرف الآخر أم أن أحدًا ينتحل شخصيته؛ لا تضغط \"الثقة\" بحكم العادة — فقبول بصمة مجهولة لا رجعة فيه وهذا القرار يعود إلى إنسان.",
+          "عندما لا يتقدّم الإصلاح، غيّر البُعد الذي تنظر إليه بدل إعادة إصلاح الطبقة نفسها: إذا لم يُحرّك المتغيّر نفسه تغييره مرتين أي مقياس، فهذا المسار ميت — غيّر الطبقة فورًا. (من دفتر الخبرة الداخلي)",
+          "الاحتواء والشفاء أمران مختلفان: لا تُقدّم العصابة اليدوية كعلاج، وأبلغ عن \"توقف النزيف\" منفصلًا عن \"لا يزال يحتاج إصلاحًا جذريًا\". (من دفتر الخبرة الداخلي)"
         ]
       }
     }
