@@ -1,122 +1,172 @@
 {
-  "ver": "1.5.95",
-  "date": "2026-11-19",
-  "summary": "【修了什么】今日无新功能上线，也没有对外可见的 bug 修复。倒是把一件事查清了：自动巡检突然连续失败，不是网络抽风，而是对面那台服务器的安全指纹变了（对方重装了系统）。没有擅自去点「信任新指纹」——接受一个来历不明的指纹不可逆，这种事得由人来定，所以巡检先停着，等人拍板。【优化/新增了什么】无。【自我学习到了什么】①安全指纹突然变了，先分清是「对面重装」还是「有人冒充」，别顺手点信任；不可逆的动作要交回给人。②修不动的时候要换维度查，别在同一层反复修——同一个变量改两次指标不动，就当这条路废了，立刻换层。（学自内部经验库）③隔离和根治是两件事，别把止血当治好；汇报里要把「已经止血」和「要不要根治」分开说。（学自内部经验库）",
+  "ver": "1.6.0",
+  "date": "2026-11-21",
+  "summary": "【修了什么】①排队消息串会话：高峰期被限流弹回排队的消息会落进「当前」会话而不是原来那个，队列又不过期，刷新页面后旧消息会自动发进一个空的新会话，还拿它起名——看起来就像「突然冒出一个已解决的会话」。现在排队消息绑定原会话并带时间戳，30 分钟过期，孤儿/无时间戳的旧票据直接丢弃不发，开机再清一遍。②给已删除会话发消息没回音：在另一端已经删掉的会话里发消息，后台其实跑完了一轮，但记录被旧的删除状态拒收，三个端都看不到回话。现在本人亲口发话优先于旧的删除记录，复活记录随同步广播到各端，各端清掉本地旧的删除账。【优化/新增了什么】定时抓取类任务改成无界面后台运行：以前这类任务拉起的是带窗口的浏览器，跑完不关窗，桌面上会莫名冒出空白搜索页；现在全程后台无窗口，桌面不再被打扰。【自我学习到了什么】①「余额是 0」不等于通道坏了，只代表还没人用过——要判一条发放/支付通道死了，必须拿「有人付过但没到账」的流水证据，不能拿「当前余额恒为 0」当判据。（学自内部经验库）②查「最新的一笔」要从尾部看，用头部会把刚发生的事漏掉。（学自内部经验库）③单点采样最容易把「正在跑」误判成「内存泄漏」，至少三点成线才下结论。（学自内部经验库）",
   "sections": {
-    "skills": [],
-    "bugs": [],
+    "skills": [
+      "定时抓取类任务改为无界面后台运行：不再拉起带窗口的浏览器，跑完不留窗，桌面不会被莫名弹出的空白页打扰。"
+    ],
+    "bugs": [
+      "排队消息串会话：限流弹回排队的消息绑原会话并带时间戳，超过 30 分钟或没有时间戳的旧票据丢弃不发，开机清扫旧队列，不再出现「突然冒出的已解决会话」。",
+      "给已删除会话发消息没回音：本人亲口发话优先于旧的删除记录，复活记录随同步广播各端，各端清掉本地旧的删除账。"
+    ],
     "lessons": [
-      "安全指纹突然变了，先分清是「对面重装系统」还是「有人冒充」，别顺手点信任——接受一个来历不明的指纹不可逆，这种决定要交回给人。",
-      "修不动的时候要换维度查，别在同一层反复修：同一个变量改两次指标不动，就当这条路废了，立刻换层。（学自内部经验库）",
-      "隔离和根治是两件事，别把止血当治好；汇报里把「已经止血」和「要不要根治」分开说，别混成一句「修好了」。（学自内部经验库）"
+      "「余额是 0」不等于通道坏了，只代表还没人用过——判一条发放/支付通道死了，必须拿「有人付过但没到账」的流水证据，不能拿「当前余额恒为 0」当判据。（学自内部经验库）",
+      "查「最新的一笔」要从尾部看，用头部会把刚发生的事漏掉。（学自内部经验库）",
+      "单点采样最容易把「正在跑」误判成「内存泄漏」，至少三点成线才下结论。（学自内部经验库）"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "[What we fixed] No new features shipped today, and no user-visible bug fix. What we did sort out: an automated health check suddenly kept failing, and it was not flaky networking - the security fingerprint of the machine on the other end had changed (the other side reinstalled its system). We did not go ahead and tap \"trust the new fingerprint\": accepting an unknown fingerprint is irreversible, so that call belongs to a person. The check stays paused until then. [What we improved / added] Nothing. [What we learned] (1) When a security fingerprint suddenly changes, first work out whether the other side was reinstalled or someone is impersonating it - don't tap \"trust\" out of habit; irreversible actions go back to a human. (2) When a fix won't move, change the dimension you are looking at instead of re-fixing the same layer - if the same variable changed twice moves no metric, that path is dead, switch layers immediately. (from the internal playbook) (3) Containment and cure are two different things: don't pass off a tourniquet as a cure, and report \"stopped the bleeding\" separately from \"still needs a real fix\". (from the internal playbook)",
+      "summary": "[What we fixed] (1) Queued messages landing in the wrong conversation: at busy times a message that gets rate-limited and pushed back into the queue would land in the \"current\" conversation instead of the original one, and the queue never expired - so after a page refresh an old message could be sent into an empty new conversation and even name it, which looked exactly like \"a resolved conversation suddenly appearing\". Queued messages are now bound to their original conversation and carry a timestamp, expire after 30 minutes, orphaned or timestamp-less tickets are dropped instead of sent, and old queues are cleaned at startup. (2) Messages to a deleted conversation got no reply: sending into a conversation deleted on another device did run a round in the background, but the record was rejected by the old deletion state, so none of the three clients ever saw the reply. A message you type yourself now takes precedence over the old deletion record, the revival record is broadcast to every client with sync, and each client clears its stale local deletion entries. [What we improved / added] Scheduled fetching tasks now run headless in the background: before, those tasks launched a browser with a visible window and never closed it, so blank search pages could pop up on the desktop; now everything runs windowless in the background. [What we learned] (1) A balance of 0 does not mean a channel is broken - it only means nobody has used it yet; before calling a payout or payment channel dead you need flow evidence of \"someone paid but it never arrived\", never \"the balance is always 0\" as the argument. (from the internal playbook) (2) To find \"the latest transaction\", read from the tail - reading from the head misses what just happened. (from the internal playbook) (3) Single-point sampling most easily mistakes \"busy running\" for a memory leak; only three points forming a line justify a conclusion. (from the internal playbook)",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "Scheduled fetching tasks now run headless in the background: no more browser with a visible window, no window left behind, and no blank pages popping up on the desktop."
+        ],
+        "bugs": [
+          "Queued messages landing in the wrong conversation: queued messages are bound to their original conversation and carry a timestamp; tickets older than 30 minutes or without a timestamp are dropped instead of sent, and old queues are swept at startup, so a \"suddenly appeared resolved conversation\" no longer shows up.",
+          "Messages to a deleted conversation got no reply: what you type yourself now takes precedence over the old deletion record, the revival record is broadcast to all clients with sync, and each client clears its stale local deletion entries."
+        ],
         "lessons": [
-          "When a security fingerprint suddenly changes, first work out whether the other side was reinstalled or someone is impersonating it - don't tap \"trust\" out of habit; accepting an unknown fingerprint is irreversible and that decision goes back to a human.",
-          "When a fix won't move, change the dimension you are looking at instead of re-fixing the same layer: if the same variable changed twice moves no metric, that path is dead - switch layers immediately. (from the internal playbook)",
-          "Containment and cure are two different things: don't pass off a tourniquet as a cure, and report \"stopped the bleeding\" separately from \"still needs a real fix\". (from the internal playbook)"
+          "A balance of 0 does not mean a channel is broken - it only means nobody has used it yet; before calling a payout or payment channel dead you need flow evidence of \"someone paid but it never arrived\", never \"the balance is always 0\" as the argument. (from the internal playbook)",
+          "To find \"the latest transaction\", read from the tail - reading from the head misses what just happened. (from the internal playbook)",
+          "Single-point sampling most easily mistakes \"busy running\" for a memory leak; only three points forming a line justify a conclusion. (from the internal playbook)"
         ]
       }
     },
     "ja": {
-      "summary": "【修正したこと】本日は新機能のリリースも、ユーザーに見える不具合修正もありません。ただ一つはっきりさせたことがあります。自動点検が突然連続で失敗したのは、回線の一時的な不調ではなく、接続先マシンのセキュリティ指紋が変わっていたためでした（相手がOSを再インストール）。そのまま「新しい指紋を信頼する」を押すことはしていません。出所の分からない指紋を受け入れるのは取り返しがつかないので、その判断は人に委ねます。点検は判断待ちで止めています。【改善・追加】なし。【学んだこと】①セキュリティ指紋が突然変わったら、まず「相手の再インストール」か「誰かの成りすまし」かを見分けること。習慣で「信頼」を押さない。取り返しのつかない操作は人に返す。②直らないときは同じ層で直し続けず、見る次元を変えること。同じ変数を2回変えても指標が動かなければその道は捨て、すぐ層を変える。（社内の経験ノートより）③封じ込めと根治は別物で、止血を治癒と言い換えないこと。報告では「止血済み」と「根治が必要か」を分けて書く。（社内の経験ノートより）",
+      "summary": "【修正したこと】①待機メッセージが別の会話に入る不具合：混雑時にレート制限でキューに戻されたメッセージが、元の会話ではなく「現在」の会話に入っていました。しかもキューに有効期限がなく、ページを再読み込みすると古いメッセージが空の新しい会話に送られ、その会話名まで決めてしまう——「解決済みの会話が突然現れる」ように見えていたのはこれです。現在は待機メッセージを元の会話に紐づけ、時刻を持たせ、30 分で失効、宛先不明や時刻なしの古いチケットは送らずに破棄し、起動時にも古いキューを掃除します。②削除済み会話への送信が無反応：別端末で削除した会話に送ると、裏では 1 ターン実行されていたのに記録が古い削除状態に拒否され、3 端末とも返信が見えませんでした。現在は本人が自分で打った発言が古い削除記録より優先され、復活記録が同期で各端末に配られ、各端末はローカルの古い削除記録を消します。【改善・追加】定時の取得系タスクを画面なしのバックグラウンド実行に変更：以前はウィンドウ付きのブラウザを起動し、終わっても閉じないため、デスクトップに空白の検索ページが勝手に出ることがありました。現在は完全にバックグラウンドで動き、画面には何も出ません。【学んだこと】①「残高が 0」は経路が壊れた証拠ではなく、まだ誰も使っていないだけ。支払い・付与の経路が死んだと判断するには「誰かが払ったのに届いていない」流れの証拠が必要で、「残高が常に 0」を根拠にしてはいけない。（社内の経験ノートより）②「最新の 1 件」を探すときは末尾から見る。先頭から見ると、たった今起きたことを見落とす。（社内の経験ノートより）③1 点だけのサンプリングは「動いている最中」を「メモリリーク」と誤判定しやすい。少なくとも 3 点が線になってから結論を出す。（社内の経験ノートより）",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "定時の取得系タスクを画面なしのバックグラウンド実行に変更：ウィンドウ付きブラウザを起動せず、終わっても窓が残らず、デスクトップに空白ページが出ることもなくなります。"
+        ],
+        "bugs": [
+          "待機メッセージが別の会話に入る不具合：待機メッセージを元の会話に紐づけて時刻を持たせ、30 分を超えたものや時刻なしの古いチケットは送らずに破棄、起動時に古いキューも掃除するので、「突然現れる解決済み会話」は起きなくなりました。",
+          "削除済み会話への送信が無反応：本人が自分で打った発言が古い削除記録より優先され、復活記録が同期で各端末に配られ、各端末はローカルの古い削除記録を消します。"
+        ],
         "lessons": [
-          "セキュリティ指紋が突然変わったら、まず「相手の再インストール」か「誰かの成りすまし」かを見分けること。習慣で「信頼」を押さない——出所不明の指紋の受け入れは取り返しがつかず、その判断は人に返す。",
-          "直らないときは同じ層で直し続けず、見る次元を変えること。同じ変数を2回変えても指標が動かなければその道は捨て、すぐ層を変える。（社内の経験ノートより）",
-          "封じ込めと根治は別物で、止血を治癒と言い換えないこと。報告では「止血済み」と「根治が必要か」を分けて書く。（社内の経験ノートより）"
+          "「残高が 0」は経路が壊れた証拠ではなく、まだ誰も使っていないだけ。支払い・付与の経路が死んだと判断するには「誰かが払ったのに届いていない」流れの証拠が必要で、「残高が常に 0」を根拠にしてはいけない。（社内の経験ノートより）",
+          "「最新の 1 件」を探すときは末尾から見る。先頭から見ると、たった今起きたことを見落とす。（社内の経験ノートより）",
+          "1 点だけのサンプリングは「動いている最中」を「メモリリーク」と誤判定しやすい。少なくとも 3 点が線になってから結論を出す。（社内の経験ノートより）"
         ]
       }
     },
     "ko": {
-      "summary": "[수정한 것] 오늘 새 기능 배포도, 사용자에게 보이는 버그 수정도 없습니다. 다만 한 가지는 확실히 밝혀냈습니다. 자동 점검이 갑자기 연속 실패한 것은 회선이 흔들린 게 아니라, 반대편 기계의 보안 지문이 바뀌었기 때문이었습니다(상대가 OS를 재설치). 그렇다고 \"새 지문 신뢰\"를 눌러 버리지는 않았습니다. 출처를 모르는 지문을 받아들이는 건 되돌릴 수 없는 일이라 그 판단은 사람에게 넘깁니다. 점검은 판단 대기로 멈춰 있습니다. [개선·추가] 없음. [배운 것] ①보안 지문이 갑자기 바뀌면 먼저 \"상대 재설치\"인지 \"누군가의 사칭\"인지 가려야 합니다. 습관적으로 \"신뢰\"를 누르지 말고, 되돌릴 수 없는 조작은 사람에게 돌려보냅니다. ②안 고쳐질 때는 같은 층에서 계속 고치지 말고 보는 차원을 바꾸세요. 같은 변수를 두 번 바꿔도 지표가 안 움직이면 그 길은 버리고 즉시 층을 바꿉니다. (사내 경험 노트) ③격리와 근치는 다릅니다. 지혈을 치료라고 말하지 말고, 보고에서는 \"지혈 완료\"와 \"근치가 필요한가\"를 나눠 쓰세요. (사내 경험 노트)",
+      "summary": "[수정한 것] ①대기 메시지가 엉뚱한 대화로 들어가는 문제: 붐비는 시간에 속도 제한으로 큐에 되돌아간 메시지가 원래 대화가 아니라 \"현재\" 대화로 들어갔고, 큐에는 만료가 없어서 새로고침하면 오래된 메시지가 빈 새 대화로 자동 전송되며 그 대화 이름까지 정해 버렸습니다. \"해결된 대화가 갑자기 나타난다\"는 현상이 바로 이것이었습니다. 이제 대기 메시지는 원래 대화에 묶이고 시각이 붙으며, 30분이 지나거나 시각이 없는 옛 표는 보내지 않고 버리고, 시작할 때 옛 큐도 청소합니다. ②삭제된 대화로 보낸 메시지가 무응답: 다른 기기에서 지운 대화에 보내면 뒤에서는 한 턴이 돌았지만 기록이 옛 삭제 상태에 막혀 세 기기 모두 답장을 볼 수 없었습니다. 이제 본인이 직접 입력한 말이 옛 삭제 기록보다 우선하고, 되살림 기록이 동기화로 각 기기에 전달되며, 각 기기는 로컬의 옛 삭제 기록을 지웁니다. [개선·추가] 정기 수집 작업을 화면 없는 백그라운드 실행으로 변경: 예전에는 창이 있는 브라우저를 띄우고 끝나도 닫지 않아 바탕화면에 빈 검색 페이지가 뜨곤 했습니다. 이제는 전부 백그라운드에서 창 없이 돕니다. [배운 것] ①\"잔액이 0\"은 통로가 고장 났다는 뜻이 아니라 아직 아무도 쓰지 않았다는 뜻입니다. 지급·결제 통로가 죽었다고 판정하려면 \"누군가 결제했는데 도착하지 않았다\"는 흐름 증거가 필요하고, \"잔액이 늘 0\"을 근거로 삼으면 안 됩니다. (사내 경험 노트) ②\"가장 최근 1건\"을 찾을 때는 끝에서부터 봅니다. 앞에서부터 보면 방금 일어난 일을 놓칩니다. (사내 경험 노트) ③한 점만 샘플링하면 \"돌고 있는 중\"을 \"메모리 누수\"로 오판하기 쉽습니다. 최소 세 점이 선을 이뤄야 결론을 냅니다. (사내 경험 노트)",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "정기 수집 작업을 화면 없는 백그라운드 실행으로 변경: 창이 있는 브라우저를 띄우지 않고, 끝나도 창이 남지 않으며, 바탕화면에 빈 페이지가 뜨지 않습니다."
+        ],
+        "bugs": [
+          "대기 메시지가 엉뚱한 대화로 들어가는 문제: 대기 메시지를 원래 대화에 묶고 시각을 붙이며, 30분이 지났거나 시각이 없는 옛 표는 보내지 않고 버리고 시작할 때 옛 큐도 청소하므로 \"갑자기 나타나는 해결된 대화\"는 더 이상 생기지 않습니다.",
+          "삭제된 대화로 보낸 메시지가 무응답: 본인이 직접 입력한 말이 옛 삭제 기록보다 우선하고, 되살림 기록이 동기화로 모든 기기에 전달되며, 각 기기는 로컬의 옛 삭제 기록을 지웁니다."
+        ],
         "lessons": [
-          "보안 지문이 갑자기 바뀌면 먼저 \"상대 재설치\"인지 \"누군가의 사칭\"인지 가려야 한다. 습관적으로 \"신뢰\"를 누르지 말 것 — 출처 모르는 지문 수용은 되돌릴 수 없어 그 판단은 사람에게 돌려보낸다.",
-          "안 고쳐질 때는 같은 층에서 계속 고치지 말고 보는 차원을 바꾼다. 같은 변수를 두 번 바꿔도 지표가 안 움직이면 그 길은 버리고 즉시 층을 바꾼다. (사내 경험 노트)",
-          "격리와 근치는 다르다. 지혈을 치료라고 말하지 말고, 보고에서는 \"지혈 완료\"와 \"근치가 필요한가\"를 나눠 쓴다. (사내 경험 노트)"
+          "\"잔액이 0\"은 통로가 고장 났다는 뜻이 아니라 아직 아무도 쓰지 않았다는 뜻입니다. 지급·결제 통로가 죽었다고 판정하려면 \"누군가 결제했는데 도착하지 않았다\"는 흐름 증거가 필요하고, \"잔액이 늘 0\"을 근거로 삼으면 안 됩니다. (사내 경험 노트)",
+          "\"가장 최근 1건\"을 찾을 때는 끝에서부터 봅니다. 앞에서부터 보면 방금 일어난 일을 놓칩니다. (사내 경험 노트)",
+          "한 점만 샘플링하면 \"돌고 있는 중\"을 \"메모리 누수\"로 오판하기 쉽습니다. 최소 세 점이 선을 이뤄야 결론을 냅니다. (사내 경험 노트)"
         ]
       }
     },
     "es": {
-      "summary": "[Lo que arreglamos] Hoy no hay funciones nuevas ni corrección visible para el usuario. Lo que sí aclaramos: una comprobación automática empezó a fallar en cadena y no era la red — la huella de seguridad de la máquina del otro lado había cambiado (reinstalaron el sistema). No pulsamos \"confiar en la nueva huella\": aceptar una huella desconocida es irreversible y esa decisión es de una persona. La comprobación queda en pausa hasta entonces. [Lo que mejoramos / añadimos] Nada. [Lo que aprendimos] (1) Cuando una huella de seguridad cambia de golpe, primero averigua si reinstalaron el otro lado o si alguien se está haciendo pasar por él; no pulses \"confiar\" por costumbre: lo irreversible vuelve a manos de una persona. (2) Cuando un arreglo no avanza, cambia la dimensión que miras en vez de re-arreglar la misma capa: si cambiar dos veces la misma variable no mueve ninguna métrica, ese camino está muerto, cambia de capa ya. (del cuaderno interno) (3) Contener y curar son cosas distintas: no vendas un torniquete como cura, e informa \"ya no sangra\" por separado de \"falta arreglarlo de raíz\". (del cuaderno interno)",
+      "summary": "[Lo que arreglamos] (1) Mensajes en cola que caían en la conversación equivocada: en horas punta, un mensaje limitado por ritmo y devuelto a la cola caía en la conversación \"actual\" en vez de la original, y la cola no caducaba, así que al refrescar la página un mensaje viejo se enviaba a una conversación nueva y vacía e incluso le ponía nombre: eso era exactamente lo de \"aparece de golpe una conversación ya resuelta\". Ahora los mensajes en cola van atados a su conversación original y llevan hora, caducan a los 30 minutos, los tickets huérfanos o sin hora se descartan en vez de enviarse, y las colas viejas se limpian al arrancar. (2) Mensajes a una conversación borrada sin respuesta: al escribir en una conversación borrada en otro dispositivo sí se ejecutaba un turno por detrás, pero el registro lo rechazaba el estado de borrado antiguo, así que ninguno de los tres clientes veía la respuesta. Ahora lo que escribes tú tiene prioridad sobre el registro de borrado antiguo, el registro de resurrección se difunde con la sincronización a todos los clientes, y cada cliente limpia sus entradas de borrado locales obsoletas. [Lo que mejoramos / añadimos] Las tareas programadas de captura ahora se ejecutan sin interfaz en segundo plano: antes lanzaban un navegador con ventana y no la cerraban, así que podían aparecer páginas de búsqueda en blanco en el escritorio; ahora todo va en segundo plano sin ventana. [Lo que aprendimos] (1) Un saldo de 0 no significa que un canal esté roto: solo significa que nadie lo ha usado todavía; para dar por muerto un canal de pago o de entrega hace falta la prueba de flujo de \"alguien pagó y no llegó\", nunca \"el saldo siempre es 0\" como argumento. (del cuaderno interno) (2) Para encontrar \"el último movimiento\", lee desde el final: leyendo desde el principio te pierdes lo que acaba de pasar. (del cuaderno interno) (3) Una sola muestra confunde con facilidad \"está trabajando\" con \"fuga de memoria\"; hacen falta al menos tres puntos en línea para concluir. (del cuaderno interno)",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "Las tareas programadas de captura se ejecutan ahora sin interfaz en segundo plano: no se lanza un navegador con ventana, no queda ninguna ventana abierta y no aparecen páginas en blanco en el escritorio."
+        ],
+        "bugs": [
+          "Mensajes en cola que caían en la conversación equivocada: los mensajes en cola van atados a su conversación original y llevan hora; los tickets de más de 30 minutos o sin hora se descartan en vez de enviarse, y las colas viejas se limpian al arrancar, así que ya no aparece \"una conversación resuelta de la nada\".",
+          "Mensajes a una conversación borrada sin respuesta: lo que escribes tú tiene prioridad sobre el registro de borrado antiguo, el registro de resurrección se difunde con la sincronización a todos los clientes y cada cliente limpia sus entradas de borrado locales obsoletas."
+        ],
         "lessons": [
-          "Cuando una huella de seguridad cambia de golpe, primero averigua si reinstalaron el otro lado o si alguien se hace pasar por él; no pulses \"confiar\" por costumbre: aceptar una huella desconocida es irreversible y esa decisión vuelve a manos de una persona.",
-          "Cuando un arreglo no avanza, cambia la dimensión que miras en vez de re-arreglar la misma capa: si cambiar dos veces la misma variable no mueve ninguna métrica, ese camino está muerto, cambia de capa ya. (del cuaderno interno)",
-          "Contener y curar son cosas distintas: no vendas un torniquete como cura, e informa \"ya no sangra\" por separado de \"falta arreglarlo de raíz\". (del cuaderno interno)"
+          "Un saldo de 0 no significa que un canal esté roto: solo significa que nadie lo ha usado todavía; para dar por muerto un canal de pago o de entrega hace falta la prueba de flujo de \"alguien pagó y no llegó\", nunca \"el saldo siempre es 0\" como argumento. (del cuaderno interno)",
+          "Para encontrar \"el último movimiento\", lee desde el final: leyendo desde el principio te pierdes lo que acaba de pasar. (del cuaderno interno)",
+          "Una sola muestra confunde con facilidad \"está trabajando\" con \"fuga de memoria\"; hacen falta al menos tres puntos en línea para concluir. (del cuaderno interno)"
         ]
       }
     },
     "fr": {
-      "summary": "[Ce qu'on a corrigé] Aujourd'hui, pas de nouvelle fonction ni de correction visible pour l'utilisateur. En revanche, une chose est éclaircie : une vérification automatique s'est mise à échouer en série, et ce n'était pas le réseau — l'empreinte de sécurité de la machine d'en face avait changé (le système a été réinstallé côté distant). Nous n'avons pas appuyé sur « faire confiance à la nouvelle empreinte » : accepter une empreinte inconnue est irréversible, et cette décision revient à une personne. La vérification reste en pause jusque-là. [Ce qu'on a amélioré / ajouté] Rien. [Ce qu'on a appris] (1) Quand une empreinte de sécurité change d'un coup, cherchez d'abord si le côté distant a été réinstallé ou si quelqu'un se fait passer pour lui — n'appuyez pas sur « faire confiance » par réflexe : l'irréversible revient à un humain. (2) Quand une correction ne bouge pas, changez la dimension que vous regardez plutôt que de recorriger la même couche : si changer deux fois la même variable ne bouge aucune métrique, cette voie est morte, changez de couche tout de suite. (du carnet interne) (3) Confiner et guérir sont deux choses : ne faites pas passer un garrot pour une guérison, et rendez compte séparément de « le saignement est arrêté » et de « il reste à traiter à la racine ». (du carnet interne)",
+      "summary": "[Ce qu'on a corrigé] (1) Messages en file qui tombaient dans la mauvaise conversation : aux heures de pointe, un message limité puis remis en file atterrissait dans la conversation « actuelle » au lieu de l'originale, et la file n'expirait jamais : après un rafraîchissement, un vieux message partait dans une nouvelle conversation vide et lui donnait même son nom — d'où l'impression qu'« une conversation déjà réglée surgit d'un coup ». Désormais les messages en file sont liés à leur conversation d'origine et horodatés, expirent au bout de 30 minutes, les tickets orphelins ou sans horodatage sont jetés au lieu d'être envoyés, et les vieilles files sont nettoyées au démarrage. (2) Messages vers une conversation supprimée sans réponse : écrire dans une conversation supprimée sur un autre appareil lançait bien un tour en arrière-plan, mais l'enregistrement était refusé par l'ancien état de suppression, donc aucun des trois clients ne voyait la réponse. Maintenant ce que vous tapez vous-même prime sur l'ancien enregistrement de suppression, l'enregistrement de résurrection est diffusé avec la synchro à tous les clients, et chaque client efface ses anciennes entrées de suppression locales. [Ce qu'on a amélioré / ajouté] Les tâches planifiées de collecte tournent désormais sans interface en arrière-plan : avant, elles lançaient un navigateur avec fenêtre et ne la fermaient pas, si bien que des pages de recherche vides pouvaient surgir sur le bureau ; maintenant tout tourne en arrière-plan sans fenêtre. [Ce qu'on a appris] (1) Un solde à 0 ne veut pas dire qu'un canal est cassé : cela veut seulement dire que personne ne l'a encore utilisé ; pour déclarer mort un canal de paiement ou de versement, il faut la preuve de flux « quelqu'un a payé et rien n'est arrivé », jamais « le solde est toujours à 0 » comme argument. (du carnet interne) (2) Pour trouver « la dernière opération », lisez depuis la fin : en lisant depuis le début, vous ratez ce qui vient de se passer. (du carnet interne) (3) Un seul point de mesure confond facilement « en train de tourner » avec « fuite mémoire » ; il faut au moins trois points alignés pour conclure. (du carnet interne)",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "Les tâches planifiées de collecte tournent désormais sans interface en arrière-plan : plus de navigateur avec fenêtre, aucune fenêtre laissée ouverte, aucune page blanche qui surgit sur le bureau."
+        ],
+        "bugs": [
+          "Messages en file qui tombaient dans la mauvaise conversation : les messages en file sont liés à leur conversation d'origine et horodatés ; les tickets de plus de 30 minutes ou sans horodatage sont jetés au lieu d'être envoyés, et les vieilles files sont nettoyées au démarrage, donc plus de « conversation déjà réglée qui surgit ».",
+          "Messages vers une conversation supprimée sans réponse : ce que vous tapez vous-même prime sur l'ancien enregistrement de suppression, l'enregistrement de résurrection est diffusé avec la synchro à tous les clients et chaque client efface ses anciennes entrées de suppression locales."
+        ],
         "lessons": [
-          "Quand une empreinte de sécurité change d'un coup, cherchez d'abord si le côté distant a été réinstallé ou si quelqu'un se fait passer pour lui ; n'appuyez pas sur « faire confiance » par réflexe — accepter une empreinte inconnue est irréversible et cette décision revient à un humain.",
-          "Quand une correction ne bouge pas, changez la dimension que vous regardez plutôt que de recorriger la même couche : si changer deux fois la même variable ne bouge aucune métrique, cette voie est morte, changez de couche tout de suite. (du carnet interne)",
-          "Confiner et guérir sont deux choses : ne faites pas passer un garrot pour une guérison, et rendez compte séparément de « le saignement est arrêté » et de « il reste à traiter à la racine ». (du carnet interne)"
+          "Un solde à 0 ne veut pas dire qu'un canal est cassé : cela veut seulement dire que personne ne l'a encore utilisé ; pour déclarer mort un canal de paiement ou de versement, il faut la preuve de flux « quelqu'un a payé et rien n'est arrivé », jamais « le solde est toujours à 0 » comme argument. (du carnet interne)",
+          "Pour trouver « la dernière opération », lisez depuis la fin : en lisant depuis le début, vous ratez ce qui vient de se passer. (du carnet interne)",
+          "Un seul point de mesure confond facilement « en train de tourner » avec « fuite mémoire » ; il faut au moins trois points alignés pour conclure. (du carnet interne)"
         ]
       }
     },
     "de": {
-      "summary": "[Was wir behoben haben] Heute keine neue Funktion und keine für Nutzer sichtbare Fehlerbehebung. Klar geworden ist aber eines: Eine automatische Prüfung fiel plötzlich reihenweise aus, und es lag nicht am Netz — der Sicherheits-Fingerabdruck der Maschine auf der anderen Seite hatte sich geändert (dort wurde das System neu installiert). Wir haben nicht einfach „neuem Fingerabdruck vertrauen“ gedrückt: Einen unbekannten Fingerabdruck zu akzeptieren ist unumkehrbar, und diese Entscheidung gehört zu einem Menschen. Die Prüfung bleibt bis dahin pausiert. [Was wir verbessert / hinzugefügt haben] Nichts. [Was wir gelernt haben] (1) Ändert sich ein Sicherheits-Fingerabdruck plötzlich, erst klären, ob die Gegenseite neu installiert wurde oder jemand sich ausgibt — nicht reflexartig „vertrauen“ drücken; Unumkehrbares geht zurück an einen Menschen. (2) Wenn eine Reparatur nicht vorankommt, wechsle die Dimension, die du betrachtest, statt dieselbe Schicht erneut zu reparieren: Bewegt dieselbe Variable zweimal geändert keine Messgröße, ist dieser Weg tot — sofort die Schicht wechseln. (aus dem internen Erfahrungsheft) (3) Eindämmen und Heilen sind zwei Dinge: Verkaufe kein Abbinden als Heilung und berichte „Blutung gestoppt“ getrennt von „muss noch an der Wurzel behoben werden“. (aus dem internen Erfahrungsheft)",
+      "summary": "[Was wir behoben haben] (1) Wartende Nachrichten landeten in der falschen Unterhaltung: Zu Stoßzeiten rutschte eine wegen Rate-Limits zurück in die Warteschlange gelegte Nachricht in die „aktuelle“ statt in die ursprüngliche Unterhaltung, und die Warteschlange lief nie ab – nach einem Neuladen ging eine alte Nachricht in eine leere neue Unterhaltung und benannte sie sogar. Genau das sah aus wie „plötzlich taucht eine schon erledigte Unterhaltung auf“. Jetzt sind wartende Nachrichten an ihre ursprüngliche Unterhaltung gebunden und tragen einen Zeitstempel, verfallen nach 30 Minuten, verwaiste oder zeitstempellose Tickets werden verworfen statt gesendet, und alte Warteschlangen werden beim Start bereinigt. (2) Nachrichten an eine gelöschte Unterhaltung blieben ohne Antwort: Beim Schreiben in eine auf einem anderen Gerät gelöschte Unterhaltung lief im Hintergrund zwar eine Runde, aber der Datensatz wurde vom alten Löschzustand abgelehnt, sodass keiner der drei Clients die Antwort sah. Jetzt hat, was Sie selbst tippen, Vorrang vor dem alten Löschdatensatz, der Wiederbelebungsdatensatz wird per Sync an alle Clients verteilt, und jeder Client räumt seine veralteten lokalen Löschvermerke auf. [Was wir verbessert / hinzugefügt haben] Zeitgesteuerte Sammelaufgaben laufen jetzt ohne Oberfläche im Hintergrund: Früher starteten sie einen Browser mit Fenster und schlossen es nicht, sodass leere Suchseiten auf dem Desktop auftauchen konnten; jetzt läuft alles fensterlos im Hintergrund. [Was wir gelernt haben] (1) Ein Kontostand von 0 heißt nicht, dass ein Kanal kaputt ist – es heißt nur, dass ihn noch niemand genutzt hat; um einen Auszahlungs- oder Zahlungskanal für tot zu erklären, braucht es Flussbeweise für „jemand hat gezahlt und es kam nie an“, nie „der Stand ist immer 0“ als Argument. (aus dem internen Erfahrungsheft) (2) Um „die letzte Buchung“ zu finden, liest man vom Ende – von vorne liest man an dem vorbei, was gerade passiert ist. (aus dem internen Erfahrungsheft) (3) Eine einzelne Messung verwechselt am leichtesten „läuft gerade“ mit „Speicherleck“; erst drei Punkte auf einer Linie rechtfertigen eine Schlussfolgerung. (aus dem internen Erfahrungsheft)",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "Zeitgesteuerte Sammelaufgaben laufen jetzt ohne Oberfläche im Hintergrund: kein Browser mit Fenster mehr, kein zurückgelassenes Fenster, keine leeren Seiten, die auf dem Desktop auftauchen."
+        ],
+        "bugs": [
+          "Wartende Nachrichten landeten in der falschen Unterhaltung: wartende Nachrichten sind an ihre ursprüngliche Unterhaltung gebunden und tragen einen Zeitstempel; Tickets älter als 30 Minuten oder ohne Zeitstempel werden verworfen statt gesendet, alte Warteschlangen werden beim Start bereinigt – „plötzlich auftauchende erledigte Unterhaltung“ gibt es nicht mehr.",
+          "Nachrichten an eine gelöschte Unterhaltung blieben ohne Antwort: was Sie selbst tippen, hat Vorrang vor dem alten Löschdatensatz, der Wiederbelebungsdatensatz wird per Sync an alle Clients verteilt, und jeder Client räumt seine veralteten lokalen Löschvermerke auf."
+        ],
         "lessons": [
-          "Ändert sich ein Sicherheits-Fingerabdruck plötzlich, erst klären, ob die Gegenseite neu installiert wurde oder jemand sich ausgibt; nicht reflexartig \"vertrauen\" drücken — einen unbekannten Fingerabdruck zu akzeptieren ist unumkehrbar und diese Entscheidung gehört zu einem Menschen.",
-          "Wenn eine Reparatur nicht vorankommt, wechsle die Dimension, die du betrachtest, statt dieselbe Schicht erneut zu reparieren: Bewegt dieselbe Variable zweimal geändert keine Messgröße, ist dieser Weg tot — sofort die Schicht wechseln. (aus dem internen Erfahrungsheft)",
-          "Eindämmen und Heilen sind zwei Dinge: Verkaufe kein Abbinden als Heilung und berichte \"Blutung gestoppt\" getrennt von \"muss noch an der Wurzel behoben werden\". (aus dem internen Erfahrungsheft)"
+          "Ein Kontostand von 0 heißt nicht, dass ein Kanal kaputt ist – es heißt nur, dass ihn noch niemand genutzt hat; um einen Auszahlungs- oder Zahlungskanal für tot zu erklären, braucht es Flussbeweise für „jemand hat gezahlt und es kam nie an“, nie „der Stand ist immer 0“ als Argument. (aus dem internen Erfahrungsheft)",
+          "Um „die letzte Buchung“ zu finden, liest man vom Ende – von vorne liest man an dem vorbei, was gerade passiert ist. (aus dem internen Erfahrungsheft)",
+          "Eine einzelne Messung verwechselt am leichtesten „läuft gerade“ mit „Speicherleck“; erst drei Punkte auf einer Linie rechtfertigen eine Schlussfolgerung. (aus dem internen Erfahrungsheft)"
         ]
       }
     },
     "ru": {
-      "summary": "[Что исправили] Сегодня нет ни новых функций, ни заметных пользователю исправлений. Зато выяснили одно: автоматическая проверка вдруг начала падать подряд, и дело было не в сети — сменился отпечаток безопасности машины на той стороне (там переустановили систему). Мы не стали нажимать «доверять новому отпечатку»: принять незнакомый отпечаток необратимо, и такое решение остаётся за человеком. Проверка пока на паузе. [Что улучшили / добавили] Ничего. [Что мы поняли] (1) Если отпечаток безопасности вдруг изменился, сначала выясните: ту сторону переустановили или кто-то выдаёт себя за неё, — не жмите «доверять» по привычке; необратимое возвращается к человеку. (2) Когда починка не движется, смените измерение, а не чините тот же слой заново: если одна и та же переменная, изменённая дважды, не двигает ни одной метрики, этот путь мёртв — сразу меняйте слой. (из внутренней базы опыта) (3) Локализация и излечение — разные вещи: не выдавайте жгут за лечение и сообщайте «кровотечение остановлено» отдельно от «нужно исправлять в корне». (из внутренней базы опыта)",
+      "summary": "[Что исправили] (1) Сообщения из очереди попадали не в тот диалог: в часы нагрузки сообщение, отброшенное ограничением частоты обратно в очередь, попадало в «текущий» диалог вместо исходного, а у очереди не было срока — после обновления страницы старое сообщение уходило в пустой новый диалог и даже давало ему название. Именно это выглядело как «внезапно появляется уже решённый диалог». Теперь сообщения в очереди привязаны к исходному диалогу и имеют метку времени, истекают через 30 минут, осиротевшие билеты и билеты без метки выбрасываются вместо отправки, старые очереди чистятся при запуске. (2) Сообщения в удалённый диалог оставались без ответа: при отправке в диалог, удалённый на другом устройстве, раунд на самом деле выполнялся, но запись отклонялась старым состоянием удаления, и ни один из трёх клиентов не видел ответ. Теперь то, что вы набрали сами, имеет приоритет над старой записью удаления, запись восстановления рассылается синхронизацией на все клиенты, а каждый клиент убирает устаревшие локальные записи удаления. [Что улучшили / добавили] Задачи планового сбора теперь работают без интерфейса в фоне: раньше они запускали браузер с окном и не закрывали его, поэтому на рабочем столе могли появляться пустые страницы поиска; теперь всё идёт в фоне без окон. [Что мы поняли] (1) Баланс 0 не значит, что канал сломан — это значит лишь, что им ещё никто не пользовался; чтобы объявить канал выплат или платежей мёртвым, нужны доказательства потока «кто-то заплатил, а не дошло», а не «баланс всегда 0» как аргумент. (из внутренней базы опыта) (2) Чтобы найти «последнюю операцию», читайте с конца — читая с начала, вы пропускаете только что произошедшее. (из внутренней базы опыта) (3) Один замер легче всего путает «сейчас работает» с «утечкой памяти»; вывод можно делать только когда три точки выстроятся в линию. (из внутренней базы опыта)",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "Задачи планового сбора теперь работают без интерфейса в фоне: браузер с окном не запускается, окно не остаётся, пустые страницы на рабочем столе не появляются."
+        ],
+        "bugs": [
+          "Сообщения из очереди попадали не в тот диалог: сообщения в очереди привязаны к исходному диалогу и имеют метку времени; билеты старше 30 минут или без метки выбрасываются вместо отправки, старые очереди чистятся при запуске — «внезапно появившегося решённого диалога» больше нет.",
+          "Сообщения в удалённый диалог оставались без ответа: то, что вы набрали сами, имеет приоритет над старой записью удаления, запись восстановления рассылается синхронизацией на все клиенты, и каждый клиент убирает устаревшие локальные записи удаления."
+        ],
         "lessons": [
-          "Если отпечаток безопасности вдруг изменился, сначала выясните: ту сторону переустановили или кто-то выдаёт себя за неё; не жмите \"доверять\" по привычке — принять незнакомый отпечаток необратимо, и это решение остаётся за человеком.",
-          "Когда починка не движется, смените измерение, а не чините тот же слой заново: если одна и та же переменная, изменённая дважды, не двигает ни одной метрики, этот путь мёртв — сразу меняйте слой. (из внутренней базы опыта)",
-          "Локализация и излечение — разные вещи: не выдавайте жгут за лечение и сообщайте \"кровотечение остановлено\" отдельно от \"нужно исправлять в корне\". (из внутренней базы опыта)"
+          "Баланс 0 не значит, что канал сломан — это значит лишь, что им ещё никто не пользовался; чтобы объявить канал выплат или платежей мёртвым, нужны доказательства потока «кто-то заплатил, а не дошло», а не «баланс всегда 0» как аргумент. (из внутренней базы опыта)",
+          "Чтобы найти «последнюю операцию», читайте с конца — читая с начала, вы пропускаете только что произошедшее. (из внутренней базы опыта)",
+          "Один замер легче всего путает «сейчас работает» с «утечкой памяти»; вывод можно делать только когда три точки выстроятся в линию. (из внутренней базы опыта)"
         ]
       }
     },
     "pt": {
-      "summary": "[O que corrigimos] Hoje sem funcionalidades novas e sem correção visível para o utilizador. Mas esclarecemos uma coisa: uma verificação automática começou a falhar em série e não era a rede — a impressão digital de segurança da máquina do outro lado mudou (reinstalaram o sistema). Não carregámos em \"confiar na nova impressão digital\": aceitar uma impressão desconhecida é irreversível e essa decisão é de uma pessoa. A verificação fica em pausa até lá. [O que melhorámos / adicionámos] Nada. [O que aprendemos] (1) Quando uma impressão digital de segurança muda de repente, primeiro perceba se reinstalaram o outro lado ou se alguém se faz passar por ele; não carregue em \"confiar\" por hábito — o irreversível volta para as mãos de uma pessoa. (2) Quando uma correção não avança, mude a dimensão que observa em vez de recarregar a mesma camada: se mudar a mesma variável duas vezes não move nenhuma métrica, esse caminho está morto, mude de camada já. (do caderno interno) (3) Conter e curar são coisas diferentes: não venda um garrote como cura e relate \"parou de sangrar\" separadamente de \"falta resolver na raiz\". (do caderno interno)",
+      "summary": "[O que corrigimos] (1) Mensagens em fila a cair na conversa errada: em horas de ponta, uma mensagem limitada por ritmo e devolvida à fila caía na conversa \"atual\" em vez da original, e a fila nunca expirava — ao atualizar a página, uma mensagem antiga era enviada para uma conversa nova e vazia e até lhe dava nome. Era exatamente isto o \"aparece de repente uma conversa já resolvida\". Agora as mensagens em fila ficam ligadas à conversa original e levam hora, expiram aos 30 minutos, os bilhetes órfãos ou sem hora são descartados em vez de enviados, e as filas antigas são limpas no arranque. (2) Mensagens para uma conversa apagada sem resposta: escrever numa conversa apagada noutro dispositivo até corria um turno em segundo plano, mas o registo era recusado pelo estado de eliminação antigo, por isso nenhum dos três clientes via a resposta. Agora o que escreve tem prioridade sobre o registo de eliminação antigo, o registo de reativação é difundido com a sincronização para todos os clientes, e cada cliente limpa os seus registos de eliminação locais antigos. [O que melhorámos / adicionámos] As tarefas programadas de recolha passam a correr sem interface em segundo plano: antes lançavam um navegador com janela e não a fechavam, pelo que podiam surgir páginas de pesquisa em branco no ambiente de trabalho; agora tudo corre em segundo plano sem janela. [O que aprendemos] (1) Um saldo de 0 não significa que um canal está avariado — significa apenas que ninguém o usou ainda; para dar um canal de pagamento ou entrega como morto é preciso a prova de fluxo \"alguém pagou e não chegou\", nunca \"o saldo está sempre a 0\" como argumento. (do caderno interno) (2) Para encontrar \"o último movimento\", leia pelo fim — a ler pelo início perde o que acabou de acontecer. (do caderno interno) (3) Uma única amostra confunde facilmente \"está a trabalhar\" com \"fuga de memória\"; só três pontos em linha justificam uma conclusão. (do caderno interno)",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "As tarefas programadas de recolha passam a correr sem interface em segundo plano: sem navegador com janela, sem janela deixada aberta e sem páginas em branco a surgir no ambiente de trabalho."
+        ],
+        "bugs": [
+          "Mensagens em fila a cair na conversa errada: as mensagens em fila ficam ligadas à conversa original e levam hora; bilhetes com mais de 30 minutos ou sem hora são descartados em vez de enviados, e as filas antigas são limpas no arranque, pelo que já não aparece \"uma conversa resolvida de repente\".",
+          "Mensagens para uma conversa apagada sem resposta: o que escreve tem prioridade sobre o registo de eliminação antigo, o registo de reativação é difundido com a sincronização para todos os clientes e cada cliente limpa os seus registos de eliminação locais antigos."
+        ],
         "lessons": [
-          "Quando uma impressão digital de segurança muda de repente, primeiro perceba se reinstalaram o outro lado ou se alguém se faz passar por ele; não carregue em \"confiar\" por hábito — aceitar uma impressão desconhecida é irreversível e essa decisão volta para as mãos de uma pessoa.",
-          "Quando uma correção não avança, mude a dimensão que observa em vez de recarregar a mesma camada: se mudar a mesma variável duas vezes não move nenhuma métrica, esse caminho está morto, mude de camada já. (do caderno interno)",
-          "Conter e curar são coisas diferentes: não venda um garrote como cura e relate \"parou de sangrar\" separadamente de \"falta resolver na raiz\". (do caderno interno)"
+          "Um saldo de 0 não significa que um canal está avariado — significa apenas que ninguém o usou ainda; para dar um canal de pagamento ou entrega como morto é preciso a prova de fluxo \"alguém pagou e não chegou\", nunca \"o saldo está sempre a 0\" como argumento. (do caderno interno)",
+          "Para encontrar \"o último movimento\", leia pelo fim — a ler pelo início perde o que acabou de acontecer. (do caderno interno)",
+          "Uma única amostra confunde facilmente \"está a trabalhar\" com \"fuga de memória\"; só três pontos em linha justificam uma conclusão. (do caderno interno)"
         ]
       }
     },
     "ar": {
-      "summary": "[ما أصلحناه] اليوم لا ميزات جديدة ولا إصلاح ظاهر للمستخدم. لكننا أوضحنا أمرًا: بدأ فحص تلقائي يفشل على التوالي، ولم تكن المشكلة في الشبكة — بل تغيّرت بصمة الأمان لجهاز الطرف الآخر (أُعيد تثبيت نظامه). لم نضغط «الثقة بالبصمة الجديدة»: قبول بصمة مجهولة لا رجعة فيه، وهذا القرار يعود إلى إنسان. الفحص متوقف حتى ذلك الحين. [ما حسّنّاه/أضفناه] لا شيء. [ما تعلّمناه] (1) عندما تتغير بصمة أمان فجأة، تبيّن أولًا: هل أُعيد تثبيت الطرف الآخر أم أن أحدًا ينتحل شخصيته؛ لا تضغط «الثقة» بحكم العادة — فما لا رجعة فيه يعود إلى إنسان. (2) عندما لا يتقدّم الإصلاح، غيّر البُعد الذي تنظر إليه بدل إعادة إصلاح الطبقة نفسها: إذا لم يُحرّك المتغيّر نفسه تغييره مرتين أي مقياس، فهذا المسار ميت — غيّر الطبقة فورًا. (من دفتر الخبرة الداخلي) (3) الاحتواء والشفاء أمران مختلفان: لا تُقدّم العصابة اليدوية كعلاج، وأبلغ عن «توقف النزيف» منفصلًا عن «لا يزال يحتاج إصلاحًا جذريًا». (من دفتر الخبرة الداخلي)",
+      "summary": "[ما أصلحناه] (١) رسائل في الانتظار تصل إلى محادثة خاطئة: في أوقات الذروة كانت الرسالة التي يعيدها حدّ المعدّل إلى قائمة الانتظار تصل إلى المحادثة «الحالية» بدل المحادثة الأصلية، والقائمة بلا انتهاء صلاحية، فبعد تحديث الصفحة تُرسَل رسالة قديمة إلى محادثة جديدة فارغة وتُسمّيها أيضًا — وهذا بالضبط ما كان يبدو كـ«محادثة محلولة تظهر فجأة». الآن تُربَط رسائل الانتظار بمحادثتها الأصلية وتحمل وقتًا، وتنتهي صلاحيتها بعد ٣٠ دقيقة، والبطاقات اليتيمة أو بلا وقت تُطرح بدل إرسالها، وتُمسح القوائم القديمة عند البدء. (٢) رسائل إلى محادثة محذوفة بلا رد: الكتابة في محادثة محذوفة على جهاز آخر كانت تُشغّل دورة في الخلفية فعلًا، لكن السجل كان يُرفض بسبب حالة الحذف القديمة، فلم يرَ الرد أي من الأطراف الثلاثة. الآن ما تكتبه أنت له أولوية على سجل الحذف القديم، وسجل الإحياء يُبَثّ مع المزامنة إلى كل الأطراف، وكل طرف يمسح سجلات الحذف المحلية القديمة. [ما حسّنّاه/أضفناه] صارت مهام الجمع المجدولة تعمل بلا واجهة في الخلفية: كانت سابقًا تُطلق متصفحًا بنافذة ولا تغلقها، فقد تظهر صفحات بحث فارغة على سطح المكتب؛ الآن كل شيء يعمل في الخلفية بلا نوافذ. [ما تعلّمناه] (١) رصيد صفر لا يعني أن القناة معطّلة، بل يعني فقط أن أحدًا لم يستخدمها بعد؛ للحكم بموت قناة دفع أو صرف تحتاج دليل تدفّق «أحد دفع ولم يصل»، لا «الرصيد دائمًا صفر» كحجّة. (من دفتر الخبرة الداخلي) (٢) للعثور على «أحدث عملية» اقرأ من الذيل؛ القراءة من الرأس تُفوّت ما حدث للتوّ. (من دفتر الخبرة الداخلي) (٣) القياس من نقطة واحدة يخلط بسهولة بين «يعمل الآن» و«تسريب ذاكرة»؛ لا تُصدر حكمًا قبل أن تصطفّ ثلاث نقاط على خط واحد. (من دفتر الخبرة الداخلي)",
       "sections": {
-        "skills": [],
-        "bugs": [],
+        "skills": [
+          "صارت مهام الجمع المجدولة تعمل بلا واجهة في الخلفية: لا متصفح بنافذة، ولا نافذة تُترك مفتوحة، ولا صفحات فارغة تظهر على سطح المكتب."
+        ],
+        "bugs": [
+          "رسائل في الانتظار تصل إلى محادثة خاطئة: تُربَط رسائل الانتظار بمحادثتها الأصلية وتحمل وقتًا؛ والبطاقات الأقدم من ٣٠ دقيقة أو بلا وقت تُطرح بدل إرسالها، وتُمسح القوائم القديمة عند البدء، فلا تظهر «محادثة محلولة فجأة» بعد الآن.",
+          "رسائل إلى محادثة محذوفة بلا رد: ما تكتبه أنت له أولوية على سجل الحذف القديم، وسجل الإحياء يُبَثّ مع المزامنة إلى كل الأطراف، وكل طرف يمسح سجلات الحذف المحلية القديمة."
+        ],
         "lessons": [
-          "عندما تتغير بصمة أمان فجأة، تبيّن أولًا هل أُعيد تثبيت الطرف الآخر أم أن أحدًا ينتحل شخصيته؛ لا تضغط \"الثقة\" بحكم العادة — فقبول بصمة مجهولة لا رجعة فيه وهذا القرار يعود إلى إنسان.",
-          "عندما لا يتقدّم الإصلاح، غيّر البُعد الذي تنظر إليه بدل إعادة إصلاح الطبقة نفسها: إذا لم يُحرّك المتغيّر نفسه تغييره مرتين أي مقياس، فهذا المسار ميت — غيّر الطبقة فورًا. (من دفتر الخبرة الداخلي)",
-          "الاحتواء والشفاء أمران مختلفان: لا تُقدّم العصابة اليدوية كعلاج، وأبلغ عن \"توقف النزيف\" منفصلًا عن \"لا يزال يحتاج إصلاحًا جذريًا\". (من دفتر الخبرة الداخلي)"
+          "رصيد صفر لا يعني أن القناة معطّلة، بل يعني فقط أن أحدًا لم يستخدمها بعد؛ للحكم بموت قناة دفع أو صرف تحتاج دليل تدفّق «أحد دفع ولم يصل»، لا «الرصيد دائمًا صفر» كحجّة. (من دفتر الخبرة الداخلي)",
+          "للعثور على «أحدث عملية» اقرأ من الذيل؛ القراءة من الرأس تُفوّت ما حدث للتوّ. (من دفتر الخبرة الداخلي)",
+          "القياس من نقطة واحدة يخلط بسهولة بين «يعمل الآن» و«تسريب ذاكرة»؛ لا تُصدر حكمًا قبل أن تصطفّ ثلاث نقاط على خط واحد. (من دفتر الخبرة الداخلي)"
         ]
       }
     }
