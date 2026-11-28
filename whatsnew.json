@@ -1,7 +1,7 @@
 {
   "ver": "1.6.8",
   "date": "2026-11-28",
-  "summary": "【修了什么】今天没有对外功能改动，版本仍是 1.6.8，之前「任务汇报完就变灰」的修正继续有效。【优化/新增了什么】今日无新增功能，把几条排查经验固化成了标准检查点。【自我学习到了什么】学自内部经验库：①连接失败只花一两毫秒，多半是那个端口根本没在监听，不是网速慢；②监控要测用户真实走的那条路，别测自己方便的那条；③延迟呈规律锯齿、最小值只有一两毫秒，是设备息屏省电，别乱改设置；④探端口通不通，先拿一个必然不存在的端口做对照。",
+  "summary": "【修了什么】今天没有对外功能改动，版本仍是 1.6.8，之前「任务汇报完就变灰」的修正继续有效。【优化/新增了什么】今日无新增功能，把几条排查经验固化成了标准检查点。【自我学习到了什么】学自内部经验库：①连接失败只花一两毫秒，多半是那个端口根本没在监听，不是网速慢；②监控要测用户真实走的那条路，别测自己方便的那条；③延迟呈规律锯齿、最小值只有一两毫秒，是设备息屏省电，别乱改设置；④探端口通不通，先拿一个必然不存在的端口做对照。⑤自检脚本必须把结果写进固定文件，只打印在屏幕上等于没测。",
   "sections": {
     "skills": [],
     "bugs": [],
@@ -9,12 +9,13 @@
       "「连不上」先看失败花了多久：一两毫秒就失败，通常是那个端口根本没在监听，不是网速慢；真超时要等好几秒。",
       "监控要测用户实际走的那条路：测自己方便的那条，容易报出一堆假警报，而用户那边其实好得很。",
       "延迟出现规律的锯齿、最小值只有一两毫秒，多半是设备息屏省电，别急着改设置。",
-      "判断端口通不通，先拿一个必然不存在的端口做对照：连它都显示「通」，说明中间有设备在替你应答，后面所有结论都不作数。"
+      "判断端口通不通，先拿一个必然不存在的端口做对照：连它都显示「通」，说明中间有设备在替你应答，后面所有结论都不作数。",
+      "自检脚本一定要把结果写进固定文件：只在屏幕上打印，定时跑起来什么都不剩，最后你会一直等一个根本不会出现的结果。"
     ]
   },
   "i18n": {
     "en": {
-      "summary": "[Fixed] No user-facing changes today; the version stays 1.6.8 and the earlier fix for \"a task turning grey right after it finished reporting\" still applies. [New/Improved] Nothing new today — a few troubleshooting lessons were turned into fixed checkpoints. [What we learned] From our own experience library: (1) if a connection fails in one or two milliseconds, the port usually isn't listening at all — it isn't slow networking; (2) monitor the path users actually take, not the one that's convenient for you; (3) a delay with a regular sawtooth pattern and a minimum of one or two milliseconds means the device is asleep saving power — don't touch the settings; (4) before claiming a port is open, test one that certainly doesn't exist as a control.",
+      "summary": "[Fixed] No user-facing changes today; the version stays 1.6.8 and the earlier fix for \"a task turning grey right after it finished reporting\" still applies. [New/Improved] Nothing new today — a few troubleshooting lessons were turned into fixed checkpoints. [What we learned] From our own experience library: (1) if a connection fails in one or two milliseconds, the port usually isn't listening at all — it isn't slow networking; (2) monitor the path users actually take, not the one that's convenient for you; (3) a delay with a regular sawtooth pattern and a minimum of one or two milliseconds means the device is asleep saving power — don't touch the settings; (4) before claiming a port is open, test one that certainly doesn't exist as a control.⑤ a self-check script must write its results to a fixed file — printing to the screen alone means nothing was really tested.",
       "sections": {
         "skills": [],
         "bugs": [],
@@ -22,12 +23,13 @@
           "When something \"can't connect\", first check how long the failure took: one or two milliseconds means that port isn't listening at all, not that the network is slow; a real timeout takes seconds.",
           "Monitor the path users actually take: testing the convenient path produces piles of false alarms while users are perfectly fine.",
           "A delay with a regular sawtooth pattern and a minimum of one or two milliseconds usually means the device is asleep saving power — don't rush to change settings.",
-          "Before judging whether a port is reachable, test a port that certainly doesn't exist as a control: if even that shows \"open\", something in the middle is answering for you and every later conclusion is void."
+          "Before judging whether a port is reachable, test a port that certainly doesn't exist as a control: if even that shows \"open\", something in the middle is answering for you and every later conclusion is void.",
+          "A self-check script must always write its results to a fixed file: if it only prints to the screen, a scheduled run leaves nothing behind and you end up waiting forever for a result that will never come."
         ]
       }
     },
     "ja": {
-      "summary": "【修正】本日はユーザー向けの機能変更はありません。バージョンは 1.6.8 のままで、以前の「報告が終わった直後にタスクが灰色になる」修正は引き続き有効です。【最適化/新規】本日新規機能はありませんが、いくつかの調査ノウハウを標準チェック項目として固定しました。【自主学習】自社の経験庫より：①接続失敗が1〜2ミリ秒で返るなら、そのポートがそもそも待ち受けていない可能性が高く、回線が遅いわけではない。②監視はユーザーが実際に通る経路で行い、自分に都合のよい経路で測らない。③遅延が規則的なノコギリ状で最小値が1〜2ミリ秒なら、端末が省電力で休んでいるだけなので設定をいじらない。④ポートの疎通判定は、必ず存在しないポートを対照として先に試す。",
+      "summary": "【修正】本日はユーザー向けの機能変更はありません。バージョンは 1.6.8 のままで、以前の「報告が終わった直後にタスクが灰色になる」修正は引き続き有効です。【最適化/新規】本日新規機能はありませんが、いくつかの調査ノウハウを標準チェック項目として固定しました。【自主学習】自社の経験庫より：①接続失敗が1〜2ミリ秒で返るなら、そのポートがそもそも待ち受けていない可能性が高く、回線が遅いわけではない。②監視はユーザーが実際に通る経路で行い、自分に都合のよい経路で測らない。③遅延が規則的なノコギリ状で最小値が1〜2ミリ秒なら、端末が省電力で休んでいるだけなので設定をいじらない。④ポートの疎通判定は、必ず存在しないポートを対照として先に試す。⑤自己点検のスクリプトは結果を必ず決まったファイルに書き出す。画面に表示するだけでは、実質何も測れていない。",
       "sections": {
         "skills": [],
         "bugs": [],
@@ -35,12 +37,13 @@
           "「つながらない」と言われたら、まず失敗までの時間を見る。1〜2ミリ秒で失敗するなら、そのポートが待ち受けていないのが原因で、回線が遅いわけではない。本当のタイムアウトは数秒かかる。",
           "監視はユーザーが実際に通る経路で行う。自分に都合のよい経路で測ると、ユーザー側は何も問題ないのに誤警報が山ほど出る。",
           "遅延が規則的なノコギリ状で、最小値が1〜2ミリ秒しかないなら、端末が省電力で休んでいるだけのことが多い。慌てて設定を変えない。",
-          "ポートが通るかどうかを判断する前に、必ず存在しないポートを対照として試す。それすら「通る」と出るなら、途中の機器が代わりに応答しており、その後の結論はすべて無効になる。"
+          "ポートが通るかどうかを判断する前に、必ず存在しないポートを対照として試す。それすら「通る」と出るなら、途中の機器が代わりに応答しており、その後の結論はすべて無効になる。",
+          "自己点検のスクリプトは必ず結果を決まったファイルに書き出す。画面に表示するだけだと、定時実行では何も残らず、永遠に来ない結果を待ち続けることになる。"
         ]
       }
     },
     "ko": {
-      "summary": "【수정】오늘은 사용자에게 보이는 기능 변경이 없습니다. 버전은 1.6.8 그대로이며, 이전의 「보고가 끝나자마자 작업이 회색으로 바뀌던」 수정은 계속 적용됩니다. 【최적화/신규】오늘 새 기능은 없지만 몇 가지 점검 노하우를 표준 확인 항목으로 고정했습니다. 【스스로 배운 것】자체 경험 저장소에서: ①연결 실패가 1~2밀리초 만에 끝나면 그 포트가 아예 수신 대기 중이 아닐 가능성이 크며, 회선이 느린 것이 아니다. ②모니터링은 사용자가 실제로 지나는 경로로 하고, 내게 편한 경로로 재지 않는다. ③지연이 규칙적인 톱니 모양이고 최솟값이 1~2밀리초라면 기기가 절전으로 쉬는 중이니 설정을 건드리지 않는다. ④포트 연결 여부를 판단하기 전에 반드시 존재하지 않는 포트를 대조군으로 먼저 시험한다.",
+      "summary": "【수정】오늘은 사용자에게 보이는 기능 변경이 없습니다. 버전은 1.6.8 그대로이며, 이전의 「보고가 끝나자마자 작업이 회색으로 바뀌던」 수정은 계속 적용됩니다. 【최적화/신규】오늘 새 기능은 없지만 몇 가지 점검 노하우를 표준 확인 항목으로 고정했습니다. 【스스로 배운 것】자체 경험 저장소에서: ①연결 실패가 1~2밀리초 만에 끝나면 그 포트가 아예 수신 대기 중이 아닐 가능성이 크며, 회선이 느린 것이 아니다. ②모니터링은 사용자가 실제로 지나는 경로로 하고, 내게 편한 경로로 재지 않는다. ③지연이 규칙적인 톱니 모양이고 최솟값이 1~2밀리초라면 기기가 절전으로 쉬는 중이니 설정을 건드리지 않는다. ④포트 연결 여부를 판단하기 전에 반드시 존재하지 않는 포트를 대조군으로 먼저 시험한다.⑤ 자체 점검 스크립트는 결과를 반드시 지정한 파일에 기록해야 한다. 화면에 출력만 하면 측정한 것이 아니다.",
       "sections": {
         "skills": [],
         "bugs": [],
@@ -48,12 +51,13 @@
           "「연결이 안 된다」는 말을 들으면 먼저 실패까지 걸린 시간을 본다. 1~2밀리초 만에 실패하면 그 포트가 수신 대기 중이 아닌 것이지 회선이 느린 것이 아니다. 진짜 타임아웃은 몇 초가 걸린다.",
           "모니터링은 사용자가 실제로 지나는 경로로 한다. 내게 편한 경로로 재면 사용자 쪽은 멀쩡한데 잘못된 경보만 잔뜩 쌓인다.",
           "지연이 규칙적인 톱니 모양이고 최솟값이 1~2밀리초뿐이면 기기가 절전으로 쉬는 중인 경우가 많다. 서둘러 설정을 바꾸지 않는다.",
-          "포트가 열려 있는지 판단하기 전에 반드시 존재하지 않는 포트를 대조군으로 시험한다. 그것까지 「열림」으로 나오면 중간 장비가 대신 응답하는 것이므로 이후 결론은 모두 무효다."
+          "포트가 열려 있는지 판단하기 전에 반드시 존재하지 않는 포트를 대조군으로 시험한다. 그것까지 「열림」으로 나오면 중간 장비가 대신 응답하는 것이므로 이후 결론은 모두 무효다.",
+          "자체 점검 스크립트는 결과를 반드시 지정한 파일에 기록해야 한다. 화면에 출력만 하면 정기 실행 시 아무것도 남지 않아, 영원히 오지 않을 결과를 기다리게 된다."
         ]
       }
     },
     "es": {
-      "summary": "【Corregido】Hoy no hay cambios visibles para el usuario; la versión sigue en 1.6.8 y la corrección anterior («una tarea se volvía gris justo al terminar de informar») sigue vigente. 【Mejoras/Novedades】Hoy no hay funciones nuevas, pero varias lecciones de diagnóstico quedaron fijadas como puntos de control estándar. 【Lo que aprendimos】De nuestra propia experiencia: ①si una conexión falla en uno o dos milisegundos, lo más probable es que ese puerto no esté escuchando, no que la red vaya lenta; ②hay que monitorizar el camino que usan de verdad los usuarios, no el que nos resulta cómodo; ③una latencia con sierra regular y un mínimo de uno o dos milisegundos suele significar que el equipo está dormido ahorrando energía: no toques los ajustes; ④antes de afirmar que un puerto está abierto, prueba uno que seguro no existe como control.",
+      "summary": "【Corregido】Hoy no hay cambios visibles para el usuario; la versión sigue en 1.6.8 y la corrección anterior («una tarea se volvía gris justo al terminar de informar») sigue vigente. 【Mejoras/Novedades】Hoy no hay funciones nuevas, pero varias lecciones de diagnóstico quedaron fijadas como puntos de control estándar. 【Lo que aprendimos】De nuestra propia experiencia: ①si una conexión falla en uno o dos milisegundos, lo más probable es que ese puerto no esté escuchando, no que la red vaya lenta; ②hay que monitorizar el camino que usan de verdad los usuarios, no el que nos resulta cómodo; ③una latencia con sierra regular y un mínimo de uno o dos milisegundos suele significar que el equipo está dormido ahorrando energía: no toques los ajustes; ④antes de afirmar que un puerto está abierto, prueba uno que seguro no existe como control.⑤ un script de autocomprobación debe escribir sus resultados en un archivo fijo: imprimir solo en pantalla equivale a no haber probado nada.",
       "sections": {
         "skills": [],
         "bugs": [],
@@ -61,12 +65,13 @@
           "Cuando algo «no conecta», primero mira cuánto tardó en fallar: uno o dos milisegundos significa que ese puerto no está escuchando, no que la red sea lenta; un tiempo de espera real tarda segundos.",
           "Monitoriza el camino que usan de verdad los usuarios: medir el camino cómodo genera montones de falsas alarmas mientras el usuario está perfectamente bien.",
           "Una latencia con sierra regular y un mínimo de uno o dos milisegundos suele ser el equipo dormido ahorrando energía; no corras a cambiar ajustes.",
-          "Antes de juzgar si un puerto es alcanzable, prueba uno que seguro no existe como control: si hasta ese sale «abierto», algo en medio responde por ti y todas las conclusiones posteriores quedan anuladas."
+          "Antes de juzgar si un puerto es alcanzable, prueba uno que seguro no existe como control: si hasta ese sale «abierto», algo en medio responde por ti y todas las conclusiones posteriores quedan anuladas.",
+          "Un script de autocomprobación debe escribir siempre sus resultados en un archivo fijo: si solo imprime en pantalla, una ejecución programada no deja nada y acabas esperando para siempre un resultado que nunca llegará."
         ]
       }
     },
     "fr": {
-      "summary": "【Corrigé】Aucun changement visible pour l'utilisateur aujourd'hui ; la version reste 1.6.8 et la correction précédente (« une tâche passait en gris dès qu'elle finissait de rendre compte ») reste active. 【Optimisations/Nouveautés】Aucune nouveauté aujourd'hui, mais plusieurs leçons de diagnostic ont été figées en points de contrôle standards. 【Ce que nous avons appris】D'après notre propre expérience : ①si une connexion échoue en un ou deux millisecondes, c'est probablement que le port n'écoute pas du tout, pas que le réseau est lent ; ②il faut surveiller le chemin que prennent réellement les utilisateurs, pas celui qui nous arrange ; ③une latence en dents de scie régulière avec un minimum d'un ou deux millisecondes signifie souvent que l'appareil dort pour économiser l'énergie : ne touchez pas aux réglages ; ④avant d'affirmer qu'un port est ouvert, testez-en un qui n'existe sûrement pas comme témoin.",
+      "summary": "【Corrigé】Aucun changement visible pour l'utilisateur aujourd'hui ; la version reste 1.6.8 et la correction précédente (« une tâche passait en gris dès qu'elle finissait de rendre compte ») reste active. 【Optimisations/Nouveautés】Aucune nouveauté aujourd'hui, mais plusieurs leçons de diagnostic ont été figées en points de contrôle standards. 【Ce que nous avons appris】D'après notre propre expérience : ①si une connexion échoue en un ou deux millisecondes, c'est probablement que le port n'écoute pas du tout, pas que le réseau est lent ; ②il faut surveiller le chemin que prennent réellement les utilisateurs, pas celui qui nous arrange ; ③une latence en dents de scie régulière avec un minimum d'un ou deux millisecondes signifie souvent que l'appareil dort pour économiser l'énergie : ne touchez pas aux réglages ; ④avant d'affirmer qu'un port est ouvert, testez-en un qui n'existe sûrement pas comme témoin.⑤ un script d'auto-vérification doit écrire ses résultats dans un fichier fixe : un simple affichage à l'écran revient à n'avoir rien testé.",
       "sections": {
         "skills": [],
         "bugs": [],
@@ -74,12 +79,13 @@
           "Quand « ça ne se connecte pas », regardez d'abord combien de temps l'échec a pris : un ou deux millisecondes veut dire que le port n'écoute pas, pas que le réseau est lent ; un vrai délai d'attente prend des secondes.",
           "Surveillez le chemin que prennent réellement les utilisateurs : mesurer le chemin pratique produit des tas de fausses alertes alors que l'utilisateur va très bien.",
           "Une latence en dents de scie régulière avec un minimum d'un ou deux millisecondes, c'est souvent l'appareil endormi en économie d'énergie ; ne changez pas les réglages à la hâte.",
-          "Avant de juger qu'un port est joignable, testez-en un qui n'existe sûrement pas comme témoin : si même celui-là sort « ouvert », un équipement intermédiaire répond à votre place et toutes les conclusions suivantes sont nulles."
+          "Avant de juger qu'un port est joignable, testez-en un qui n'existe sûrement pas comme témoin : si même celui-là sort « ouvert », un équipement intermédiaire répond à votre place et toutes les conclusions suivantes sont nulles.",
+          "Un script d'auto-vérification doit toujours écrire ses résultats dans un fichier fixe : s'il ne fait qu'afficher à l'écran, une exécution planifiée ne laisse rien et vous attendez indéfiniment un résultat qui n'arrivera jamais."
         ]
       }
     },
     "de": {
-      "summary": "【Behoben】Heute keine sichtbaren Änderungen für Nutzer; die Version bleibt 1.6.8, und die frühere Korrektur (« eine Aufgabe wurde grau, sobald sie ihren Bericht abgegeben hatte ») gilt weiter. 【Verbessert/Neu】Heute nichts Neues, aber einige Diagnose-Lehren wurden zu festen Prüfpunkten gemacht. 【Was wir gelernt haben】Aus unserem eigenen Erfahrungsschatz: ①Scheitert eine Verbindung in ein bis zwei Millisekunden, lauscht der Port meist gar nicht — das Netz ist nicht langsam; ②überwachen muss man den Weg, den Nutzer tatsächlich gehen, nicht den bequemen; ③eine Latenz mit regelmäßiger Sägezahnform und einem Minimum von ein bis zwei Millisekunden heißt meist, das Gerät schläft im Energiesparmodus — Finger weg von den Einstellungen; ④bevor man einen Port als offen bezeichnet, testet man einen, den es sicher nicht gibt, als Kontrolle.",
+      "summary": "【Behoben】Heute keine sichtbaren Änderungen für Nutzer; die Version bleibt 1.6.8, und die frühere Korrektur (« eine Aufgabe wurde grau, sobald sie ihren Bericht abgegeben hatte ») gilt weiter. 【Verbessert/Neu】Heute nichts Neues, aber einige Diagnose-Lehren wurden zu festen Prüfpunkten gemacht. 【Was wir gelernt haben】Aus unserem eigenen Erfahrungsschatz: ①Scheitert eine Verbindung in ein bis zwei Millisekunden, lauscht der Port meist gar nicht — das Netz ist nicht langsam; ②überwachen muss man den Weg, den Nutzer tatsächlich gehen, nicht den bequemen; ③eine Latenz mit regelmäßiger Sägezahnform und einem Minimum von ein bis zwei Millisekunden heißt meist, das Gerät schläft im Energiesparmodus — Finger weg von den Einstellungen; ④bevor man einen Port als offen bezeichnet, testet man einen, den es sicher nicht gibt, als Kontrolle.⑤ Ein Selbstprüfungs-Skript muss seine Ergebnisse in eine feste Datei schreiben — nur auf dem Bildschirm ausgeben heißt, nichts geprüft zu haben.",
       "sections": {
         "skills": [],
         "bugs": [],
@@ -87,12 +93,13 @@
           "Wenn etwas «keine Verbindung bekommt», zuerst schauen, wie lange der Fehlschlag gedauert hat: ein bis zwei Millisekunden heißt, der Port lauscht gar nicht, nicht dass das Netz langsam ist; ein echtes Timeout dauert Sekunden.",
           "Überwachen muss man den Weg, den Nutzer tatsächlich gehen: den bequemen Weg zu messen erzeugt Berge falscher Alarme, während beim Nutzer alles bestens läuft.",
           "Eine Latenz mit regelmäßiger Sägezahnform und einem Minimum von nur ein bis zwei Millisekunden ist meist ein schlafendes Gerät im Energiesparmodus — nicht hastig an den Einstellungen drehen.",
-          "Bevor man beurteilt, ob ein Port erreichbar ist, testet man einen Port, den es sicher nicht gibt, als Kontrolle: zeigt selbst der «offen», antwortet ein Gerät dazwischen für einen, und alle folgenden Schlüsse sind ungültig."
+          "Bevor man beurteilt, ob ein Port erreichbar ist, testet man einen Port, den es sicher nicht gibt, als Kontrolle: zeigt selbst der «offen», antwortet ein Gerät dazwischen für einen, und alle folgenden Schlüsse sind ungültig.",
+          "Ein Selbstprüfungs-Skript muss seine Ergebnisse immer in eine feste Datei schreiben: gibt es nur auf dem Bildschirm aus, bleibt bei einem geplanten Lauf nichts übrig und man wartet ewig auf ein Ergebnis, das nie kommt."
         ]
       }
     },
     "ru": {
-      "summary": "【Исправлено】Сегодня изменений для пользователей нет; версия остаётся 1.6.8, а прежнее исправление («задача становилась серой сразу после отчёта») продолжает действовать. 【Улучшено/Новое】Нового сегодня нет, но несколько уроков диагностики закреплены как стандартные пункты проверки. 【Чему мы научились】Из собственного опыта: ①если соединение падает за одну-две миллисекунды, скорее всего порт вообще не слушается, а не «медленная сеть»; ②проверять надо тот путь, которым реально идут пользователи, а не удобный нам; ③задержка с ровной пилообразной формой и минимумом в одну-две миллисекунды обычно означает, что устройство спит в режиме экономии — не трогайте настройки; ④прежде чем говорить, что порт открыт, проверьте заведомо несуществующий порт как контроль.",
+      "summary": "【Исправлено】Сегодня изменений для пользователей нет; версия остаётся 1.6.8, а прежнее исправление («задача становилась серой сразу после отчёта») продолжает действовать. 【Улучшено/Новое】Нового сегодня нет, но несколько уроков диагностики закреплены как стандартные пункты проверки. 【Чему мы научились】Из собственного опыта: ①если соединение падает за одну-две миллисекунды, скорее всего порт вообще не слушается, а не «медленная сеть»; ②проверять надо тот путь, которым реально идут пользователи, а не удобный нам; ③задержка с ровной пилообразной формой и минимумом в одну-две миллисекунды обычно означает, что устройство спит в режиме экономии — не трогайте настройки; ④прежде чем говорить, что порт открыт, проверьте заведомо несуществующий порт как контроль.⑤ скрипт самопроверки обязан записывать результат в отдельный файл: вывод только на экран равносилен отсутствию проверки.",
       "sections": {
         "skills": [],
         "bugs": [],
@@ -100,12 +107,13 @@
           "Когда «не подключается», сначала смотрите, сколько длился сбой: одна-две миллисекунды означают, что порт не слушается, а не что сеть медленная; настоящее ожидание длится секунды.",
           "Проверяйте тот путь, которым реально идут пользователи: измерение удобного пути рождает горы ложных тревог, хотя у пользователя всё в порядке.",
           "Задержка с ровной пилообразной формой и минимумом всего в одну-две миллисекунды — чаще всего устройство спит в режиме экономии; не спешите менять настройки.",
-          "Прежде чем судить, доступен ли порт, проверьте заведомо несуществующий порт как контроль: если даже он показывает «открыт», значит, отвечает какое-то устройство посередине, и все дальнейшие выводы недействительны."
+          "Прежде чем судить, доступен ли порт, проверьте заведомо несуществующий порт как контроль: если даже он показывает «открыт», значит, отвечает какое-то устройство посередине, и все дальнейшие выводы недействительны.",
+          "Скрипт самопроверки обязан всегда записывать результат в отдельный файл: если он только печатает на экран, при запуске по расписанию ничего не остаётся, и вы бесконечно ждёте результат, который никогда не придёт."
         ]
       }
     },
     "pt": {
-      "summary": "【Corrigido】Hoje não há mudanças visíveis para o usuário; a versão continua 1.6.8 e a correção anterior («uma tarefa ficava cinza assim que terminava de reportar») segue valendo. 【Melhorias/Novidades】Nada novo hoje, mas algumas lições de diagnóstico viraram pontos de verificação fixos. 【O que aprendemos】Da nossa própria experiência: ①se uma conexão falha em um ou dois milissegundos, provavelmente aquela porta não está escutando — não é rede lenta; ②é preciso monitorar o caminho que os usuários realmente usam, não o que é conveniente para nós; ③uma latência em dente de serra regular com mínimo de um ou dois milissegundos costuma ser o aparelho dormindo para economizar energia: não mexa nas configurações; ④antes de afirmar que uma porta está aberta, teste uma que certamente não existe como controle.",
+      "summary": "【Corrigido】Hoje não há mudanças visíveis para o usuário; a versão continua 1.6.8 e a correção anterior («uma tarefa ficava cinza assim que terminava de reportar») segue valendo. 【Melhorias/Novidades】Nada novo hoje, mas algumas lições de diagnóstico viraram pontos de verificação fixos. 【O que aprendemos】Da nossa própria experiência: ①se uma conexão falha em um ou dois milissegundos, provavelmente aquela porta não está escutando — não é rede lenta; ②é preciso monitorar o caminho que os usuários realmente usam, não o que é conveniente para nós; ③uma latência em dente de serra regular com mínimo de um ou dois milissegundos costuma ser o aparelho dormindo para economizar energia: não mexa nas configurações; ④antes de afirmar que uma porta está aberta, teste uma que certamente não existe como controle.⑤ um script de autoverificação precisa gravar o resultado num arquivo fixo: imprimir só na tela equivale a não ter testado nada.",
       "sections": {
         "skills": [],
         "bugs": [],
@@ -113,12 +121,13 @@
           "Quando algo «não conecta», veja primeiro quanto tempo a falha levou: um ou dois milissegundos significa que a porta não está escutando, não que a rede esteja lenta; um tempo limite de verdade leva segundos.",
           "Monitore o caminho que os usuários realmente usam: medir o caminho conveniente gera montes de alarmes falsos enquanto o usuário está perfeitamente bem.",
           "Uma latência em dente de serra regular com mínimo de apenas um ou dois milissegundos costuma ser o aparelho dormindo para economizar energia; não corra para mudar configurações.",
-          "Antes de julgar se uma porta é alcançável, teste uma porta que certamente não existe como controle: se até ela aparece «aberta», algo no meio está respondendo por você e todas as conclusões seguintes ficam inválidas."
+          "Antes de julgar se uma porta é alcançável, teste uma porta que certamente não existe como controle: se até ela aparece «aberta», algo no meio está respondendo por você e todas as conclusões seguintes ficam inválidas.",
+          "Um script de autoverificação precisa sempre gravar o resultado num arquivo fixo: se apenas imprime na tela, uma execução agendada não deixa nada e você fica esperando para sempre um resultado que nunca vem."
         ]
       }
     },
     "ar": {
-      "summary": "【تم الإصلاح】لا توجد اليوم تغييرات ظاهرة للمستخدم؛ يبقى الإصدار 1.6.8، والتصحيح السابق («كانت المهمة تتحول إلى رمادي فور انتهاء تقريرها») لا يزال ساريًا. 【تحسينات/جديد】لا جديد اليوم، لكن عدة دروس في التشخيص ثُبّتت كنقاط فحص قياسية. 【ما تعلمناه】من خبرتنا الداخلية: ①إذا فشل الاتصال خلال ميلي ثانية أو اثنتين فالغالب أن المنفذ لا يستمع أصلًا، وليست الشبكة بطيئة؛ ②المراقبة يجب أن تقيس المسار الذي يسلكه المستخدمون فعلًا لا المسار المريح لنا؛ ③تأخير بشكل مسنّن منتظم بأدنى قيمة ميلي ثانية أو اثنتين يعني غالبًا أن الجهاز نائم لتوفير الطاقة، فلا تعبث بالإعدادات؛ ④قبل الحكم بأن منفذًا مفتوح، اختبر منفذًا غير موجود قطعًا كمرجع للمقارنة.",
+      "summary": "【تم الإصلاح】لا توجد اليوم تغييرات ظاهرة للمستخدم؛ يبقى الإصدار 1.6.8، والتصحيح السابق («كانت المهمة تتحول إلى رمادي فور انتهاء تقريرها») لا يزال ساريًا. 【تحسينات/جديد】لا جديد اليوم، لكن عدة دروس في التشخيص ثُبّتت كنقاط فحص قياسية. 【ما تعلمناه】من خبرتنا الداخلية: ①إذا فشل الاتصال خلال ميلي ثانية أو اثنتين فالغالب أن المنفذ لا يستمع أصلًا، وليست الشبكة بطيئة؛ ②المراقبة يجب أن تقيس المسار الذي يسلكه المستخدمون فعلًا لا المسار المريح لنا؛ ③تأخير بشكل مسنّن منتظم بأدنى قيمة ميلي ثانية أو اثنتين يعني غالبًا أن الجهاز نائم لتوفير الطاقة، فلا تعبث بالإعدادات؛ ④قبل الحكم بأن منفذًا مفتوح، اختبر منفذًا غير موجود قطعًا كمرجع للمقارنة.⑤ يجب أن يكتب سكربت الفحص الذاتي نتيجته في ملف ثابت؛ الطباعة على الشاشة فقط تعني أنك لم تفحص شيئًا فعليًا.",
       "sections": {
         "skills": [],
         "bugs": [],
@@ -126,7 +135,8 @@
           "عندما يقال «لا يتصل»، انظر أولًا كم استغرق الفشل: ميلي ثانية أو اثنتان تعني أن المنفذ لا يستمع أصلًا، وليست الشبكة بطيئة؛ الانتظار الحقيقي يستغرق ثواني.",
           "راقب المسار الذي يسلكه المستخدمون فعلًا: قياس المسار المريح ينتج أكوامًا من الإنذارات الكاذبة بينما حال المستخدم جيدة تمامًا.",
           "تأخير بشكل مسنّن منتظم بأدنى قيمة ميلي ثانية أو اثنتين غالبًا يعني أن الجهاز نائم لتوفير الطاقة؛ لا تسرع بتغيير الإعدادات.",
-          "قبل الحكم بوصول منفذ، اختبر منفذًا غير موجود قطعًا كمرجع: فإن ظهر حتى ذاك «مفتوحًا» فثمة جهاز في المنتصف يجيب نيابة عنك، وكل الاستنتاجات اللاحقة باطلة."
+          "قبل الحكم بوصول منفذ، اختبر منفذًا غير موجود قطعًا كمرجع: فإن ظهر حتى ذاك «مفتوحًا» فثمة جهاز في المنتصف يجيب نيابة عنك، وكل الاستنتاجات اللاحقة باطلة.",
+          "يجب أن يكتب سكربت الفحص الذاتي نتيجته دائمًا في ملف ثابت؛ فإن اكتفى بالطباعة على الشاشة لن يبقى شيء بعد التشغيل المجدول، وتظل تنتظر إلى الأبد نتيجة لن تأتي."
         ]
       }
     }
